@@ -1,0 +1,26 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Versicap",
+            "type": "cppdbg",
+            "request": "launch",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}/build",
+            "environment": [ ],
+            "externalConsole": false,
+            "osx": {
+                "MIMode": "lldb",
+                "program": "${workspaceRoot}/build/Applications/Versicap.app/Contents/MacOS/Versicap",
+                "logging": {
+                    "moduleLoad": false,
+                    "exceptions": false,
+                }
+            },
+        }
+    ]
+}
