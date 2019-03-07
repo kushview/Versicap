@@ -1,0 +1,44 @@
+{
+    "version": 4,
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1",
+                "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/include",
+                "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/usr/include",
+                "/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7",
+                "${workspaceRoot}/jucer/JuceLibraryCode",
+                "${workspaceRoot}/src",
+                "${workspaceRoot}/libs/kv/modules",
+                "~/SDKs/JUCE/modules"
+            ],
+            "defines": [ ],
+            "forcedInclude": [ ],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../include/c++/v1",
+                    "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/../lib/clang/8.1.0/include",
+                    "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include",
+                    "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/usr/include",
+                    "/System/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7",
+                    "${workspaceRoot}/jucer/JuceLibraryCode",
+                    "${workspaceRoot}/src",
+                    "${workspaceRoot}/libs/kv/modules",
+                    "~/SDKs/JUCE/modules"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": "",
+                "defines": [ ]
+            },
+            "macFrameworkPath": [
+                "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang",
+            "cStandard": "c11",
+            "cppStandard": "c++14"
+        }
+    ]
+}
