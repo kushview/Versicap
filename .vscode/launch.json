@@ -13,6 +13,7 @@
             "cwd": "${workspaceFolder}/build",
             "environment": [ ],
             "externalConsole": false,
+            "program": "${workspaceRoot}/build/bin/versicap",
             "osx": {
                 "MIMode": "lldb",
                 "program": "${workspaceRoot}/build/Applications/Versicap.app/Contents/MacOS/Versicap",
