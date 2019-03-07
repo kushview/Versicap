@@ -11,6 +11,7 @@
 #include "JuceHeader.h"
 #include "MainComponent.h"
 
+
 //==============================================================================
 class VersacapApplication  : public JUCEApplication
 {
@@ -26,15 +27,14 @@ public:
     void initialise (const String& commandLine) override
     {
         // This method is where you should put your application's initialisation code..
-
+        LookAndFeel::setDefaultLookAndFeel (&look);
         mainWindow.reset (new MainWindow (getApplicationName()));
     }
 
     void shutdown() override
     {
-        // Add your application's shutdown code here..
-
         mainWindow = nullptr; // (deletes our window)
+        LookAndFeel::setDefaultLookAndFeel (nullptr);
     }
 
     //==============================================================================
@@ -99,6 +99,7 @@ public:
 
 private:
     std::unique_ptr<MainWindow> mainWindow;
+    kv::LookAndFeel_KV1 look;
 };
 
 //==============================================================================

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<JUCERPROJECT id="tfndUm" name="Versicap" projectType="guiapp" jucerVersion="5.4.2"
+              version="1.0.0" companyName="Kushview" companyCopyright="Copyright (c) 2019 Kushview, LLC"
+              companyWebsite="https://kushview.net" companyEmail="support@kushview.net"
+              bundleIdentifier="net.kushview.Versicap">
+  <MAINGROUP id="BYhNP7" name="Versicap">
+    <GROUP id="{CF3D9FD5-623B-929D-8445-AAA1B8D9FA7C}" name="src">
+      <FILE id="kHOade" name="Main.cpp" compile="1" resource="0" file="../src/Main.cpp"/>
+      <FILE id="yKqcEQ" name="MainComponent.cpp" compile="1" resource="0"
+            file="../src/MainComponent.cpp"/>
+      <FILE id="gandlE" name="MainComponent.h" compile="0" resource="0" file="../src/MainComponent.h"/>
+    </GROUP>
+  </MAINGROUP>
+  <EXPORTFORMATS>
+    <XCODE_MAC targetFolder="Builds/MacOSX">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Versicap"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Versicap" codeSigningIdentity="9511F5241B78B0D38961CD756873066A5F0ED225"
+                       osxCompatibility="10.8 SDK" osxArchitecture="64BitIntel"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="~/SDKs/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="~/SDKs/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="~/SDKs/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="~/SDKs/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="~/SDKs/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="~/SDKs/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="~/SDKs/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="~/SDKs/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="~/SDKs/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="~/SDKs/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="~/SDKs/JUCE/modules"/>
+        <MODULEPATH id="kv_core" path="../libs/kv/modules"/>
+        <MODULEPATH id="kv_gui" path="../libs/kv/modules"/>
+        <MODULEPATH id="kv_models" path="../libs/kv/modules"/>
+      </MODULEPATHS>
+    </XCODE_MAC>
+    <VS2017 targetFolder="Builds/VisualStudio2017">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Versicap"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Versicap"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="../../../../../opt/kushview/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../../../opt/kushview/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../../../opt/kushview/JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../../../opt/kushview/JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../../../../opt/kushview/JUCE/modules"/>
+        <MODULEPATH id="juce_cryptography" path="../../../../../opt/kushview/JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../../../opt/kushview/JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../../../../opt/kushview/JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../../../opt/kushview/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../../../opt/kushview/JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../../../opt/kushview/JUCE/modules"/>
+        <MODULEPATH id="kv_core" path="../libs/kv/modules"/>
+        <MODULEPATH id="kv_gui" path="../libs/kv/modules"/>
+        <MODULEPATH id="kv_models" path="../libs/kv/modules"/>
+      </MODULEPATHS>
+    </VS2017>
+  </EXPORTFORMATS>
+  <MODULES>
+    <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_cryptography" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="kv_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="kv_gui" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="kv_models" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+  </MODULES>
+  <LIVE_SETTINGS>
+    <OSX/>
+  </LIVE_SETTINGS>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_WEB_BROWSER="0" KV_DOCKING_WINDOWS="0"
+               JUCE_PLUGINHOST_VST="0" JUCE_PLUGINHOST_VST3="0" JUCE_PLUGINHOST_LADSPA="0"/>
+</JUCERPROJECT>

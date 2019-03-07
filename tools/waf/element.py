@@ -42,8 +42,8 @@ def check_mingw (self):
 @conf
 def check_mac (self):
     # VST/VST3 OSX Support
-    self.define('JUCE_PLUGINHOST_VST3', 1)
-    self.define('JUCE_PLUGINHOST_VST', 1)
+    self.define('JUCE_PLUGINHOST_VST3', 0)
+    self.define('JUCE_PLUGINHOST_VST', 0)
     # Python scripting
     if (self.options.enable_python):
         self.check_cfg(path='python-config', args='--includes', package='Python', use='PYTHON')

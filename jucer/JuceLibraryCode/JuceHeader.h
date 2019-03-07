@@ -25,6 +25,9 @@
 #include <juce_graphics/juce_graphics.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <juce_gui_extra/juce_gui_extra.h>
+#include <kv_core/kv_core.h>
+#include <kv_gui/kv_gui.h>
+#include <kv_models/kv_models.h>
 
 
 #if ! DONT_SET_USING_JUCE_NAMESPACE
@@ -36,8 +39,8 @@
 #if ! JUCE_DONT_DECLARE_PROJECTINFO
 namespace ProjectInfo
 {
-    const char* const  projectName    = "Versacap";
-    const char* const  companyName    = "";
+    const char* const  projectName    = "Versicap";
+    const char* const  companyName    = "Kushview";
     const char* const  versionString  = "1.0.0";
     const int          versionNumber  = 0x10000;
 }

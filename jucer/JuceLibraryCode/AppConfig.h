@@ -59,6 +59,9 @@
 #define JUCE_MODULE_AVAILABLE_juce_graphics              1
 #define JUCE_MODULE_AVAILABLE_juce_gui_basics            1
 #define JUCE_MODULE_AVAILABLE_juce_gui_extra             1
+#define JUCE_MODULE_AVAILABLE_kv_core                    1
+#define JUCE_MODULE_AVAILABLE_kv_gui                     1
+#define JUCE_MODULE_AVAILABLE_kv_models                  1
 
 #define JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED 1
 
@@ -136,11 +139,11 @@
 // juce_audio_processors flags:
 
 #ifndef    JUCE_PLUGINHOST_VST
- //#define JUCE_PLUGINHOST_VST 0
+ #define   JUCE_PLUGINHOST_VST 0
 #endif
 
 #ifndef    JUCE_PLUGINHOST_VST3
- //#define JUCE_PLUGINHOST_VST3 0
+ #define   JUCE_PLUGINHOST_VST3 0
 #endif
 
 #ifndef    JUCE_PLUGINHOST_AU
@@ -148,7 +151,7 @@
 #endif
 
 #ifndef    JUCE_PLUGINHOST_LADSPA
- //#define JUCE_PLUGINHOST_LADSPA 0
+ #define   JUCE_PLUGINHOST_LADSPA 0
 #endif
 
 //==============================================================================
@@ -256,6 +259,13 @@
 
 #ifndef    JUCE_ENABLE_LIVE_CONSTANT_EDITOR
  //#define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 0
+#endif
+
+//==============================================================================
+// kv_gui flags:
+
+#ifndef    KV_DOCKING_WINDOWS
+ #define   KV_DOCKING_WINDOWS 0
 #endif
 
 //==============================================================================

@@ -39,7 +39,7 @@ def configure_product (conf):
     return
 
 def configure_product_name (conf):
-    return "Versacap"
+    return "Versicap"
 
 def configure (conf):
     conf.check_ccache()
@@ -97,20 +97,24 @@ def configure (conf):
 
 def common_use_flags():
     return 'ACCELERATE AUDIO_TOOLBOX AUDIO_UNIT CORE_AUDIO CORE_AUDIO_KIT COCOA CORE_MIDI IO_KIT QUARTZ_CORE'.split()
+
 def build_mac (bld):
     appEnv = bld.env.derive()
     app = bld.program (
         source      = bld.path.ant_glob ("src/**/*.cpp") +
                       bld.path.ant_glob ("jucer/JuceLibraryCode/*.mm"),
-        includes    = [ 'jucer/JuceLibraryCode', 'src', \
+        includes    = [ 'jucer/JuceLibraryCode', \
+                        'libs/kv/modules', \
+                        'src', \
                         os.path.expanduser('~') + '/SDKs/VST_SDK/VST3_SDK', \
+                        os.path.expanduser('~') + '/SDKs/VST_SDK/VST2_SDK', \
                         os.path.expanduser('~') + '/SDKs/JUCE/modules' ],
-        target      = 'Applications/Versacap',
-        name        = 'Versacap',
+        target      = 'Applications/Versicap',
+        name        = 'Versicap',
         env         = appEnv,
         use         = common_use_flags(),
-        mac_app     = True #,
-        # mac_plist   = 'tools/macdeploy/Info.plist',
+        mac_app     = True,
+        mac_plist   = 'tools/macdeploy/Info.plist'
         # mac_files   = [ 'project/Builds/MacOSX/Icon.icns' ]
     )
     
