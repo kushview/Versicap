@@ -1,37 +1,57 @@
-/*
-  ==============================================================================
-
-    This file was auto-generated!
-
-  ==============================================================================
-*/
 
 #include "MainComponent.h"
+#include "MainTabs.h"
 
-//==============================================================================
+class MainComponent::Content : public Component
+{
+public:
+    Content (MainComponent& o)
+        : owner (o)
+    {
+        setOpaque (true);
+        addAndMakeVisible (tabs);
+        setSize (600, 400);
+    }
+
+    ~Content()
+    {
+
+    }
+
+    void paint (Graphics& g) override
+    {
+        g.fillAll (Colours::black);
+    }
+
+    void resized() override
+    {
+        tabs.setBounds (getLocalBounds());
+    }
+
+private:
+    MainComponent& owner;
+    MainTabs tabs;
+};
+
 MainComponent::MainComponent()
 {
+    setOpaque (true);
+    content.reset (new Content (*this));
+    addAndMakeVisible (content.get());
     setSize (600, 400);
 }
 
 MainComponent::~MainComponent()
 {
+    content.reset();
 }
 
-//==============================================================================
 void MainComponent::paint (Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
-
-    g.setFont (Font (16.0f));
-    g.setColour (Colours::white);
-    g.drawText ("Hello World!", getLocalBounds(), Justification::centred, true);
+    g.fillAll (getLookAndFeel().findColour (DocumentWindow::backgroundColourId));
 }
 
 void MainComponent::resized()
 {
-    // This is called when the MainComponent is resized.
-    // If you add any child components, this is where you should
-    // update their positions.
+    content->setBounds (getLocalBounds());
 }
