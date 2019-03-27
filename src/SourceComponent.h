@@ -8,6 +8,12 @@ class SourceComponent : public Component
 public:
     SourceComponent()
     {
+        addAndMakeVisible (sourceLabel);
+        sourceLabel.setText ("Source", dontSendNotification);
+        addAndMakeVisible (sourceCombo);
+        sourceCombo.addItem ("MIDI Device", 1);
+        sourceCombo.addItem ("Plugin", 2);
+        
         addAndMakeVisible (recordingDeviceLabel);
         recordingDeviceLabel.setText ("Device", dontSendNotification);
         addAndMakeVisible (recordingDeviceCombo);
@@ -24,6 +30,10 @@ public:
     {
         auto r  = getLocalBounds();
         auto r2 = r.removeFromTop (22);
+        sourceLabel.setBounds (r2.removeFromLeft (100));
+        sourceCombo.setBounds (r2);
+        r.removeFromTop (4);
+        r2 = r.removeFromTop (22);
         recordingDeviceLabel.setBounds (r2.removeFromLeft (100));
         recordingDeviceCombo.setBounds (r2);
         r.removeFromTop (4);
@@ -33,8 +43,10 @@ public:
     }
 
 private:
+    Label sourceLabel;
     Label recordingDeviceLabel;
     Label bitDepthLabel;
+    ComboBox sourceCombo;
     ComboBox recordingDeviceCombo;
     ComboBox bitDepthCombo;
 
