@@ -100,7 +100,7 @@ def common_use_flags():
 
 def build_mac (bld):
     appEnv = bld.env.derive()
-    app = bld.program (
+    bld.program (
         source      = bld.path.ant_glob ("src/**/*.cpp") +
                       bld.path.ant_glob ("jucer/JuceLibraryCode/*.mm"),
         includes    = [ 'jucer/JuceLibraryCode', \
