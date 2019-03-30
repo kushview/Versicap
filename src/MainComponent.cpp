@@ -10,7 +10,7 @@ public:
     {
         setOpaque (true);
         addAndMakeVisible (tabs);
-        setSize (600, 400);
+        setSize (500, 340);
     }
 
     ~Content()

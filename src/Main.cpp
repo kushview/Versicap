@@ -35,30 +35,40 @@ public:
     class MainWindow    : public DocumentWindow
     {
     public:
-        MainWindow (String name)  : DocumentWindow (name,
-                                                    Desktop::getInstance().getDefaultLookAndFeel()
-                                                                          .findColour (ResizableWindow::backgroundColourId),
-                                                    DocumentWindow::allButtons)
+        MainWindow (String name) 
+            : DocumentWindow (name, Desktop::getInstance().getDefaultLookAndFeel()
+                                        .findColour (ResizableWindow::backgroundColourId),
+                                         DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
+            setBackgroundColour (kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
             setContentOwned (new MainComponent(), true);
 
-           #if JUCE_IOS || JUCE_ANDROID
-            setFullScreen (true);
-           #else
             setResizable (true, true);
+            constrain.setMinimumSize (280, 200);
+            constrain.setMaximumSize (600, 600);
+            setConstrainer (&constrain);
             centreWithSize (getWidth(), getHeight());
-           #endif
 
             setVisible (true);
         }
 
+        ~MainWindow()
+        {
+            setConstrainer (nullptr);
+        }
         void closeButtonPressed() override
         {
             JUCEApplication::getInstance()->systemRequestedQuit();
         }
 
+        void maximiseButtonPressed() override
+        {
+            return;
+        }
+
     private:
+        ComponentBoundsConstrainer constrain;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
     };
 

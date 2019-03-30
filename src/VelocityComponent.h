@@ -12,6 +12,6 @@ public:
     void resized() override;
 
 private:
-    OwnedArray<ToggleButton> toggles;
+    OwnedArray<TextButton> toggles;
     OwnedArray<Slider> sliders;
 };

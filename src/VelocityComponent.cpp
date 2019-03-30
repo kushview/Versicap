@@ -8,9 +8,11 @@ VelocityComponent::VelocityComponent()
         addAndMakeVisible (slider);
         slider->setRange (0.0, 127.0, 1);
 
-        auto* const toggle = toggles.add (new ToggleButton());
+        auto* const toggle = toggles.add (new TextButton());
         addAndMakeVisible (toggle);
-        toggle->setButtonText (String ("Velocity ") + String (i + 1));
+        toggle->setClickingTogglesState (true);
+        toggle->setColour (TextButton::buttonOnColourId, Colours::greenyellow);
+        toggle->setButtonText (String ("Layer ") + String (i + 1));
     }
 }
 
@@ -22,7 +24,7 @@ VelocityComponent::~VelocityComponent()
 
 void VelocityComponent::paint (Graphics& g)
 {
-    g.fillAll (Colours::black);
+
 }
 
 void VelocityComponent::resized()
@@ -31,8 +33,8 @@ void VelocityComponent::resized()
     for (int i = 0; i < 4; ++i)
     {
         auto r2 = r.removeFromTop (24);
-        toggles[i]->setBounds (r2.removeFromLeft (getWidth() / 2));
+        toggles[i]->setBounds (r2.removeFromLeft (100));
         sliders[i]->setBounds (r2);
-        r.removeFromTop (10);
+        r.removeFromTop (4);
     }
 }

@@ -3,6 +3,14 @@
 
 #include "JuceHeader.h"
 
+struct SourceType
+{
+    enum ID {
+        MidiDevice  = 0,
+        AudioPlugin = 1
+    };
+};
+
 class SourceComponent : public Component
 {
 public:
@@ -11,9 +19,12 @@ public:
         addAndMakeVisible (sourceLabel);
         sourceLabel.setText ("Source", dontSendNotification);
         addAndMakeVisible (sourceCombo);
-        sourceCombo.addItem ("MIDI Device", 1);
-        sourceCombo.addItem ("Plugin", 2);
-        
+        sourceCombo.addItem ("MIDI Device", 1 + SourceType::MidiDevice);
+        sourceCombo.addItem ("Plugin", 1 + SourceType::AudioPlugin);
+        sourceCombo.onChange = [this]() {
+            updateLayout();
+        };
+
         addAndMakeVisible (recordingDeviceLabel);
         recordingDeviceLabel.setText ("Device", dontSendNotification);
         addAndMakeVisible (recordingDeviceCombo);
@@ -50,6 +61,23 @@ private:
     ComboBox recordingDeviceCombo;
     ComboBox bitDepthCombo;
 
+    void updateLayout()
+    {
+        switch (sourceCombo.getSelectedId() - 1)
+        {
+            case SourceType::MidiDevice:
+            {
+
+            } break;
+
+            case SourceType::AudioPlugin:
+            {
+
+            } break;
+        }
+
+    }
+
     void refreshRecordingDevices()
     {
         recordingDeviceCombo.clear();
@@ -57,3 +85,4 @@ private:
             recordingDeviceCombo.addItem ("Device " + String (i + 1), i + 1);
     }
 };
+
