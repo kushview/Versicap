@@ -7,6 +7,7 @@ class LoopingComponent : public SettingGroup
 public:
     LoopingComponent()
     {
+        labelWidth = 120;
         addAndMakeVisible (loopTypeLabel);
         loopTypeLabel.setText ("Loop Mode", dontSendNotification);
         addAndMakeVisible (loopType);
@@ -21,16 +22,22 @@ public:
         loopStartLabel.setText ("Loop Start", dontSendNotification);
         addAndMakeVisible (loopStart);
         loopStart.setRange (0, 10000, 1);
+        loopStart.textFromValueFunction = SettingGroup::milliSecondValueInt;
+        setupSlider (loopStart);
 
         addAndMakeVisible (loopEndLabel);
         loopEndLabel.setText ("Loop End", dontSendNotification);
         addAndMakeVisible (loopEnd);
         loopEnd.setRange (0, 10000, 1);
+        loopEnd.textFromValueFunction = SettingGroup::milliSecondValueInt;
+        setupSlider (loopEnd);
 
         addAndMakeVisible (crossfadeLengthLabel);
-        crossfadeLengthLabel.setText ("Base Name", dontSendNotification);
+        crossfadeLengthLabel.setText ("Crossfade Length", dontSendNotification);
         addAndMakeVisible (crossfadeLength);
         crossfadeLength.setRange (0, 5000, 1);
+        crossfadeLength.textFromValueFunction = SettingGroup::milliSecondValueInt;
+        setupSlider (crossfadeLength);
     }
 
     ~LoopingComponent()
@@ -63,7 +70,7 @@ public:
     
     void resized() override
     {
-        auto r = getLocalBounds();
+        auto r = getLocalBounds().reduced (8, 10);
         layout (r, loopTypeLabel, loopType);
         layout (r, loopStartLabel, loopStart);
         layout (r, loopEndLabel, loopEnd);

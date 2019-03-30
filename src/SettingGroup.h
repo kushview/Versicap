@@ -13,6 +13,13 @@ public:
         return str;
     }
 
+    static String noteValue (double value)
+    {
+        return MidiMessage::getMidiNoteName (
+            roundToInt (value),
+            true, true, 4);
+    }
+
     SettingGroup() : Component() {}
     virtual ~SettingGroup() = default;
 
@@ -28,7 +35,7 @@ protected:
     void layout (Rectangle<int>& r, Component& label, Component& body,
                  int labelPad = 0, 
                  int settingSize = 22, 
-                 int spacingBelow = 8)
+                 int spacingBelow = 12)
     {
         r = r.withWidth (jmax (labelWidth + settingWidth, r.getWidth()));
         
@@ -43,8 +50,13 @@ protected:
         {
             auto r2 = r.removeFromTop (settingSize);
             body.setBounds (r2.removeFromRight (settingWidth));
-            label.setBounds (r2);
+            label.setBounds (r2.withWidth (labelWidth));
             r.removeFromTop (spacingBelow);
         }
+    }
+
+    void setupSlider (Slider& slider)
+    {
+        slider.setSliderStyle (Slider::LinearBar);
     }
 };

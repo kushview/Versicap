@@ -1,14 +1,17 @@
 #pragma once
 
-#include "JuceHeader.h"
+#include "SettingGroup.h"
 
-class VelocityComponent : public Component
+class VelocityComponent : public SettingGroup
 {
 public:
     VelocityComponent();
     ~VelocityComponent();
 
-    void paint (Graphics& g) override;
+    void fillSettings (RenderContext&) override;
+    void updateSettings (const RenderContext&) override;
+    void stabilizeSettings() override;
+    
     void resized() override;
 
 private:

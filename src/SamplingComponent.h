@@ -21,12 +21,14 @@ public:
         addAndMakeVisible (noteLength);
         noteLength.setRange (1, 10000, 1);
         noteLength.textFromValueFunction = SettingGroup::milliSecondValueInt;
+        setupSlider (noteLength);
 
         addAndMakeVisible (tailLengthLabel);
         tailLengthLabel.setText ("Tail Length", dontSendNotification);
         addAndMakeVisible (tailLength);
         tailLength.setRange (1, 10000, 1);
         tailLength.textFromValueFunction = SettingGroup::milliSecondValueInt;
+        setupSlider (tailLength);
     }
 
     ~SamplingComponent() = default;
@@ -49,7 +51,7 @@ public:
     
     void resized() override
     {
-        auto r = getLocalBounds();
+        auto r = getLocalBounds().reduced (8, 10);
         layout (r, baseNameLabel, baseName);
         layout (r, noteLengthLabel, noteLength);
         layout (r, tailLengthLabel, tailLength);

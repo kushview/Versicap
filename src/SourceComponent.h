@@ -1,17 +1,18 @@
 
 #pragma once
 
-#include "JuceHeader.h"
+#include "SettingGroup.h"
 
 struct SourceType
 {
-    enum ID {
+    enum ID
+    {
         MidiDevice  = 0,
         AudioPlugin = 1
     };
 };
 
-class SourceComponent : public Component
+class SourceComponent : public SettingGroup
 {
 public:
     SourceComponent()
@@ -21,9 +22,7 @@ public:
         addAndMakeVisible (sourceCombo);
         sourceCombo.addItem ("MIDI Device", 1 + SourceType::MidiDevice);
         sourceCombo.addItem ("Plugin", 1 + SourceType::AudioPlugin);
-        sourceCombo.onChange = [this]() {
-            updateLayout();
-        };
+        sourceCombo.onChange = [this]() { stabilizeSettings(); };
 
         addAndMakeVisible (recordingDeviceLabel);
         recordingDeviceLabel.setText ("Device", dontSendNotification);
@@ -37,31 +36,7 @@ public:
         bitDepthCombo.addItem ("24 bit", 2);
     }
 
-    void resized() override
-    {
-        auto r  = getLocalBounds();
-        auto r2 = r.removeFromTop (22);
-        sourceLabel.setBounds (r2.removeFromLeft (100));
-        sourceCombo.setBounds (r2);
-        r.removeFromTop (4);
-        r2 = r.removeFromTop (22);
-        recordingDeviceLabel.setBounds (r2.removeFromLeft (100));
-        recordingDeviceCombo.setBounds (r2);
-        r.removeFromTop (4);
-        r2 = r.removeFromTop (22);
-        bitDepthLabel.setBounds (r2.removeFromLeft (100));
-        bitDepthCombo.setBounds (r2);
-    }
-
-private:
-    Label sourceLabel;
-    Label recordingDeviceLabel;
-    Label bitDepthLabel;
-    ComboBox sourceCombo;
-    ComboBox recordingDeviceCombo;
-    ComboBox bitDepthCombo;
-
-    void updateLayout()
+    void stabilizeSettings() override
     {
         switch (sourceCombo.getSelectedId() - 1)
         {
@@ -77,6 +52,22 @@ private:
         }
 
     }
+
+    void resized() override
+    {
+        auto r = getLocalBounds().reduced (8, 10);
+        layout (r, sourceLabel, sourceCombo);
+        layout (r, recordingDeviceLabel, recordingDeviceCombo);
+        layout (r, bitDepthLabel, bitDepthCombo);
+    }
+
+private:
+    Label sourceLabel;
+    Label recordingDeviceLabel;
+    Label bitDepthLabel;
+    ComboBox sourceCombo;
+    ComboBox recordingDeviceCombo;
+    ComboBox bitDepthCombo;
 
     void refreshRecordingDevices()
     {

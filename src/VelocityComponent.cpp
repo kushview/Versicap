@@ -1,3 +1,5 @@
+
+#include "RenderContext.h"
 #include "VelocityComponent.h"
 
 VelocityComponent::VelocityComponent()
@@ -7,12 +9,14 @@ VelocityComponent::VelocityComponent()
         auto* const slider = sliders.add (new Slider());
         addAndMakeVisible (slider);
         slider->setRange (0.0, 127.0, 1);
-
+        setupSlider (*slider);
+        
         auto* const toggle = toggles.add (new TextButton());
         addAndMakeVisible (toggle);
         toggle->setClickingTogglesState (true);
         toggle->setColour (TextButton::buttonOnColourId, Colours::greenyellow);
         toggle->setButtonText (String ("Layer ") + String (i + 1));
+        toggle->onClick = [this]() { stabilizeSettings(); };
     }
 }
 
@@ -22,19 +26,54 @@ VelocityComponent::~VelocityComponent()
     toggles.clear();
 }
 
-void VelocityComponent::paint (Graphics& g)
+void VelocityComponent::fillSettings (RenderContext& ctx)
 {
+    bool anythingToggled = false;
+    for (int i = 0; i < 4; ++i)
+    {
+        if (toggles[i]->getToggleState())
+        {
+            anythingToggled = true;
+            break;
+        }
+    }
 
+    if (! anythingToggled)
+    {
+        for (int i = 0; i < 4; ++i)
+            ctx.layerEnabled[i] = false;
+        ctx.layerEnabled[0] = true;
+        ctx.layerVelocities[0] = 127;
+        return;
+    }
+
+    for (int i = 0; i < 4; ++i)
+    {
+        ctx.layerEnabled[i]     = toggles[i]->getToggleState();
+        ctx.layerVelocities[i]  = roundToInt (sliders[i]->getValue());
+    }
+}
+
+void VelocityComponent::updateSettings (const RenderContext& ctx)
+{
+    for (int i = 0; i < 4; ++i)
+    {
+        toggles[i]->setToggleState (ctx.layerEnabled[i], dontSendNotification);
+        sliders[i]->setValue ((double) ctx.layerVelocities[i], dontSendNotification);
+    }
+}
+
+void VelocityComponent::stabilizeSettings()
+{
+    for (int i = 0; i < 4; ++i)
+    {
+        sliders[i]->setEnabled (toggles[i]->getToggleState());
+    }
 }
 
 void VelocityComponent::resized()
 {
-    auto r = getLocalBounds();
+    auto r = getLocalBounds().reduced (8, 10);
     for (int i = 0; i < 4; ++i)
-    {
-        auto r2 = r.removeFromTop (24);
-        toggles[i]->setBounds (r2.removeFromLeft (100));
-        sliders[i]->setBounds (r2);
-        r.removeFromTop (4);
-    }
+        layout (r, *toggles[i], *sliders[i]);
 }
