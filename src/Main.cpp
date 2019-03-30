@@ -45,7 +45,7 @@ public:
             setContentOwned (new MainComponent(), true);
 
             setResizable (true, true);
-            constrain.setMinimumSize (280, 200);
+            constrain.setMinimumSize (400, 200);
             constrain.setMaximumSize (600, 600);
             setConstrainer (&constrain);
             centreWithSize (getWidth(), getHeight());

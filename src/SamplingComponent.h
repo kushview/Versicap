@@ -2,56 +2,57 @@
 
 #pragma once
 
-#include "JuceHeader.h"
+#include "SettingGroup.h"
 
-class SamplingComponent : public Component
+class SamplingComponent : public SettingGroup
 {
 public:
     SamplingComponent()
     {
-        addAndMakeVisible (noteLengthLabel);
-        noteLengthLabel.setText ("Note Length", dontSendNotification);
-        addAndMakeVisible (noteLength);
-        noteLength.setRange (0.5, 10.0, 0.01);
-
-        addAndMakeVisible (tailLengthLabel);
-        tailLengthLabel.setText ("Tail Length", dontSendNotification);
-        addAndMakeVisible (tailLength);
-        tailLength.setRange (0.5, 10.0, 0.01);
-
+        settingWidth = 300;
+        
         addAndMakeVisible (baseNameLabel);
         baseNameLabel.setText ("Base Name", dontSendNotification);
         addAndMakeVisible (baseName);
         baseName.setText ("Sample");
+
+        addAndMakeVisible (noteLengthLabel);
+        noteLengthLabel.setText ("Note Length", dontSendNotification);
+        addAndMakeVisible (noteLength);
+        noteLength.setRange (1, 10000, 1);
+        noteLength.textFromValueFunction = SettingGroup::milliSecondValueInt;
+
+        addAndMakeVisible (tailLengthLabel);
+        tailLengthLabel.setText ("Tail Length", dontSendNotification);
+        addAndMakeVisible (tailLength);
+        tailLength.setRange (1, 10000, 1);
+        tailLength.textFromValueFunction = SettingGroup::milliSecondValueInt;
     }
 
-    ~SamplingComponent()
+    ~SamplingComponent() = default;
+
+    void fillSettings (RenderContext& ctx) override 
+    { 
+        ctx.baseName    = baseName.getText();
+        ctx.noteLength  = roundToInt (noteLength.getValue());
+        ctx.tailLength  = roundToInt (tailLength.getValue());
+    }
+
+    void updateSettings (const RenderContext& ctx) override 
     {
-
+        baseName.setText (ctx.baseName, false);
+        noteLength.setValue ((double) ctx.noteLength, dontSendNotification);
+        tailLength.setValue ((double) ctx.tailLength, dontSendNotification);
     }
-
-    void paint (Graphics&) override
-    {
-
-    }
+    
+    void stabilizeSettings() override {}
     
     void resized() override
     {
         auto r = getLocalBounds();
-        auto r2 = r.removeFromTop (22);
-        baseNameLabel.setBounds (r2.removeFromLeft (100));
-        baseNameLabel.setText ("Base Name", dontSendNotification);
-        baseName.setBounds (r2);
-        r.removeFromTop (4);
-        r2 = r.removeFromTop (22);
-        noteLengthLabel.setBounds (r2.removeFromLeft (100));
-        noteLengthLabel.setText ("Note Length", dontSendNotification);
-        noteLength.setBounds (r2);
-        r.removeFromTop (4);
-        r2 = r.removeFromTop (22);
-        tailLengthLabel.setBounds (r2.removeFromLeft (100));
-        tailLengthLabel.setText ("Tail Length", dontSendNotification);
-        tailLength.setBounds (r2);
+        layout (r, baseNameLabel, baseName);
+        layout (r, noteLengthLabel, noteLength);
+        layout (r, tailLengthLabel, tailLength);
     }
 
 private:
