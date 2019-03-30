@@ -50,7 +50,8 @@
             "command": "python",
             "args": [
                 "waf",
-                "configure"
+                "configure",
+                "--debug"
             ],
             "options": {
                 

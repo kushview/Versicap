@@ -7,7 +7,6 @@ class LoopingComponent : public SettingGroup
 public:
     LoopingComponent()
     {
-        labelWidth = 120;
         addAndMakeVisible (loopTypeLabel);
         loopTypeLabel.setText ("Loop Mode", dontSendNotification);
         addAndMakeVisible (loopType);

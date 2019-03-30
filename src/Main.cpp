@@ -13,6 +13,7 @@ public:
 
     void initialise (const String& commandLine) override
     {
+        look.setColour (Slider::backgroundColourId, kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
         LookAndFeel::setDefaultLookAndFeel (&look);
         mainWindow.reset (new MainWindow (getApplicationName()));
     }
@@ -44,9 +45,9 @@ public:
             setBackgroundColour (kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
             setContentOwned (new MainComponent(), true);
 
-            setResizable (true, true);
-            constrain.setMinimumSize (400, 200);
-            constrain.setMaximumSize (600, 600);
+            setResizable (false, false);
+            constrain.setMinimumSize (440, 300);
+            constrain.setMaximumSize (440, 300);
             setConstrainer (&constrain);
             centreWithSize (getWidth(), getHeight());
 

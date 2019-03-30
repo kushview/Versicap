@@ -13,10 +13,12 @@ VelocityComponent::VelocityComponent()
         
         auto* const toggle = toggles.add (new TextButton());
         addAndMakeVisible (toggle);
+        if (i == 0)
+            toggle->setToggleState (true, dontSendNotification);
         toggle->setClickingTogglesState (true);
         toggle->setColour (TextButton::buttonOnColourId, Colours::greenyellow);
         toggle->setButtonText (String ("Layer ") + String (i + 1));
-        toggle->onClick = [this]() { stabilizeSettings(); };
+        toggle->addListener (this);
     }
 }
 
@@ -26,7 +28,14 @@ VelocityComponent::~VelocityComponent()
     toggles.clear();
 }
 
-void VelocityComponent::fillSettings (RenderContext& ctx)
+void VelocityComponent::buttonClicked (Button* toggle)
+{
+    if (! hasLayers())
+        toggle->setToggleState (true, dontSendNotification);
+    stabilizeSettings();
+}
+
+bool VelocityComponent::hasLayers()
 {
     bool anythingToggled = false;
     for (int i = 0; i < 4; ++i)
@@ -37,15 +46,12 @@ void VelocityComponent::fillSettings (RenderContext& ctx)
             break;
         }
     }
+    return anythingToggled;
+}
 
-    if (! anythingToggled)
-    {
-        for (int i = 0; i < 4; ++i)
-            ctx.layerEnabled[i] = false;
-        ctx.layerEnabled[0] = true;
-        ctx.layerVelocities[0] = 127;
-        return;
-    }
+void VelocityComponent::fillSettings (RenderContext& ctx)
+{
+    jassert (hasLayers());
 
     for (int i = 0; i < 4; ++i)
     {
@@ -75,5 +81,5 @@ void VelocityComponent::resized()
 {
     auto r = getLocalBounds().reduced (8, 10);
     for (int i = 0; i < 4; ++i)
-        layout (r, *toggles[i], *sliders[i]);
+        layout (r, *toggles[i], *sliders[i], 10);
 }

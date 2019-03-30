@@ -2,7 +2,8 @@
 
 #include "SettingGroup.h"
 
-class VelocityComponent : public SettingGroup
+class VelocityComponent : public SettingGroup,
+                          public Button::Listener
 {
 public:
     VelocityComponent();
@@ -13,8 +14,11 @@ public:
     void stabilizeSettings() override;
     
     void resized() override;
+    void buttonClicked (Button*) override;
 
 private:
     OwnedArray<TextButton> toggles;
     OwnedArray<Slider> sliders;
+
+    bool hasLayers();
 };

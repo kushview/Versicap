@@ -30,7 +30,7 @@ public:
     void paint (Graphics&) override {}
 
 protected:
-    int labelWidth = 100;
+    int labelWidth = 120;
     int settingWidth = 300;
     void layout (Rectangle<int>& r, Component& label, Component& body,
                  int labelPad = 0, 
@@ -50,7 +50,7 @@ protected:
         {
             auto r2 = r.removeFromTop (settingSize);
             body.setBounds (r2.removeFromRight (settingWidth));
-            label.setBounds (r2.withWidth (labelWidth));
+            label.setBounds (r2.withWidth (labelWidth - labelPad));
             r.removeFromTop (spacingBelow);
         }
     }
@@ -58,5 +58,6 @@ protected:
     void setupSlider (Slider& slider)
     {
         slider.setSliderStyle (Slider::LinearBar);
+        slider.setTextBoxIsEditable (false);
     }
 };

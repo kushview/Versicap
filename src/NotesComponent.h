@@ -8,10 +8,11 @@ public:
     NotesComponent()
     {
         addAndMakeVisible (keyStartLabel);
-        keyStartLabel.setText ("Start Note", dontSendNotification);
+        keyStartLabel.setText ("Note Start", dontSendNotification);
         addAndMakeVisible (keyStart);
         keyStart.setRange (0, 127, 1);
         keyStart.textFromValueFunction = SettingGroup::noteValue;
+        keyStart.onValueChange = [this]() { stabilizeKeyStart(); };
         setupSlider (keyStart);
 
         addAndMakeVisible (keyEndLabel);
@@ -19,6 +20,7 @@ public:
         addAndMakeVisible (keyEnd);
         keyEnd.setRange (0, 127, 1);
         keyEnd.textFromValueFunction = SettingGroup::noteValue;
+        keyEnd.onValueChange = [this]() { stabilizeKeyEnd(); };
         setupSlider (keyEnd);
 
         addAndMakeVisible (keyStrideLabel);
@@ -49,10 +51,26 @@ public:
 
     void stabilizeSettings() override
     {
+        if (! stabilizeKeyStart())
+            stabilizeKeyEnd();
         keyStart.updateText();
-        keyEnd.updateText();
-        if (keyEnd.getValue() <= keyStart.getValue())
+        keyEnd.updateText();        
+    }
+
+    bool stabilizeKeyStart()
+    {
+        bool shouldConstrain = keyEnd.getValue() <= keyStart.getValue();
+        if (shouldConstrain)
             keyEnd.setValue (keyStart.getValue() + 1.0, dontSendNotification);
+        return shouldConstrain;
+    }
+
+    bool stabilizeKeyEnd()
+    {
+        bool shouldConstrain = keyStart.getValue() >= keyEnd.getValue();
+        if (shouldConstrain)
+            keyStart.setValue (keyEnd.getValue() - 1.0, dontSendNotification);
+        return shouldConstrain;
     }
 
     void resized() override
