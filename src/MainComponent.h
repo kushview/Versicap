@@ -5,22 +5,28 @@
 
 namespace vcp {
 
+class Versicap;
+
 class MainComponent   : public Component
 {
 public:
-    MainComponent();
+    MainComponent (Versicap&);
     ~MainComponent();
 
-    void paint (Graphics&) override;
-    void resized() override;
+    Versicap& getVersicap() { return versicap; }
 
     void startRendering();
     void stopRendering();
+
+    void paint (Graphics&) override;
+    void resized() override;
     
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
+    Versicap& versicap;
     class Content;
     std::unique_ptr<Content> content;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
 
 }

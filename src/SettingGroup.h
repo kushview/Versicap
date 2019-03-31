@@ -25,6 +25,7 @@ public:
     SettingGroup() : Component() {}
     virtual ~SettingGroup() = default;
 
+    virtual void refresh() {}
     virtual void fillSettings (RenderContext&) { }
     virtual void updateSettings (const RenderContext&) { }
     virtual void stabilizeSettings() { }

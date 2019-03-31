@@ -1,4 +1,5 @@
 
+#include "Versicap.h"
 #include "MainComponent.h"
 #include "MainTabs.h"
 
@@ -37,12 +38,16 @@ private:
     MainTabs tabs;
 };
 
-MainComponent::MainComponent()
+MainComponent::MainComponent (Versicap& vc)
+    : versicap (vc)
 {
     setOpaque (true);
     content.reset (new Content (*this));
     addAndMakeVisible (content.get());
     setSize (600, 400);
+
+    auto& tabs = content->getTabs();
+    tabs.refresh();
 
     const auto file = File::getSpecialLocation (File::userDesktopDirectory).getChildFile ("default.versicap");
     if (auto* xml = XmlDocument::parse (file))
@@ -72,7 +77,7 @@ MainComponent::MainComponent()
             ctx.layerVelocities[i]  = l.getProperty("velocity", ctx.layerVelocities [i]);
         }
 
-        content->getTabs().updateSettings (ctx);
+        tabs.updateSettings (ctx);
         deleteAndZero (xml);
     }
 }

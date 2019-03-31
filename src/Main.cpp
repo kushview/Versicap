@@ -17,15 +17,34 @@ public:
     void initialise (const String& commandLine) override
     {
         versicap.reset (new Versicap());
+        
+        setupGlobals();
+
         look.setColour (Slider::backgroundColourId, kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
         LookAndFeel::setDefaultLookAndFeel (&look);
-        mainWindow.reset (new MainWindow (getApplicationName()));
+        mainWindow.reset (new MainWindow (getApplicationName(), *versicap));
+    }
+
+    void setupGlobals()
+    {
+        auto& formats = versicap->getAudioFormats();
+        formats.registerBasicFormats();
+
+        auto& devices = versicap->getDeviceManager();
+        devices.initialiseWithDefaultDevices (32, 32);
+        
+        auto& plugins = versicap->getPluginManager();
+        plugins.addDefaultFormats();
     }
 
     void shutdown() override
     {
         mainWindow = nullptr;
         LookAndFeel::setDefaultLookAndFeel (nullptr);
+
+        auto& devices = versicap->getDeviceManager();
+        devices.removeAudioCallback (versicap.get());
+
         versicap.reset();
     }
 
@@ -41,14 +60,14 @@ public:
     class MainWindow : public DocumentWindow
     {
     public:
-        MainWindow (String name) 
+        MainWindow (String name, Versicap& vc) 
             : DocumentWindow (name, Desktop::getInstance().getDefaultLookAndFeel()
                                         .findColour (ResizableWindow::backgroundColourId),
                                          DocumentWindow::allButtons)
         {
             setUsingNativeTitleBar (true);
             setBackgroundColour (kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
-            setContentOwned (new MainComponent(), true);
+            setContentOwned (new MainComponent (vc), true);
 
             setResizable (false, false);
             constrain.setMinimumSize (440, 300);

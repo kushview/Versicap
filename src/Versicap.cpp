@@ -8,14 +8,17 @@ struct Versicap::Impl
     Impl() { }
     ~Impl() { }
 
+    OptionalScopedPointer<AudioDeviceManager> devices;
     OptionalScopedPointer<AudioFormatManager> formats;
+    OptionalScopedPointer<AudioPluginFormatManager> plugins;
 };
 
 Versicap::Versicap()
 {
     impl.reset (new Impl());
+    impl->devices.setOwned (new AudioDeviceManager ());
     impl->formats.setOwned (new AudioFormatManager ());
-    impl->formats->registerBasicFormats();
+    impl->plugins.setOwned (new AudioPluginFormatManager());
 }
 
 Versicap::~Versicap()
@@ -23,6 +26,10 @@ Versicap::~Versicap()
     impl->formats->clearFormats();
     impl.reset();
 }
+
+AudioDeviceManager& Versicap::getDeviceManager()        { return *impl->devices; }
+AudioFormatManager& Versicap::getAudioFormats()         { return *impl->formats; }
+AudioPluginFormatManager& Versicap::getPluginManager()  { return *impl->plugins; }
 
 void Versicap::audioDeviceIOCallback (const float** inputChannelData,
                             int numInputChannels, float** outputChannelData,

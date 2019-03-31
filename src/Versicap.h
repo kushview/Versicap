@@ -4,12 +4,18 @@
 
 namespace vcp {
 
-class Versicap : public AudioIODeviceCallback
+class Versicap final : public AudioIODeviceCallback
 {
 public:
     Versicap();
     ~Versicap();
 
+    //=========================================================================
+    AudioDeviceManager& getDeviceManager();
+    AudioPluginFormatManager& getPluginManager();
+    AudioFormatManager& getAudioFormats();
+
+    //=========================================================================
     void audioDeviceIOCallback (const float** inputChannelData,
                                 int numInputChannels, float** outputChannelData,
                                 int numOutputChannels, int numSamples) override;

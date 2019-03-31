@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include "JuceHeader.h"
-
 #include "RenderContext.h"
 
 #include "EngineComponent.h"
@@ -36,6 +34,13 @@ public:
     }
 
     ~MainTabs() { }
+
+    void refresh()
+    {
+        for (int i = 0; i < getNumTabs(); ++i)
+            if (auto* const group = dynamic_cast<SettingGroup*> (getTabContentComponent (i)))
+                group->refresh();
+    }
 
     RenderContext getRenderContext()
     {

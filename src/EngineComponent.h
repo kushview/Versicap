@@ -28,7 +28,7 @@ public:
         sourceCombo.setSelectedId (1, dontSendNotification);
 
         addAndMakeVisible (midiDeviceLabel);
-        midiDeviceLabel.setText ("Device", dontSendNotification);
+        midiDeviceLabel.setText ("MIDI", dontSendNotification);
         addAndMakeVisible (midiDeviceCombo);
         refreshMidiDevices();
         
@@ -38,23 +38,49 @@ public:
         pluginButton.onClick = std::bind (&EngineComponent::choosePlugin, this);
         pluginButton.setTriggeredOnMouseDown (true);
 
-        addAndMakeVisible (bitDepthLabel);
-        bitDepthLabel.setText ("Bit Depth", dontSendNotification);
-        addAndMakeVisible (bitDepthCombo);
-        bitDepthCombo.addItem ("16 bit", 1);
-        bitDepthCombo.addItem ("24 bit", 2);
-        bitDepthCombo.setSelectedId (1);
+        auto applyAudioDeviceSettingsCallback = std::bind (
+            &EngineComponent::applyAudioDeviceSettings, this);
 
-        addAndMakeVisible (recordingDeviceLabel);
-        recordingDeviceLabel.setText ("Recorder", dontSendNotification);
-        addAndMakeVisible (recordingDeviceCombo);
-        recordingDeviceCombo.addItem ("Audio Device 1", 1);
-        recordingDeviceCombo.addItem ("Audio Device 2", 2);
-        recordingDeviceCombo.setSelectedId (1);
+        addAndMakeVisible (sampleRateLabel);
+        sampleRateLabel.setText ("Sample Rate", dontSendNotification);
+        addAndMakeVisible (sampleRateCombo);
+        sampleRateCombo.addItem ("44100", 44100);
+        sampleRateCombo.addItem ("48000", 48000);
+        sampleRateCombo.addItem ("96000", 96000);
+        sampleRateCombo.addItem ("192000", 192000);
+        sampleRateCombo.setSelectedId (44100, dontSendNotification);
+        sampleRateCombo.onChange = applyAudioDeviceSettingsCallback;
 
+        addAndMakeVisible (bufferSizeLabel);
+        bufferSizeLabel.setText ("Buffer Size", dontSendNotification);
+        addAndMakeVisible (bufferSizeCombo);
+        bufferSizeCombo.addItem ("16", 16);
+        bufferSizeCombo.addItem ("32", 32);
+        bufferSizeCombo.addItem ("64", 64);
+        bufferSizeCombo.addItem ("128", 128);
+        bufferSizeCombo.addItem ("256", 256);
+        bufferSizeCombo.addItem ("512", 512);
+        bufferSizeCombo.addItem ("1024", 1024);
+        bufferSizeCombo.addItem ("2048", 2048);
+        bufferSizeCombo.addItem ("4096", 4096);
+        bufferSizeCombo.setSelectedId (512, dontSendNotification);
+        bufferSizeCombo.onChange = applyAudioDeviceSettingsCallback;
+
+        addAndMakeVisible (inputDeviceLabel);
+        inputDeviceLabel.setText ("Audio In", dontSendNotification);
+        addAndMakeVisible (inputDeviceCombo);
+        inputDeviceCombo.onChange = applyAudioDeviceSettingsCallback;
+
+        addAndMakeVisible (outputDeviceLabel);
+        outputDeviceLabel.setText ("Audio Out", dontSendNotification);
+        addAndMakeVisible (outputDeviceCombo);
+        outputDeviceCombo.onChange = applyAudioDeviceSettingsCallback;
+        
         addAndMakeVisible (renderButton);
         renderButton.setButtonText ("Render");
         renderButton.onClick = [this]() { startRender(); };
+
+        refresh();
 
         stabilizeSettings();
         setSize (300, 300);
@@ -73,8 +99,6 @@ public:
             {
                 midiDeviceLabel.setVisible (true);
                 midiDeviceCombo.setVisible (true);
-                recordingDeviceLabel.setVisible (true);
-                recordingDeviceCombo.setVisible (true);
                 pluginLabel.setVisible (false);
                 pluginButton.setVisible (false);
             } break;
@@ -83,14 +107,18 @@ public:
             {
                 midiDeviceLabel.setVisible (false);
                 midiDeviceCombo.setVisible (false);
-                recordingDeviceLabel.setVisible (false);
-                recordingDeviceCombo.setVisible (false);
                 pluginLabel.setVisible (true);
                 pluginButton.setVisible (true);
             } break;
         }
 
         resized();
+    }
+
+    void refresh() override
+    {
+        refreshMidiDevices();
+        refreshAudioDevices();
     }
 
     void resized() override
@@ -102,28 +130,33 @@ public:
         if (pluginLabel.isVisible())
             layout (r, pluginLabel, pluginButton);
         
-        if (recordingDeviceLabel.isVisible())
-            layout (r, recordingDeviceLabel, recordingDeviceCombo);
-
-        layout (r, bitDepthLabel, bitDepthCombo);
+        layout (r, inputDeviceLabel, inputDeviceCombo, 0, 22, 4);
+        layout (r, outputDeviceLabel, outputDeviceCombo, 0, 22, 4);
+        layout (r, sampleRateLabel, sampleRateCombo, 0, 22, 4);
+        layout (r, bufferSizeLabel, bufferSizeCombo);
 
         renderButton.setBounds (r.removeFromTop (22).reduced (60, 0));
     }
 
 private:
     PluginDescription plugin;
+    StringArray midiOutputs;
 
     Label sourceLabel;
     Label midiDeviceLabel;
     Label pluginLabel;
-    Label bitDepthLabel;
-    Label recordingDeviceLabel;
+    Label sampleRateLabel;
+    Label bufferSizeLabel;
+    Label inputDeviceLabel;
+    Label outputDeviceLabel;
 
     ComboBox sourceCombo;
     ComboBox midiDeviceCombo;
     TextButton pluginButton;
-    ComboBox bitDepthCombo;
-    ComboBox recordingDeviceCombo;
+    ComboBox sampleRateCombo;
+    ComboBox bufferSizeCombo;
+    ComboBox inputDeviceCombo;
+    ComboBox outputDeviceCombo;
 
     TextButton renderButton;
 
@@ -131,11 +164,20 @@ private:
 
     void refreshMidiDevices()
     {
+        midiOutputs = MidiOutput::getDevices();
+        String current = midiDeviceCombo.getItemText (midiDeviceCombo.getSelectedItemIndex());
         midiDeviceCombo.clear();
-        for (int i = 0; i < 4; ++i)
-            midiDeviceCombo.addItem ("Device " + String (i + 1), i + 1);
-        midiDeviceCombo.setSelectedItemIndex (0);
+        int i = 1;
+        for (const auto& device : midiOutputs)
+            midiDeviceCombo.addItem (device, i++);
+        if (current.isNotEmpty())
+            midiDeviceCombo.setSelectedItemIndex (jmax (0, midiOutputs.indexOf (current)));
+        else
+            midiDeviceCombo.setSelectedItemIndex (0);
     }
+
+    void refreshAudioDevices();
+    void applyAudioDeviceSettings();
 
     void choosePlugin()
     {
