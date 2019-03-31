@@ -22,6 +22,36 @@ struct RenderContext
     int loopEnd                 = 2500;
     int crossfadeLength         = 0;
 
+    String instrumentName       = String();
+    String outputPath           = String();
+    
+    ValueTree createValueTree()
+    {
+        ValueTree versicap ("versicap");
+        versicap.setProperty ("keyStart",   keyStart, nullptr)
+                .setProperty ("keyEnd",     keyEnd, nullptr)
+                .setProperty ("keyStride",  keyStride, nullptr)
+                .setProperty ("baseName",   baseName, nullptr)
+                .setProperty ("noteLength", noteLength, nullptr)
+                .setProperty ("tailLength", tailLength, nullptr)
+                .setProperty ("loopMode",   loopMode, nullptr)
+                .setProperty ("loopStart",  loopStart, nullptr)
+                .setProperty ("crossfadeLength", crossfadeLength, nullptr)
+                .setProperty ("instrumentName", instrumentName, nullptr)
+                .setProperty ("outputPath", outputPath, nullptr);
+        
+        auto layers = versicap.getOrCreateChildWithName ("layers", nullptr);
+        for (int i = 0; i < 4; ++i)
+        {
+            ValueTree layer ("layer");
+            layer.setProperty ("enabled", layerEnabled [i], nullptr)
+                 .setProperty ("velocity", layerVelocities [i], nullptr);
+            layers.appendChild (layer, nullptr);
+        }
+
+        return versicap;
+    }
+
     MidiMessageSequence* createMidiMessageSequence (const int layer, const double sampleRate) const
     {
         jassert (sampleRate > 0.0);
