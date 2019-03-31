@@ -8,6 +8,7 @@
 #include "EngineComponent.h"
 #include "LoopingComponent.h"
 #include "NotesComponent.h"
+#include "OutputComponent.h"
 #include "SamplingComponent.h"
 #include "LayersComponent.h"
 #include "SettingGroup.h"
@@ -23,11 +24,12 @@ public:
         auto colour = kv::LookAndFeel_KV1::widgetBackgroundColor.darker();
         setColour (TabbedComponent::backgroundColourId, colour);
         colour = kv::LookAndFeel_KV1::widgetBackgroundColor;
-        addTab ("Engine",   colour, new EngineComponent(),    true);
-        addTab ("Notes",    colour, new NotesComponent(),     true);
-        addTab ("Sampling", colour, new SamplingComponent(),  true);
-        addTab ("Layers",   colour, new LayersComponent(),    true);
-        addTab ("Looping",  colour, new LoopingComponent(),   true);
+        addTab ("Engine",   colour, new EngineComponent(),   true);
+        addTab ("Notes",    colour, new NotesComponent(),    true);
+        addTab ("Sampling", colour, new SamplingComponent(), true);
+        addTab ("Layers",   colour, new LayersComponent(),   true);
+        addTab ("Looping",  colour, new LoopingComponent(),  true);
+        addTab ("Output",   colour, new OutputComponent(),   true);
 
         RenderContext ctx;
         updateSettings (ctx);
