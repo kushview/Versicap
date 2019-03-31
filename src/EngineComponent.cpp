@@ -11,6 +11,23 @@ void EngineComponent::startRender()
         main->startRendering();
 }
 
+void EngineComponent::refreshMidiDevices()
+{
+    midiInputs = MidiInput::getDevices();
+    midiInputCombo.clear (dontSendNotification);
+    int i = 1;
+    for (const auto& device : midiInputs)
+        midiInputCombo.addItem (device, i++);
+    ensureCorrectMidiInput();
+
+    midiOutputs = MidiOutput::getDevices();
+    midiOutputCombo.clear (dontSendNotification);
+    i = 1;
+    for (const auto& device : midiOutputs)
+        midiOutputCombo.addItem (device, i++);
+    ensureCorrectMidiOutput();
+}
+
 void EngineComponent::refreshAudioDevices()
 {
     if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
@@ -39,20 +56,9 @@ void EngineComponent::refreshAudioDevices()
             outputDeviceCombo.addItem ("No Device", 9999);
         }
 
-        int inputIdx = currentIn.isNotEmpty() ? inNames.indexOf (currentIn) : -1;
-        inputDeviceCombo.setSelectedItemIndex (inputIdx >= 0 ? inputIdx : 9999, 
-                                               dontSendNotification);
-        if (inputDeviceCombo.getSelectedItemIndex() < 0)
-            inputDeviceCombo.setSelectedId (9999, dontSendNotification);
-        
-        int outputIdx = currentOut.isNotEmpty() ? outNames.indexOf (currentOut) : -1;
-        outputDeviceCombo.setSelectedItemIndex (outputIdx >= 0 ? outputIdx : 9999, 
-                                                dontSendNotification);
-        if (outputDeviceCombo.getSelectedItemIndex() < 0)
-            outputDeviceCombo.setSelectedId (9999, dontSendNotification);
-
-        sampleRateCombo.setSelectedId (roundToInt (setup.sampleRate), dontSendNotification);
-        bufferSizeCombo.setSelectedId (roundToInt (setup.bufferSize), dontSendNotification);
+        ensureCorrectAudioInput();
+        ensureCorrectAudioOutput();
+        ensureTimings();
     }
 }
 
@@ -71,11 +77,21 @@ void EngineComponent::applyAudioDeviceSettings()
         setup.bufferSize = bufferSizeCombo.getSelectedId();
         setup.sampleRate = (double) sampleRateCombo.getSelectedId();
         setup.useDefaultInputChannels = setup.useDefaultOutputChannels = true;
+
+        if (setup.inputDeviceName.isEmpty() && setup.outputDeviceName.isEmpty())
+        {
+            devices.closeAudioDevice();
+            stabilizeSettings();
+            return;
+        }
+
         const auto error = devices.setAudioDeviceSetup (setup, treatAsChosen);
 
         if (error.isNotEmpty())
         {
-            refreshAudioDevices();
+            ensureCorrectAudioInput();
+            ensureCorrectAudioOutput();
+            ensureTimings();
             AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
                 "Audio Device", error);
         }
@@ -91,6 +107,7 @@ void EngineComponent::applyMidiInput()
         for (const auto& name : MidiInput::getDevices())
             devices.setMidiInputEnabled (name, false);
         devices.setMidiInputEnabled (device, true);
+        ensureCorrectMidiInput();
     }
 }
 
@@ -101,6 +118,84 @@ void EngineComponent::applyMidiOutput()
         const auto device = midiOutputCombo.getText();
         auto& devices = main->getVersicap().getDeviceManager();
         devices.setDefaultMidiOutput (device);
+        ensureCorrectMidiOutput();
+    }
+}
+
+void EngineComponent::ensureTimings()
+{
+    if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
+    {
+        auto& versicap = main->getVersicap();
+        auto& devices = versicap.getDeviceManager();
+        const auto setup = devices.getAudioDeviceSetup();
+        sampleRateCombo.setSelectedId (roundToInt (setup.sampleRate), dontSendNotification);
+        bufferSizeCombo.setSelectedId (roundToInt (setup.bufferSize), dontSendNotification);
+    }
+}
+
+void EngineComponent::ensureCorrectAudioInput()
+{
+    if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
+    {
+        auto& versicap = main->getVersicap();
+        auto& devices = versicap.getDeviceManager();
+        const auto setup = devices.getAudioDeviceSetup();
+        auto* const type = devices.getCurrentDeviceTypeObject();
+        const auto currentIn = setup.inputDeviceName;
+        const auto inNames = type != nullptr ? type->getDeviceNames (true) : StringArray();
+        int inputIdx = currentIn.isNotEmpty() ? inNames.indexOf (currentIn) : -1;
+        inputDeviceCombo.setSelectedItemIndex (inputIdx >= 0 ? inputIdx : 9999, 
+                                                dontSendNotification);
+        if (inputDeviceCombo.getSelectedItemIndex() < 0)
+            inputDeviceCombo.setSelectedId (9999, dontSendNotification);
+    }
+}
+
+void EngineComponent::ensureCorrectAudioOutput()
+{
+    if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
+    {
+        auto& versicap = main->getVersicap();
+        auto& devices = versicap.getDeviceManager();
+        const auto setup = devices.getAudioDeviceSetup();
+        auto* const type = devices.getCurrentDeviceTypeObject();
+        const auto currentOut = setup.outputDeviceName;
+        const auto outNames = type != nullptr ? type->getDeviceNames (false) : StringArray();
+        int outputIdx = currentOut.isNotEmpty() ? outNames.indexOf (currentOut) : -1;
+        outputDeviceCombo.setSelectedItemIndex (outputIdx >= 0 ? outputIdx : 9999, 
+                                                dontSendNotification);
+        if (outputDeviceCombo.getSelectedItemIndex() < 0)
+            outputDeviceCombo.setSelectedId (9999, dontSendNotification);
+    }
+}
+
+void EngineComponent::ensureCorrectMidiInput()
+{
+    if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
+    {
+        auto& versicap = main->getVersicap();
+        auto& devices = versicap.getDeviceManager();
+        for (const auto& device : midiInputs)
+        {
+            if (devices.isMidiInputEnabled (device))
+            {
+                int index = midiInputs.indexOf (device);
+                midiInputCombo.setSelectedItemIndex (index >= 0 ? index : -1, dontSendNotification);
+                break;
+            }
+        }
+    }
+}
+
+void EngineComponent::ensureCorrectMidiOutput()
+{
+    if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
+    {
+        auto& versicap = main->getVersicap();
+        auto& devices = versicap.getDeviceManager();
+        int index = midiOutputs.indexOf (devices.getDefaultMidiOutputName());
+        midiOutputCombo.setSelectedItemIndex (index >= 0 ? index : -1, dontSendNotification);
     }
 }
 

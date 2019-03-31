@@ -85,12 +85,10 @@ public:
         renderButton.setButtonText ("Render");
         renderButton.onClick = [this]() { startRender(); };
 
-        refresh();
-
-        stabilizeSettings();
         setSize (300, 300);
     }
 
+    int getSourceType() const { return sourceCombo.getSelectedId() - 1; }
     void stabilizeSettings() override
     {
         if (plugin.name.isEmpty())
@@ -98,7 +96,7 @@ public:
         else
             pluginButton.setButtonText (plugin.name);
           
-        switch (sourceCombo.getSelectedId() - 1)
+        switch (getSourceType())
         {
             case SourceType::MidiDevice:
             {
@@ -120,6 +118,12 @@ public:
                 pluginButton.setVisible (true);
             } break;
         }
+
+        ensureCorrectAudioInput();
+        ensureCorrectAudioOutput();
+        ensureCorrectMidiInput();
+        ensureCorrectMidiOutput();
+        ensureTimings();
 
         resized();
     }
@@ -179,35 +183,19 @@ private:
 
     void startRender();
 
-    void refreshMidiDevices()
-    {
-        midiInputs = MidiInput::getDevices();
-        String current = midiInputCombo.getItemText (midiInputCombo.getSelectedItemIndex());
-        midiInputCombo.clear (dontSendNotification);
-        int i = 1;
-        for (const auto& device : midiInputs)
-            midiInputCombo.addItem (device, i++);
-        if (current.isNotEmpty())
-            midiInputCombo.setSelectedItemIndex (jmax (0, midiInputs.indexOf (current)));
-        else
-            midiInputCombo.setSelectedItemIndex (0);
-
-        midiOutputs = MidiOutput::getDevices();
-        current = midiOutputCombo.getText();
-        midiOutputCombo.clear (dontSendNotification);
-        i = 1;
-        for (const auto& device : midiOutputs)
-            midiOutputCombo.addItem (device, i++);
-        if (current.isNotEmpty())
-            midiOutputCombo.setSelectedItemIndex (jmax (0, midiOutputs.indexOf (current)));
-        else
-            midiOutputCombo.setSelectedItemIndex (0);
-    }
-
     void refreshAudioDevices();
+    void refreshMidiDevices();
+    
     void applyAudioDeviceSettings();
     void applyMidiInput();
     void applyMidiOutput();
+
+    void ensureCorrectAudioInput();
+    void ensureCorrectAudioOutput();
+    void ensureCorrectMidiInput();
+    void ensureCorrectMidiOutput();
+    void ensureTimings();
+
     void choosePlugin()
     {
         AlertWindow::showMessageBoxAsync (AlertWindow::NoIcon, 

@@ -49,12 +49,17 @@ MainComponent::MainComponent (Versicap& vc)
     auto& tabs = content->getTabs();
     tabs.refresh();
 
-    const auto file = File::getSpecialLocation (File::userDesktopDirectory).getChildFile ("default.versicap");
-    if (auto* xml = XmlDocument::parse (file))
+    File contextFile;
+    if (auto* props = versicap.getSettings().getUserSettings())
+    {
+        content->getTabs().setCurrentTabIndex (props->getIntValue ("currentTab", 0));
+        contextFile = props->getFile().getParentDirectory().getChildFile("context.versicap");
+    }
+
+    if (auto* xml = XmlDocument::parse (contextFile))
     {
         auto tree = ValueTree::fromXml (*xml);
-        content->getTabs().setCurrentTabIndex ((int) tree.getProperty ("currentTab", 0));
-
+        
         RenderContext ctx;
         ctx.baseName            = tree.getProperty ("baseName", ctx.baseName);
         ctx.crossfadeLength     = tree.getProperty ("crossfadeLength", ctx.crossfadeLength);;
@@ -86,12 +91,20 @@ MainComponent::~MainComponent()
 {
     auto ctx = content->getTabs().getRenderContext();
     ValueTree tree = ctx.createValueTree();
-    tree.setProperty ("currentTab", content->getTabs().getCurrentTabIndex(), nullptr);
+    File contextFile;
 
-    const auto file = File::getSpecialLocation (File::userDesktopDirectory).getChildFile ("default.versicap");
+    if (auto* props = versicap.getSettings().getUserSettings())
+    {
+        props->setValue ("currentTab", content->getTabs().getCurrentTabIndex());
+        contextFile = props->getFile().getParentDirectory().getChildFile("context.versicap");
+    }
+
+    if (! contextFile.getParentDirectory().exists())
+        contextFile.getParentDirectory().createDirectory();
+
     if (auto* xml = tree.createXml())
     {
-        xml->writeToFile (file, String());
+        xml->writeToFile (contextFile, String());
         deleteAndZero (xml);
     }
 

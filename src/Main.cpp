@@ -29,12 +29,8 @@ public:
     {
         auto& formats = versicap->getAudioFormats();
         formats.registerBasicFormats();
-
-        auto& devices = versicap->getDeviceManager();
-        devices.initialiseWithDefaultDevices (32, 32);
-        
-        auto& plugins = versicap->getPluginManager();
-        plugins.addDefaultFormats();
+        versicap->initializePlugins();
+        versicap->initializeAudioDevice();
     }
 
     void shutdown() override
@@ -42,9 +38,12 @@ public:
         mainWindow = nullptr;
         LookAndFeel::setDefaultLookAndFeel (nullptr);
 
+        versicap->saveSettings();
+
         auto& devices = versicap->getDeviceManager();
         devices.removeAudioCallback (versicap.get());
-
+        devices.removeMidiInputCallback (String(), versicap.get());
+        
         versicap.reset();
     }
 
