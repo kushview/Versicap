@@ -2,6 +2,8 @@
 
 #include "SettingGroup.h"
 
+namespace vcp {
+
 class NotesComponent : public SettingGroup
 {
 public:
@@ -89,3 +91,5 @@ private:
     Slider keyEnd;
     Slider keyStride;
 };
+
+}

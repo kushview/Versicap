@@ -3,6 +3,8 @@
 
 #include "SettingGroup.h"
 
+namespace vcp {
+
 struct SourceType
 {
     enum ID
@@ -12,10 +14,10 @@ struct SourceType
     };
 };
 
-class SourceComponent : public SettingGroup
+class EngineComponent : public SettingGroup
 {
 public:
-    SourceComponent()
+    EngineComponent()
     {
         addAndMakeVisible (sourceLabel);
         sourceLabel.setText ("Source", dontSendNotification);
@@ -33,7 +35,7 @@ public:
         addAndMakeVisible (pluginLabel);
         pluginLabel.setText ("Plugin", dontSendNotification);
         addAndMakeVisible (pluginButton);
-        pluginButton.onClick = std::bind (&SourceComponent::choosePlugin, this);
+        pluginButton.onClick = std::bind (&EngineComponent::choosePlugin, this);
         pluginButton.setTriggeredOnMouseDown (true);
 
         addAndMakeVisible (bitDepthLabel);
@@ -142,3 +144,4 @@ private:
     }
 };
 
+}

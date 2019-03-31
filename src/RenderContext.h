@@ -2,6 +2,8 @@
 
 #include "JuceHeader.h"
 
+namespace vcp {
+
 struct RenderContext
 {
     int keyStart                = 36;   // C2
@@ -53,3 +55,5 @@ struct RenderContext
         return seq.release();
     }
 };
+
+}

@@ -2,12 +2,14 @@
 
 #include "SettingGroup.h"
 
-class VelocityComponent : public SettingGroup,
-                          public Button::Listener
+namespace vcp {
+
+class LayersComponent : public SettingGroup,
+                        public Button::Listener
 {
 public:
-    VelocityComponent();
-    ~VelocityComponent();
+    LayersComponent();
+    ~LayersComponent();
 
     void fillSettings (RenderContext&) override;
     void updateSettings (const RenderContext&) override;
@@ -22,3 +24,5 @@ private:
 
     bool hasLayers();
 };
+
+}

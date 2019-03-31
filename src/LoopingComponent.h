@@ -2,6 +2,8 @@
 
 #include "SettingGroup.h"
 
+namespace vcp {
+
 class LoopingComponent : public SettingGroup
 {
 public:
@@ -87,3 +89,5 @@ private:
     Slider loopEnd;
     Slider crossfadeLength;
 };
+
+}

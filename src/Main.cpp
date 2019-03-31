@@ -1,6 +1,9 @@
 
 #include "JuceHeader.h"
 #include "MainComponent.h"
+#include "Versicap.h"
+
+namespace vcp {
 
 class VersicapApplication  : public JUCEApplication
 {
@@ -13,6 +16,7 @@ public:
 
     void initialise (const String& commandLine) override
     {
+        versicap.reset (new Versicap());
         look.setColour (Slider::backgroundColourId, kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
         LookAndFeel::setDefaultLookAndFeel (&look);
         mainWindow.reset (new MainWindow (getApplicationName()));
@@ -22,6 +26,7 @@ public:
     {
         mainWindow = nullptr;
         LookAndFeel::setDefaultLookAndFeel (nullptr);
+        versicap.reset();
     }
 
     void systemRequestedQuit() override
@@ -33,7 +38,7 @@ public:
     {
     }
 
-    class MainWindow    : public DocumentWindow
+    class MainWindow : public DocumentWindow
     {
     public:
         MainWindow (String name) 
@@ -76,6 +81,9 @@ public:
 private:
     std::unique_ptr<MainWindow> mainWindow;
     kv::LookAndFeel_KV1 look;
+    std::unique_ptr<Versicap> versicap;
 };
 
-START_JUCE_APPLICATION (VersicapApplication)
+}
+
+START_JUCE_APPLICATION (vcp::VersicapApplication)

@@ -2,6 +2,8 @@
 
 #include "JuceHeader.h"
 
+namespace vcp {
+
 struct RenderContext;
 
 class SettingGroup : public Component
@@ -61,3 +63,5 @@ protected:
         slider.setTextBoxIsEditable (false);
     }
 };
+
+}

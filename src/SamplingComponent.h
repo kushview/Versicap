@@ -1,8 +1,8 @@
 #pragma once
 
-#pragma once
-
 #include "SettingGroup.h"
+
+namespace vcp {
 
 class SamplingComponent : public SettingGroup
 {
@@ -65,3 +65,5 @@ private:
     Slider tailLength;
     TextEditor baseName;
 };
+
+}

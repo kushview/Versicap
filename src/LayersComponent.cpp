@@ -1,8 +1,10 @@
 
 #include "RenderContext.h"
-#include "VelocityComponent.h"
+#include "LayersComponent.h"
 
-VelocityComponent::VelocityComponent()
+namespace vcp {
+
+LayersComponent::LayersComponent()
 {
     for (int i = 0; i < 4; ++i)
     {
@@ -22,20 +24,20 @@ VelocityComponent::VelocityComponent()
     }
 }
 
-VelocityComponent::~VelocityComponent()
+LayersComponent::~LayersComponent()
 {
     sliders.clear();
     toggles.clear();
 }
 
-void VelocityComponent::buttonClicked (Button* toggle)
+void LayersComponent::buttonClicked (Button* toggle)
 {
     if (! hasLayers())
         toggle->setToggleState (true, dontSendNotification);
     stabilizeSettings();
 }
 
-bool VelocityComponent::hasLayers()
+bool LayersComponent::hasLayers()
 {
     bool anythingToggled = false;
     for (int i = 0; i < 4; ++i)
@@ -49,7 +51,7 @@ bool VelocityComponent::hasLayers()
     return anythingToggled;
 }
 
-void VelocityComponent::fillSettings (RenderContext& ctx)
+void LayersComponent::fillSettings (RenderContext& ctx)
 {
     jassert (hasLayers());
 
@@ -60,7 +62,7 @@ void VelocityComponent::fillSettings (RenderContext& ctx)
     }
 }
 
-void VelocityComponent::updateSettings (const RenderContext& ctx)
+void LayersComponent::updateSettings (const RenderContext& ctx)
 {
     for (int i = 0; i < 4; ++i)
     {
@@ -69,7 +71,7 @@ void VelocityComponent::updateSettings (const RenderContext& ctx)
     }
 }
 
-void VelocityComponent::stabilizeSettings()
+void LayersComponent::stabilizeSettings()
 {
     for (int i = 0; i < 4; ++i)
     {
@@ -77,9 +79,11 @@ void VelocityComponent::stabilizeSettings()
     }
 }
 
-void VelocityComponent::resized()
+void LayersComponent::resized()
 {
     auto r = getLocalBounds().reduced (8, 10);
     for (int i = 0; i < 4; ++i)
         layout (r, *toggles[i], *sliders[i], 10);
+}
+
 }
