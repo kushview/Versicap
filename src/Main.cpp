@@ -8,7 +8,7 @@ namespace vcp {
 class VersicapApplication  : public JUCEApplication
 {
 public:
-    VersicapApplication() {}
+    VersicapApplication() { }
 
     const String getApplicationName() override       { return ProjectInfo::projectName; }
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }
@@ -25,25 +25,11 @@ public:
         mainWindow.reset (new MainWindow (getApplicationName(), *versicap));
     }
 
-    void setupGlobals()
-    {
-        auto& formats = versicap->getAudioFormats();
-        formats.registerBasicFormats();
-        versicap->initializePlugins();
-        versicap->initializeAudioDevice();
-    }
-
     void shutdown() override
     {
-        mainWindow = nullptr;
-        LookAndFeel::setDefaultLookAndFeel (nullptr);
-
+        shutdownGui();
         versicap->saveSettings();
-
-        auto& devices = versicap->getDeviceManager();
-        devices.removeAudioCallback (versicap.get());
-        devices.removeMidiInputCallback (String(), versicap.get());
-        
+        versicap->shutdown();
         versicap.reset();
     }
 
@@ -81,6 +67,16 @@ public:
         {
             setConstrainer (nullptr);
         }
+
+        void savePersistentData()
+        {
+            if (auto* const comp = dynamic_cast<MainComponent*> (getContentComponent()))
+            {
+                comp->saveSettings();
+                comp->saveContextFile();
+            }
+        }
+
         void closeButtonPressed() override
         {
             JUCEApplication::getInstance()->systemRequestedQuit();
@@ -100,6 +96,25 @@ private:
     std::unique_ptr<MainWindow> mainWindow;
     kv::LookAndFeel_KV1 look;
     std::unique_ptr<Versicap> versicap;
+
+    void setupGlobals()
+    {
+        auto& formats = versicap->getAudioFormats();
+        formats.registerBasicFormats();
+        versicap->initializePlugins();
+        versicap->initializeAudioDevice();
+    }
+
+    void shutdownGui()
+    {
+        if (mainWindow != nullptr)
+        {
+            mainWindow->savePersistentData();
+            mainWindow = nullptr;
+        }
+
+        LookAndFeel::setDefaultLookAndFeel (nullptr);
+    }
 };
 
 }

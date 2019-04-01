@@ -64,20 +64,28 @@ MainComponent::MainComponent (Versicap& vc)
 
 MainComponent::~MainComponent()
 {
+    content.reset();
+}
+
+void MainComponent::saveSettings()
+{
+    if (auto* props = versicap.getSettings().getUserSettings())
+        props->setValue ("currentTab", content->getTabs().getCurrentTabIndex());
+}
+
+void MainComponent::saveContextFile()
+{
     const auto ctx = content->getTabs().getRenderContext();
     File contextFile;
 
     if (auto* props = versicap.getSettings().getUserSettings())
-    {
-        props->setValue ("currentTab", content->getTabs().getCurrentTabIndex());
-        contextFile = props->getFile().getParentDirectory().getChildFile("context.versicap");
-    }
+        contextFile = props->getFile().getParentDirectory()
+            .getChildFile ("context.versicap");
 
     if (! contextFile.getParentDirectory().exists())
         contextFile.getParentDirectory().createDirectory();
 
     ctx.writeToFile (contextFile);
-    content.reset();
 }
 
 void MainComponent::startRendering()

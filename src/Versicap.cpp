@@ -68,6 +68,14 @@ void Versicap::initializePlugins()
     }
 }
 
+void Versicap::shutdown()
+{
+    auto& devices = getDeviceManager();
+    devices.removeAudioCallback (this);
+    devices.removeMidiInputCallback (String(), this);
+    devices.closeAudioDevice();
+}
+
 void Versicap::saveSettings()
 {
     auto& settings = impl->settings;

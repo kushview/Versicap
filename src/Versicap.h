@@ -12,12 +12,14 @@ public:
     Versicap();
     ~Versicap();
 
+    //=========================================================================
     void initializeAudioDevice();
     void initializePlugins();
-    void saveSettings();
+    void shutdown();
 
     //=========================================================================
     Settings& getSettings();
+    void saveSettings();
 
     //=========================================================================
     AudioDeviceManager& getDeviceManager();

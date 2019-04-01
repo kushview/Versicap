@@ -15,6 +15,9 @@ public:
 
     Versicap& getVersicap() { return versicap; }
 
+    void saveContextFile();
+    void saveSettings();
+
     void startRendering();
     void stopRendering();
 
