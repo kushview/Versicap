@@ -12,8 +12,18 @@ public:
         : owner (o)
     {
         setOpaque (true);
+        
+        addAndMakeVisible (clearButton);
+        clearButton.setButtonText ("C");
+        clearButton.onClick = [this]() { tabs.updateSettings (RenderContext()); };
+
+        addAndMakeVisible (importButton);
+        importButton.setButtonText ("I");
+        addAndMakeVisible (exportButton);
+        exportButton.setButtonText ("E");
+
         addAndMakeVisible (tabs);
-        setSize (500, 340);
+        setSize (440, 340);
     }
 
     ~Content()
@@ -23,12 +33,28 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (Colours::black);
+        g.fillAll (kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
     }
 
     void resized() override
     {
-        tabs.setBounds (getLocalBounds());
+        auto r = getLocalBounds();
+        DBG(r.toString());
+        r.removeFromTop (1);
+        auto r2 = r.removeFromTop (18);
+        Component* buttons [3] = {
+            &clearButton, &importButton, &exportButton
+        };
+
+        r2.removeFromLeft (2);
+        for (int i = 0; i < 3; ++i)
+        {
+            buttons[i]->setBounds (r2.removeFromLeft (20));
+            r2.removeFromLeft (1);
+        }
+
+        r.removeFromTop (1);
+        tabs.setBounds (r);
     }
 
     MainTabs& getTabs() { return tabs; }
@@ -36,6 +62,9 @@ public:
 private:
     MainComponent& owner;
     MainTabs tabs;
+    TextButton clearButton;
+    TextButton importButton;
+    TextButton exportButton;
 };
 
 MainComponent::MainComponent (Versicap& vc)
