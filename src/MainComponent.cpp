@@ -49,48 +49,22 @@ MainComponent::MainComponent (Versicap& vc)
     auto& tabs = content->getTabs();
     tabs.refresh();
 
+    RenderContext ctx;
     File contextFile;
     if (auto* props = versicap.getSettings().getUserSettings())
     {
-        content->getTabs().setCurrentTabIndex (props->getIntValue ("currentTab", 0));
+        tabs.setCurrentTabIndex (props->getIntValue ("currentTab", 0));
         contextFile = props->getFile().getParentDirectory().getChildFile("context.versicap");
+        if (contextFile.existsAsFile())
+            ctx.restoreFromFile (contextFile);
     }
 
-    if (auto* xml = XmlDocument::parse (contextFile))
-    {
-        auto tree = ValueTree::fromXml (*xml);
-        
-        RenderContext ctx;
-        ctx.baseName            = tree.getProperty ("baseName", ctx.baseName);
-        ctx.crossfadeLength     = tree.getProperty ("crossfadeLength", ctx.crossfadeLength);;
-        ctx.instrumentName      = tree.getProperty ("instrumentName", ctx.instrumentName);;
-        ctx.keyEnd              = tree.getProperty ("keyEnd", ctx.keyEnd);;
-        ctx.keyStart            = tree.getProperty ("keyStart", ctx.keyStart);;
-        ctx.keyStride           = tree.getProperty ("keyStride", ctx.keyStride);;
-        ctx.loopEnd             = tree.getProperty ("loopEnd", ctx.loopEnd);;
-        ctx.loopMode            = tree.getProperty ("loopMode", ctx.loopMode);;
-        ctx.loopStart           = tree.getProperty ("loopStart", ctx.loopStart);;
-        ctx.noteLength          = tree.getProperty ("noteLength", ctx.noteLength);;
-        ctx.outputPath          = tree.getProperty ("outputPath", ctx.outputPath);;
-        ctx.tailLength          = tree.getProperty ("tailLength", ctx.tailLength);;
-        auto layers = tree.getChildWithName ("layers");
-        
-        for (int i = 0; i < 4; ++i)
-        {
-            auto l = layers.getChild (i);
-            ctx.layerEnabled[i]     = (bool) l.getProperty("enabled", ctx.layerEnabled [i]);
-            ctx.layerVelocities[i]  = l.getProperty("velocity", ctx.layerVelocities [i]);
-        }
-
-        tabs.updateSettings (ctx);
-        deleteAndZero (xml);
-    }
+    tabs.updateSettings (ctx);
 }
 
 MainComponent::~MainComponent()
 {
-    auto ctx = content->getTabs().getRenderContext();
-    ValueTree tree = ctx.createValueTree();
+    const auto ctx = content->getTabs().getRenderContext();
     File contextFile;
 
     if (auto* props = versicap.getSettings().getUserSettings())
@@ -102,12 +76,7 @@ MainComponent::~MainComponent()
     if (! contextFile.getParentDirectory().exists())
         contextFile.getParentDirectory().createDirectory();
 
-    if (auto* xml = tree.createXml())
-    {
-        xml->writeToFile (contextFile, String());
-        deleteAndZero (xml);
-    }
-
+    ctx.writeToFile (contextFile);
     content.reset();
 }
 
