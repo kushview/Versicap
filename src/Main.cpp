@@ -48,7 +48,8 @@ public:
         MainWindow (String name, Versicap& vc) 
             : DocumentWindow (name, Desktop::getInstance().getDefaultLookAndFeel()
                                         .findColour (ResizableWindow::backgroundColourId),
-                                         DocumentWindow::allButtons)
+                                         DocumentWindow::allButtons),
+              versicap (vc)
         {
             setUsingNativeTitleBar (true);
             setBackgroundColour (kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
@@ -58,8 +59,15 @@ public:
             constrain.setMinimumSize (440, 340);
             constrain.setMaximumSize (440, 340);
             setConstrainer (&constrain);
-            centreWithSize (getWidth(), getHeight());
+            centreWithSize (440, 340);
 
+            if (auto* props = versicap.getSettings().getUserSettings())
+            {
+                const auto state = props->getValue ("windowPosition", String());
+                if (state.isNotEmpty())
+                    restoreWindowStateFromString (state);
+            }
+            
             setVisible (true);
         }
 
@@ -70,6 +78,11 @@ public:
 
         void savePersistentData()
         {
+            if (auto* props = versicap.getSettings().getUserSettings())
+            {
+                props->setValue ("windowPosition", getWindowStateAsString());
+            }
+
             if (auto* const comp = dynamic_cast<MainComponent*> (getContentComponent()))
             {
                 comp->saveSettings();
@@ -88,6 +101,7 @@ public:
         }
 
     private:
+        Versicap& versicap;
         ComponentBoundsConstrainer constrain;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
     };

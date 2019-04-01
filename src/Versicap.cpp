@@ -60,7 +60,8 @@ void Versicap::initializePlugins()
     plugins.addDefaultFormats();
     if (auto* const props = settings.getUserSettings())
     {
-        if (auto* xml = props->getXmlValue ("plugins"))
+        const auto file = props->getFile().getParentDirectory().getChildFile("plugins.xml");
+        if (auto* xml = XmlDocument::parse (file))
         {
             impl->knownPlugins.recreateFromXml (*xml);
             deleteAndZero (xml);
@@ -93,7 +94,8 @@ void Versicap::saveSettings()
 
         if (auto* knownPlugins = impl->knownPlugins.createXml())
         {
-            props->setValue ("plugins", knownPlugins);
+            const auto file = props->getFile().getParentDirectory().getChildFile("plugins.xml");
+            knownPlugins->writeToFile (file, String());
             deleteAndZero (knownPlugins);
         }
     }

@@ -19,8 +19,26 @@ public:
 
         addAndMakeVisible (importButton);
         importButton.setButtonText ("I");
+        importButton.onClick = [this]() {
+            FileChooser chooser ("Open Versicap File", File(), "*.versicap", true, false, this);
+            if (chooser.browseForFileToOpen())
+            {
+                auto ctx = tabs.getRenderContext();
+                ctx.restoreFromFile (chooser.getResult());
+                tabs.updateSettings (ctx);
+            }
+        };
+
         addAndMakeVisible (exportButton);
-        exportButton.setButtonText ("E");
+        exportButton.setButtonText ("S");
+        exportButton.onClick = [this]() {
+            FileChooser chooser ("Save Versicap File", File(), "*.versicap", true, false, this);
+            if (chooser.browseForFileToSave(true))
+            {
+                auto ctx = tabs.getRenderContext();
+                ctx.writeToFile (chooser.getResult());
+            }
+        };
 
         addAndMakeVisible (tabs);
         setSize (440, 340);
@@ -39,7 +57,6 @@ public:
     void resized() override
     {
         auto r = getLocalBounds();
-        DBG(r.toString());
         r.removeFromTop (1);
         auto r2 = r.removeFromTop (18);
         Component* buttons [3] = {
