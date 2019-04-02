@@ -5,10 +5,20 @@
 
 namespace vcp {
 
+struct LoopType
+{
+    enum ID {
+        None = 0,
+        Forwards,
+        Alternating,
+        Reverse,
+        RoundRobin
+    };
+};
+
 struct SourceType
 {
-    enum ID
-    {
+    enum ID {
         MidiDevice  = 0,
         AudioPlugin = 1
     };
