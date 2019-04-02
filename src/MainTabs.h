@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "Versicap.h"
 #include "RenderContext.h"
 
 #include "EngineComponent.h"
@@ -16,18 +17,18 @@ namespace vcp {
 class MainTabs final : public TabbedComponent
 {
 public:
-    MainTabs()
+    MainTabs (Versicap& vc)
         : TabbedComponent (TabbedButtonBar::TabsAtTop)
     {
         auto colour = kv::LookAndFeel_KV1::widgetBackgroundColor.darker();
         setColour (TabbedComponent::backgroundColourId, colour);
         colour = kv::LookAndFeel_KV1::widgetBackgroundColor;
-        addTab ("Engine",   colour, new EngineComponent(),   true);
-        addTab ("Notes",    colour, new NotesComponent(),    true);
-        addTab ("Sampling", colour, new SamplingComponent(), true);
-        addTab ("Layers",   colour, new LayersComponent(),   true);
-        addTab ("Looping",  colour, new LoopingComponent(),  true);
-        addTab ("Output",   colour, new OutputComponent(),   true);
+        addTab ("Engine",   colour, new EngineComponent (vc),   true);
+        addTab ("Notes",    colour, new NotesComponent (vc),    true);
+        addTab ("Sampling", colour, new SamplingComponent (vc), true);
+        addTab ("Layers",   colour, new LayersComponent (vc),   true);
+        addTab ("Looping",  colour, new LoopingComponent (vc),  true);
+        addTab ("Output",   colour, new OutputComponent (vc),   true);
 
         RenderContext ctx;
         updateSettings (ctx);

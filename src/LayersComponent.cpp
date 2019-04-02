@@ -4,7 +4,8 @@
 
 namespace vcp {
 
-LayersComponent::LayersComponent()
+LayersComponent::LayersComponent (Versicap& vc)
+    : SettingGroup (vc)
 {
     for (int i = 0; i < 4; ++i)
     {

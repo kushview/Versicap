@@ -8,8 +8,9 @@ namespace vcp {
 class MainComponent::Content : public Component
 {
 public:
-    Content (MainComponent& o)
-        : owner (o)
+    Content (MainComponent& o, Versicap& vc)
+        : owner (o),
+          tabs (vc)
     {
         setOpaque (true);
         
@@ -88,7 +89,7 @@ MainComponent::MainComponent (Versicap& vc)
     : versicap (vc)
 {
     setOpaque (true);
-    content.reset (new Content (*this));
+    content.reset (new Content (*this, vc));
     addAndMakeVisible (content.get());
     setSize (600, 400);
 

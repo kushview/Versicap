@@ -1,6 +1,6 @@
 #pragma once
 
-#include "JuceHeader.h"
+#include "Versicap.h"
 
 namespace vcp {
 
@@ -22,7 +22,11 @@ public:
             true, true, 4);
     }
 
-    SettingGroup() : Component() {}
+    SettingGroup (Versicap& vc) 
+        : Component(),
+          versicap (vc)
+    {}
+    
     virtual ~SettingGroup() = default;
 
     virtual void refresh() {}
@@ -30,9 +34,11 @@ public:
     virtual void updateSettings (const RenderContext&) { }
     virtual void stabilizeSettings() { }
 
+    Versicap& getVersicap();
     void paint (Graphics&) override {}
 
 protected:
+    Versicap& versicap;
     int labelWidth = 120;
     int settingWidth = 300;
     void layout (Rectangle<int>& r, Component& label, Component& body,

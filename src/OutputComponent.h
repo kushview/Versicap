@@ -1,22 +1,16 @@
 #pragma once
 
 #include "SettingGroup.h"
+#include "Exporter.h"
 
 namespace vcp {
 
 class OutputComponent : public SettingGroup
 {
 public:
-// const String& name,
-//                        const File& currentFile,
-//                        bool canEditFilename,
-//                        bool isDirectory,
-//                        bool isForSaving,
-//                        const String& fileBrowserWildcard,
-//                        const String& enforcedSuffix,
-//                        const String& textWhenNothingSelected);
-    OutputComponent()
-        : directory ("OutputPath", File(), false, true, true,
+    OutputComponent (Versicap& vc)
+        : SettingGroup (vc),
+          directory ("OutputPath", File(), false, true, true,
                      String(), String(), "Path for rendered files")
     {
         addAndMakeVisible (nameLabel);
@@ -28,6 +22,20 @@ public:
         addAndMakeVisible (directoryLabel);
         directoryLabel.setText ("Output Path", dontSendNotification);
         addAndMakeVisible (directory);
+        directory.setCurrentFile ({}, false, dontSendNotification);
+
+        for (auto* const exporter : versicap.getExporters())
+        {
+            auto* button = exporterToggles.add (new TextButton());
+            button->setButtonText (exporter->getName());
+            button->setClickingTogglesState (true);
+            button->setColour (TextButton::buttonOnColourId, kv::Colors::toggleGreen);
+            addAndMakeVisible (button);
+
+            auto* label = exporterLabels.add (new Label());
+            label->setText (exporter->getDescription(), dontSendNotification);
+            addAndMakeVisible (label);
+        }
     }
 
     ~OutputComponent()
@@ -62,8 +70,13 @@ public:
     void resized() override
     {
         auto r = getLocalBounds().reduced (8, 10);
-        layout (r, nameLabel, name);
+        layout (r, nameLabel, name, 0, 22, 4);
         layout (r, directoryLabel, directory);
+        for (int i = 0; i < exporterLabels.size(); ++i)
+        {
+            layout (r,  *exporterToggles [i], *exporterLabels [i],
+                    10, 22, 4);
+        }
     }
 
 private:
@@ -72,6 +85,9 @@ private:
 
     TextEditor name;
     FilenameComponent directory;
+
+    OwnedArray<Label> exporterLabels;
+    OwnedArray<TextButton> exporterToggles;
 };
 
 }

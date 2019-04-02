@@ -8,7 +8,7 @@ class LayersComponent : public SettingGroup,
                         public Button::Listener
 {
 public:
-    LayersComponent();
+    LayersComponent (Versicap&);
     ~LayersComponent();
 
     void fillSettings (RenderContext&) override;

@@ -11,6 +11,7 @@ public:
     ~EXS24Exporter() = default;
 
     String getName() const override { return "EXS24"; }
+    String getDescription() const { return "Format for Logic Pro and AUSampler"; }
 };
 
 }

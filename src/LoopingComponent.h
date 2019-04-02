@@ -7,7 +7,8 @@ namespace vcp {
 class LoopingComponent : public SettingGroup
 {
 public:
-    LoopingComponent()
+    LoopingComponent (Versicap& vc)
+        : SettingGroup (vc)
     {
         addAndMakeVisible (loopTypeLabel);
         loopTypeLabel.setText ("Loop Mode", dontSendNotification);

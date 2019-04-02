@@ -115,6 +115,7 @@ private:
     {
         auto& formats = versicap->getAudioFormats();
         formats.registerBasicFormats();
+        versicap->initializeExporters();
         versicap->initializePlugins();
         versicap->initializeAudioDevice();
     }

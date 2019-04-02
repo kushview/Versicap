@@ -7,7 +7,8 @@ namespace vcp {
 class NotesComponent : public SettingGroup
 {
 public:
-    NotesComponent()
+    NotesComponent (Versicap& vc)
+        : SettingGroup (vc)
     {
         addAndMakeVisible (keyStartLabel);
         keyStartLabel.setText ("Note Start", dontSendNotification);

@@ -11,7 +11,8 @@ protected:
 
 public:
     virtual ~Exporter() = default;
-    virtual String getName() const = 0;
+    virtual String getName() const =0;
+    virtual String getDescription() const =0;
 
     static void createExporters (OwnedArray<Exporter>&);
 };

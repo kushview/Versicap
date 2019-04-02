@@ -5,6 +5,8 @@
 
 namespace vcp {
 
+class Exporter;
+
 class Versicap final : public AudioIODeviceCallback,
                        public MidiInputCallback
 {
@@ -13,6 +15,7 @@ public:
     ~Versicap();
 
     //=========================================================================
+    void initializeExporters();
     void initializeAudioDevice();
     void initializePlugins();
     void shutdown();
@@ -20,6 +23,13 @@ public:
     //=========================================================================
     Settings& getSettings();
     void saveSettings();
+
+    //=========================================================================
+    static File getUserDataPath();
+    static File getSamplesPath();
+    
+    //=========================================================================
+    const OwnedArray<Exporter>& getExporters() const;
 
     //=========================================================================
     AudioDeviceManager& getDeviceManager();

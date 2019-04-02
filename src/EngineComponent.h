@@ -17,7 +17,8 @@ struct SourceType
 class EngineComponent : public SettingGroup
 {
 public:
-    EngineComponent()
+    EngineComponent (Versicap& vc)
+        : SettingGroup (vc)
     {
         addAndMakeVisible (sourceLabel);
         sourceLabel.setText ("Source", dontSendNotification);

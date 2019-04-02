@@ -1,4 +1,5 @@
 
+#include "Exporter.h"
 #include "Versicap.h"
 
 namespace vcp {
@@ -10,6 +11,7 @@ struct Versicap::Impl
 
     Settings settings;
     KnownPluginList knownPlugins;
+    OwnedArray<Exporter> exporters;
     OptionalScopedPointer<AudioDeviceManager> devices;
     OptionalScopedPointer<AudioFormatManager> formats;
     OptionalScopedPointer<AudioPluginFormatManager> plugins;
@@ -27,6 +29,11 @@ Versicap::~Versicap()
 {
     impl->formats->clearFormats();
     impl.reset();
+}
+
+void Versicap::initializeExporters()
+{
+    Exporter::createExporters (impl->exporters);
 }
 
 void Versicap::initializeAudioDevice()
@@ -101,10 +108,27 @@ void Versicap::saveSettings()
     }
 }
 
-Settings& Versicap::getSettings()                       { return impl->settings; }
-AudioDeviceManager& Versicap::getDeviceManager()        { return *impl->devices; }
-AudioFormatManager& Versicap::getAudioFormats()         { return *impl->formats; }
-AudioPluginFormatManager& Versicap::getPluginManager()  { return *impl->plugins; }
+File Versicap::getUserDataPath()
+{
+    auto path = File::getSpecialLocation (File::userMusicDirectory).getChildFile ("Versicap");
+    if (! path.exists())
+        path.createDirectory();
+    return path;
+}
+
+File Versicap::getSamplesPath()
+{
+    auto path = getUserDataPath().getChildFile ("Samples");
+    if (! path.exists())
+        path.createDirectory();
+    return path;
+}
+
+const OwnedArray<Exporter>& Versicap::getExporters() const  { return impl->exporters; }
+Settings& Versicap::getSettings()                           { return impl->settings; }
+AudioDeviceManager& Versicap::getDeviceManager()            { return *impl->devices; }
+AudioFormatManager& Versicap::getAudioFormats()             { return *impl->formats; }
+AudioPluginFormatManager& Versicap::getPluginManager()      { return *impl->plugins; }
 
 void Versicap::audioDeviceIOCallback (const float** inputChannelData,
                                       int numInputChannels, float** outputChannelData,

@@ -7,7 +7,8 @@ namespace vcp {
 class SamplingComponent : public SettingGroup
 {
 public:
-    SamplingComponent()
+    SamplingComponent (Versicap& vc)
+        : SettingGroup (vc)
     {
         settingWidth = 300;
         
