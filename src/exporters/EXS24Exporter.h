@@ -10,7 +10,7 @@ public:
     EXS24Exporter() = default;
     ~EXS24Exporter() = default;
 
-    String getName() const { return "EXS24"; }
+    String getName() const override { return "EXS24"; }
 };
 
 }
