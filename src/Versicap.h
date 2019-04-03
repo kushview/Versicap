@@ -6,6 +6,7 @@
 namespace vcp {
 
 class Exporter;
+class Render;
 
 class Versicap final : public AudioIODeviceCallback,
                        public MidiInputCallback
@@ -44,16 +45,13 @@ public:
     void audioDeviceStopped() override;
     void audioDeviceError (const String& errorMessage) override;
 
-    virtual void handleIncomingMidiMessage (MidiInput* source,
-                                            const MidiMessage& message) override {}
-
-    virtual void handlePartialSysexMessage (MidiInput* source,
-                                            const uint8* messageData,
-                                            int numBytesSoFar,
-                                            double timestamp) override {}
+    void handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message) override;
+    void handlePartialSysexMessage (MidiInput* source, const uint8* messageData,
+                                    int numBytesSoFar, double timestamp) override;
 
 private:
     struct Impl; std::unique_ptr<Impl> impl;
+    std::unique_ptr<Render> render;
 };
 
 }

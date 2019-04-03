@@ -1,5 +1,6 @@
 
 #include "Exporter.h"
+#include "Render.h"
 #include "Versicap.h"
 
 namespace vcp {
@@ -23,6 +24,8 @@ Versicap::Versicap()
     impl->devices.setOwned (new AudioDeviceManager ());
     impl->formats.setOwned (new AudioFormatManager ());
     impl->plugins.setOwned (new AudioPluginFormatManager());
+
+    render.reset (new Render());
 }
 
 Versicap::~Versicap()
@@ -130,11 +133,35 @@ AudioDeviceManager& Versicap::getDeviceManager()            { return *impl->devi
 AudioFormatManager& Versicap::getAudioFormats()             { return *impl->formats; }
 AudioPluginFormatManager& Versicap::getPluginManager()      { return *impl->plugins; }
 
-void Versicap::audioDeviceIOCallback (const float** inputChannelData,
-                                      int numInputChannels, float** outputChannelData,
-                                      int numOutputChannels, int numSamples) {}
-void Versicap::audioDeviceAboutToStart (AudioIODevice* device) {}
-void Versicap::audioDeviceStopped() { }
-void Versicap::audioDeviceError (const String& errorMessage) { }
+
+void Versicap::audioDeviceIOCallback (const float** input, int numInputs, 
+                                      float** output, int numOutputs, int nframes)
+{
+    render->process (nframes);
+    ignoreUnused (input, numInputs, output, numOutputs);
+}
+
+void Versicap::audioDeviceAboutToStart (AudioIODevice* device)
+{
+    ignoreUnused (device);
+}
+
+void Versicap::audioDeviceStopped()
+{
+
+}
+
+void Versicap::audioDeviceError (const String& errorMessage) { ignoreUnused (errorMessage); }
+
+void Versicap::handleIncomingMidiMessage (MidiInput* source, const MidiMessage& message)
+{
+
+}
+
+void Versicap::handlePartialSysexMessage (MidiInput* source, const uint8* messageData,
+                                          int numBytesSoFar, double timestamp)
+{
+
+}
 
 }
