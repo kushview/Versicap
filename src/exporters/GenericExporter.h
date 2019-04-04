@@ -11,7 +11,7 @@ public:
     ~GenericExporter() = default;
 
     String getName() const override { return "Generic"; }
-    String getDescription() const { return "Generic sample only format"; }
+    String getDescription() const override { return "Generic sample only format"; }
 };
 
 }

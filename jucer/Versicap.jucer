@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="tfndUm" name="Versicap" projectType="guiapp" jucerVersion="5.4.2"
+<JUCERPROJECT id="tfndUm" name="Versicap" projectType="guiapp" jucerVersion="5.4.3"
               version="1.0.0" companyName="Kushview" companyCopyright="Copyright (c) 2019 Kushview, LLC"
               companyWebsite="https://kushview.net" companyEmail="support@kushview.net"
               bundleIdentifier="net.kushview.Versicap">
@@ -34,6 +34,8 @@
         <MODULEPATH id="kv_core" path="../libs/kv/modules"/>
         <MODULEPATH id="kv_gui" path="../libs/kv/modules"/>
         <MODULEPATH id="kv_models" path="../libs/kv/modules"/>
+        <MODULEPATH id="kv_edd" path="../libs/kv/modules"/>
+        <MODULEPATH id="juce_product_unlocking" path="../../../../SDKs/JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2017 targetFolder="Builds/VisualStudio2017">
@@ -56,6 +58,8 @@
         <MODULEPATH id="kv_core" path="../libs/kv/modules"/>
         <MODULEPATH id="kv_gui" path="../libs/kv/modules"/>
         <MODULEPATH id="kv_models" path="../libs/kv/modules"/>
+        <MODULEPATH id="kv_edd" path="../libs/kv/modules"/>
+        <MODULEPATH id="juce_product_unlocking" path="../../../../SDKs/JUCE/modules"/>
       </MODULEPATHS>
     </VS2017>
   </EXPORTFORMATS>
@@ -71,7 +75,10 @@
     <MODULE id="juce_graphics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_product_unlocking" showAllCode="1" useLocalCopy="0"
+            useGlobalPath="0"/>
     <MODULE id="kv_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="kv_edd" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="kv_gui" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="kv_models" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
   </MODULES>

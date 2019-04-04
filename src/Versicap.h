@@ -1,12 +1,12 @@
 #pragma once
 
-#include "JuceHeader.h"
 #include "Settings.h"
 
 namespace vcp {
 
 class Exporter;
 class Render;
+class UnlockStatus;
 
 class Versicap final : public AudioIODeviceCallback,
                        public MidiInputCallback
@@ -24,6 +24,9 @@ public:
     //=========================================================================
     Settings& getSettings();
     void saveSettings();
+
+    //=========================================================================
+    UnlockStatus& getUnlockStatus();
 
     //=========================================================================
     static File getUserDataPath();

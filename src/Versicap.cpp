@@ -2,6 +2,7 @@
 #include "Exporter.h"
 #include "Render.h"
 #include "Versicap.h"
+#include "UnlockStatus.h"
 
 namespace vcp {
 
@@ -16,6 +17,7 @@ struct Versicap::Impl
     OptionalScopedPointer<AudioDeviceManager> devices;
     OptionalScopedPointer<AudioFormatManager> formats;
     OptionalScopedPointer<AudioPluginFormatManager> plugins;
+    std::unique_ptr<UnlockStatus> unlock;
 };
 
 Versicap::Versicap()
@@ -24,7 +26,7 @@ Versicap::Versicap()
     impl->devices.setOwned (new AudioDeviceManager ());
     impl->formats.setOwned (new AudioFormatManager ());
     impl->plugins.setOwned (new AudioPluginFormatManager());
-
+    impl->unlock.reset (new UnlockStatus (impl->settings));
     render.reset (new Render());
 }
 
@@ -93,6 +95,7 @@ void Versicap::saveSettings()
     auto& devices  = getDeviceManager();
     auto& plugins  = getPluginManager();
     auto& formats  = getAudioFormats();
+    auto& unlock   = getUnlockStatus();
 
     if (auto* const props = settings.getUserSettings())
     {
@@ -109,6 +112,8 @@ void Versicap::saveSettings()
             deleteAndZero (knownPlugins);
         }
     }
+
+    unlock.save();
 }
 
 File Versicap::getUserDataPath()
@@ -132,7 +137,7 @@ Settings& Versicap::getSettings()                           { return impl->setti
 AudioDeviceManager& Versicap::getDeviceManager()            { return *impl->devices; }
 AudioFormatManager& Versicap::getAudioFormats()             { return *impl->formats; }
 AudioPluginFormatManager& Versicap::getPluginManager()      { return *impl->plugins; }
-
+UnlockStatus& Versicap::getUnlockStatus() { return *impl->unlock; }
 
 void Versicap::audioDeviceIOCallback (const float** input, int numInputs, 
                                       float** output, int numOutputs, int nframes)

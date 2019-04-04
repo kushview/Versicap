@@ -2,6 +2,8 @@
 #include "Versicap.h"
 #include "MainComponent.h"
 #include "MainTabs.h"
+#include "UnlockStatus.h"
+#include "UnlockForm.h"
 
 namespace vcp {
 
@@ -107,11 +109,20 @@ MainComponent::MainComponent (Versicap& vc)
     }
 
     tabs.updateSettings (ctx);
+
+    if (! (bool) versicap.getUnlockStatus().isUnlocked())
+    {
+        unlock = new UnlockForm (versicap.getUnlockStatus(), 
+            "Sign in to your account to unlock Versicap", false, true);
+        addAndMakeVisible (unlock.getComponent(), 9999);
+    }
 }
 
 MainComponent::~MainComponent()
 {
     content.reset();
+    if (auto* overlay = unlock.getComponent())
+        delete overlay;
 }
 
 void MainComponent::saveSettings()
@@ -180,6 +191,8 @@ void MainComponent::paint (Graphics& g)
 void MainComponent::resized()
 {
     content->setBounds (getLocalBounds());
+    if (auto* overlay = unlock.getComponent())
+        overlay->setBounds (getLocalBounds());
 }
 
 }

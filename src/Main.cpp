@@ -2,6 +2,7 @@
 #include "JuceHeader.h"
 #include "MainComponent.h"
 #include "Versicap.h"
+#include "UnlockStatus.h"
 
 namespace vcp {
 
@@ -19,6 +20,9 @@ public:
         versicap.reset (new Versicap());
         
         setupGlobals();
+
+        auto& unlock = versicap->getUnlockStatus();
+        unlock.load();
 
         look.setColour (Slider::backgroundColourId, kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
         LookAndFeel::setDefaultLookAndFeel (&look);
