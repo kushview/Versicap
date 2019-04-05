@@ -2,12 +2,24 @@
 #include "Settings.h"
 #include "UnlockStatus.h"
 
-#define VCP_LICENSE_SETTINGS_KEY "VCPL"
-#define VCP_BASE_URL "http://local.kushview.net"
-#define VCP_AUTH_URL VCP_BASE_URL "/edd-cp"
-#define VCP_PUBKEY "3,753d95fa8511b392b09e5800043d41d1a7b2d330705f5714dcf2b31c8e22a7e9"
-#define VCP_PRIVKEY "4e290ea703612261cb143aaaad7e2be03282bec968eea82b7d064226e66321ab,753d95fa8511b392b09e5800043d41d1a7b2d330705f5714dcf2b31c8e22a7e9"
-#define VCP_PRODUCT_ID "784"
+#define VCP_LOCAL_AUTH      0
+
+#if VCP_LOCAL_AUTH
+ #define VCP_LICENSE_SETTINGS_KEY "VCPL"
+ #define VCP_BASE_URL "http://local.kushview.net"
+ #define VCP_AUTH_URL VCP_BASE_URL "/edd-cp"
+ #define VCP_PUBKEY "3,753d95fa8511b392b09e5800043d41d1a7b2d330705f5714dcf2b31c8e22a7e9"
+ #define VCP_PRIVKEY "4e290ea703612261cb143aaaad7e2be03282bec968eea82b7d064226e66321ab,753d95fa8511b392b09e5800043d41d1a7b2d330705f5714dcf2b31c8e22a7e9"
+ #define VCP_PRODUCT_ID "784"
+
+#else
+ #define VCP_LICENSE_SETTINGS_KEY "VCPL"
+ #define VCP_BASE_URL "https://kushview.net"
+ #define VCP_AUTH_URL VCP_BASE_URL "/products/authorize"
+ #define VCP_PUBKEY "3,753d95fa8511b392b09e5800043d41d1a7b2d330705f5714dcf2b31c8e22a7e9"
+ #define VCP_PRIVKEY "4e290ea703612261cb143aaaad7e2be03282bec968eea82b7d064226e66321ab,753d95fa8511b392b09e5800043d41d1a7b2d330705f5714dcf2b31c8e22a7e9"
+ #define VCP_PRODUCT_ID "11733"
+#endif
 
 namespace vcp {
 
