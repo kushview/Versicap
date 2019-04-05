@@ -57,7 +57,7 @@
         <CONFIGURATION isDebug="1" name="Debug" targetName="Versicap" codeSigningIdentity="9511F5241B78B0D38961CD756873066A5F0ED225"
                        osxCompatibility="10.8 SDK" osxArchitecture="64BitIntel"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="Versicap" codeSigningIdentity="9511F5241B78B0D38961CD756873066A5F0ED225"
-                       osxCompatibility="10.8 SDK" osxArchitecture="64BitUniversal"/>
+                       osxCompatibility="10.8 SDK" osxArchitecture="64BitIntel"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="~/SDKs/JUCE/modules"/>
@@ -78,10 +78,12 @@
         <MODULEPATH id="juce_product_unlocking" path="~/SDKs/JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2017 targetFolder="Builds/VisualStudio2017">
+    <VS2017 targetFolder="Builds/VisualStudio2017" toolset="v140_xp">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="Versicap"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="Versicap"/>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Versicap" headerPath="C:\SDKs\ASIOSDK2.3\common"
+                       winArchitecture="x64"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="Versicap" headerPath="C:\SDKs\ASIOSDK2.3\common"
+                       winArchitecture="x64" useRuntimeLibDLL="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="c:/SDKs/JUCE/modules"/>
@@ -124,6 +126,7 @@
   </MODULES>
   <LIVE_SETTINGS>
     <OSX/>
+    <WINDOWS/>
   </LIVE_SETTINGS>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_WEB_BROWSER="0" KV_DOCKING_WINDOWS="0"
                JUCE_PLUGINHOST_VST="0" JUCE_PLUGINHOST_VST3="0" JUCE_PLUGINHOST_LADSPA="0"
