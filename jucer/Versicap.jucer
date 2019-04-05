@@ -57,7 +57,7 @@
         <CONFIGURATION isDebug="1" name="Debug" targetName="Versicap" codeSigningIdentity="9511F5241B78B0D38961CD756873066A5F0ED225"
                        osxCompatibility="10.8 SDK" osxArchitecture="64BitIntel"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="Versicap" codeSigningIdentity="9511F5241B78B0D38961CD756873066A5F0ED225"
-                       osxCompatibility="10.8 SDK" osxArchitecture="64BitUniversal"/>
+                       osxCompatibility="10.8 SDK" osxArchitecture="64BitIntel"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="~/SDKs/JUCE/modules"/>
