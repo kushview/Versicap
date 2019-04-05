@@ -5,12 +5,6 @@
 
 namespace vcp {
 
-void EngineComponent::startRender()
-{
-    if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
-        main->startRendering();
-}
-
 void EngineComponent::refreshMidiDevices()
 {
     midiInputs = MidiInput::getDevices();

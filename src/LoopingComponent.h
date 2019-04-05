@@ -13,12 +13,13 @@ public:
         addAndMakeVisible (loopTypeLabel);
         loopTypeLabel.setText ("Loop Mode", dontSendNotification);
         addAndMakeVisible (loopType);
-        loopType.addItem ("Off", 1);
-        loopType.addItem ("Forwards", 2);
-        loopType.addItem ("Alternating", 3);
-        loopType.addItem ("Reverse", 4);
+        for (int t = LoopType::Begin; t < LoopType::End; ++t)
+        {
+            LoopType type (t);
+            loopType.addItem (type.getName(), t + 1);
+        }
+        loopType.setSelectedItemIndex (LoopType::None);
         loopType.onChange = [this]() { stabilizeSettings(); };
-        loopType.setSelectedId (1);
 
         addAndMakeVisible (loopStartLabel);
         loopStartLabel.setText ("Loop Start", dontSendNotification);
@@ -40,6 +41,8 @@ public:
         crossfadeLength.setRange (0, 5000, 1);
         crossfadeLength.textFromValueFunction = SettingGroup::milliSecondValueInt;
         setupSlider (crossfadeLength);
+
+        stabilizeSettings();
     }
 
     ~LoopingComponent()

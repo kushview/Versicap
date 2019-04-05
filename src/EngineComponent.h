@@ -2,27 +2,9 @@
 #pragma once
 
 #include "SettingGroup.h"
+#include "Types.h"
 
 namespace vcp {
-
-struct LoopType
-{
-    enum ID {
-        None = 0,
-        Forwards,
-        Alternating,
-        Reverse,
-        RoundRobin
-    };
-};
-
-struct SourceType
-{
-    enum ID {
-        MidiDevice  = 0,
-        AudioPlugin = 1
-    };
-};
 
 class EngineComponent : public SettingGroup
 {
@@ -91,10 +73,6 @@ public:
         outputDeviceLabel.setText ("Audio Out", dontSendNotification);
         addAndMakeVisible (outputDeviceCombo);
         outputDeviceCombo.onChange = applyAudioDeviceSettingsCallback;
-        
-        addAndMakeVisible (renderButton);
-        renderButton.setButtonText ("Render");
-        renderButton.onClick = [this]() { startRender(); };
 
         setSize (300, 300);
     }
@@ -164,8 +142,6 @@ public:
         layout (r, outputDeviceLabel, outputDeviceCombo, 0, 22, 4);
         layout (r, sampleRateLabel, sampleRateCombo, 0, 22, 4);
         layout (r, bufferSizeLabel, bufferSizeCombo);
-
-        renderButton.setBounds (r.removeFromTop (22).reduced (60, 0));
     }
 
 private:
@@ -189,10 +165,6 @@ private:
     ComboBox bufferSizeCombo;
     ComboBox inputDeviceCombo;
     ComboBox outputDeviceCombo;
-
-    TextButton renderButton;
-
-    void startRender();
 
     void refreshAudioDevices();
     void refreshMidiDevices();

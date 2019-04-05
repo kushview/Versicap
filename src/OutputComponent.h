@@ -36,6 +36,10 @@ public:
             label->setText (exporter->getDescription(), dontSendNotification);
             addAndMakeVisible (label);
         }
+
+        addAndMakeVisible (renderButton);
+        renderButton.setButtonText ("Render");
+        renderButton.onClick = [this]() { DBG("start rendering"); };
     }
 
     ~OutputComponent()
@@ -71,12 +75,15 @@ public:
     {
         auto r = getLocalBounds().reduced (8, 10);
         layout (r, nameLabel, name, 0, 22, 4);
-        layout (r, directoryLabel, directory);
+        layout (r, directoryLabel, directory, 0, 22, 16);
         for (int i = 0; i < exporterLabels.size(); ++i)
         {
             layout (r,  *exporterToggles [i], *exporterLabels [i],
                     10, 22, 4);
         }
+
+        r.removeFromTop (14);
+        renderButton.setBounds (r.removeFromTop (22).reduced (60, 0));
     }
 
 private:
@@ -85,6 +92,8 @@ private:
 
     TextEditor name;
     FilenameComponent directory;
+
+    TextButton renderButton;
 
     OwnedArray<Label> exporterLabels;
     OwnedArray<TextButton> exporterToggles;
