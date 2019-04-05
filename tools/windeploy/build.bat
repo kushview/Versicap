@@ -1,0 +1,2 @@
+msbuild /t:Build /p:Configuration=Release /p:Platform=x64 jucer\Builds\VisualStudio2017\Versicap.sln || exit /b
+signtool sign /f c:\SDKs\KushviewCert.p12 /p ***REMOVED*** /tr http://timestamp.comodoca.com jucer\Builds\VisualStudio2017\x64\Release\App\Versicap.exe  || exit /b
