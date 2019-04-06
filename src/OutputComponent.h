@@ -1,5 +1,6 @@
 #pragma once
 
+#include "RenderContext.h"
 #include "SettingGroup.h"
 #include "Exporter.h"
 
@@ -39,7 +40,9 @@ public:
 
         addAndMakeVisible (renderButton);
         renderButton.setButtonText ("Render");
-        renderButton.onClick = [this]() { DBG("start rendering"); };
+        renderButton.onClick = [this]() {
+            startRendering();
+        };
     }
 
     ~OutputComponent()
@@ -97,6 +100,8 @@ private:
 
     OwnedArray<Label> exporterLabels;
     OwnedArray<TextButton> exporterToggles;
+
+    void startRendering();
 };
 
 }

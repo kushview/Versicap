@@ -151,12 +151,21 @@ void MainComponent::startRendering()
     auto& tabs = content->getTabs();
     auto ctx = tabs.getRenderContext();
 
+    auto result = versicap.startRendering (ctx);
+    if (result.failed())
+    {
+        AlertWindow::showNativeDialogBox ("Versicap", result.getErrorMessage(), false);
+        return;
+    }
+
+#if 0
+    // was for debugging
     for (int i = 0; i < 4; ++i)
     {
         if (! ctx.layerEnabled [i])
             continue;
         DBG("Layer Enabled (" << int(i + 1) << "): " << (int) ctx.layerEnabled [i]);
-        auto* seq = ctx.createMidiMessageSequence (i, 44100.0);
+        auto* seq = ctx.createLayerRenderDetails (i, 44100.0);
         if (seq)
         {
             for (int i = 0; i < seq->getNumEvents(); ++i)
@@ -175,7 +184,7 @@ void MainComponent::startRendering()
             deleteAndZero (seq);
         }
     }
-
+#endif
 }
 
 void MainComponent::stopRendering()

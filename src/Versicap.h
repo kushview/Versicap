@@ -6,6 +6,7 @@ namespace vcp {
 
 class Exporter;
 class Render;
+class RenderContext;
 class UnlockStatus;
 
 class Versicap final : public AudioIODeviceCallback,
@@ -14,6 +15,13 @@ class Versicap final : public AudioIODeviceCallback,
 public:
     Versicap();
     ~Versicap();
+
+    struct Listener
+    {
+        Listener() = default;
+        virtual ~Listener() = default;
+        virtual void renderStarted() { }
+    };
 
     //=========================================================================
     void initializeExporters();
@@ -41,6 +49,14 @@ public:
     AudioFormatManager& getAudioFormats();
 
     //=========================================================================
+    Result startRendering (const RenderContext& context);
+    void stopRendering();
+
+    //=========================================================================
+    void addListener (Listener* listener)       { listeners.add (listener); }
+    void removeListener (Listener* listener)    { listeners.remove (listener); }
+
+    //=========================================================================
     void audioDeviceIOCallback (const float** inputChannelData,
                                 int numInputChannels, float** outputChannelData,
                                 int numOutputChannels, int numSamples) override;
@@ -55,6 +71,7 @@ public:
 private:
     struct Impl; std::unique_ptr<Impl> impl;
     std::unique_ptr<Render> render;
+    ListenerList<Listener> listeners;
 };
 
 }

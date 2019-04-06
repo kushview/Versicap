@@ -27,11 +27,12 @@ Versicap::Versicap()
     impl->formats.setOwned (new AudioFormatManager ());
     impl->plugins.setOwned (new AudioPluginFormatManager());
     impl->unlock.reset (new UnlockStatus (impl->settings));
-    render.reset (new Render());
+    render.reset (new Render (*impl->formats));
 }
 
 Versicap::~Versicap()
 {
+    render.reset();
     impl->formats->clearFormats();
     impl.reset();
 }
@@ -139,6 +140,19 @@ AudioFormatManager& Versicap::getAudioFormats()             { return *impl->form
 AudioPluginFormatManager& Versicap::getPluginManager()      { return *impl->plugins; }
 UnlockStatus& Versicap::getUnlockStatus() { return *impl->unlock; }
 
+Result Versicap::startRendering (const RenderContext& context)
+{
+    if (render->isRendering())
+        return Result::fail ("Versicap is already rendering");
+    render->start (context);
+    return Result::ok();
+}
+
+void Versicap::stopRendering()
+{
+    render->stop();
+}
+
 void Versicap::audioDeviceIOCallback (const float** input, int numInputs, 
                                       float** output, int numOutputs, int nframes)
 {
@@ -148,12 +162,13 @@ void Versicap::audioDeviceIOCallback (const float** input, int numInputs,
 
 void Versicap::audioDeviceAboutToStart (AudioIODevice* device)
 {
-    ignoreUnused (device);
+    ScopedLock sl (render->getCallbackLock());
+    render->prepare (device->getCurrentSampleRate(), device->getCurrentBufferSizeSamples());
 }
 
 void Versicap::audioDeviceStopped()
 {
-
+    render->stop();
 }
 
 void Versicap::audioDeviceError (const String& errorMessage) { ignoreUnused (errorMessage); }
@@ -168,5 +183,6 @@ void Versicap::handlePartialSysexMessage (MidiInput* source, const uint8* messag
 {
 
 }
+
 
 }
