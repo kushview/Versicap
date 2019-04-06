@@ -157,34 +157,6 @@ void MainComponent::startRendering()
         AlertWindow::showNativeDialogBox ("Versicap", result.getErrorMessage(), false);
         return;
     }
-
-#if 0
-    // was for debugging
-    for (int i = 0; i < 4; ++i)
-    {
-        if (! ctx.layerEnabled [i])
-            continue;
-        DBG("Layer Enabled (" << int(i + 1) << "): " << (int) ctx.layerEnabled [i]);
-        auto* seq = ctx.createLayerRenderDetails (i, 44100.0);
-        if (seq)
-        {
-            for (int i = 0; i < seq->getNumEvents(); ++i)
-            {
-                auto msg = seq->getEventPointer(i)->message;
-                if (msg.isNoteOn())
-                {
-                    DBG("on:\t" << MidiMessage::getMidiNoteName (msg.getNoteNumber(), true, true, 4));
-                }
-                else if (msg.isNoteOff())
-                {
-                    DBG("off:\t" << MidiMessage::getMidiNoteName (msg.getNoteNumber(), true, true, 4));
-                }
-            }
-
-            deleteAndZero (seq);
-        }
-    }
-#endif
 }
 
 void MainComponent::stopRendering()
