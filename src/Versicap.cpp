@@ -51,11 +51,16 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     ~Impl() { }
 
     void audioDeviceIOCallback (const float** input, int numInputs, 
-                                float** output, int numOutputs, int nframes) override
+                                float** output, int numOutputs,
+                                int nframes) override
     {
         jassert (sampleRate > 0 && bufferSize > 0);
         int totalNumChans = 0;
         ScopedNoDenormals denormals;
+        messageCollector.removeNextBlockOfMessages (incomingMidi, nframes);
+
+        ScopedLock sl (render->getCallbackLock());
+
         if (numInputs > numOutputs)
         {
             // if there aren't enough output channels for the number of
@@ -94,7 +99,31 @@ struct Versicap::Impl : public AudioIODeviceCallback,
             }
         }
 
-        AudioSampleBuffer buffer (channels, totalNumChans, nframes); 
+        render->renderCycleBegin();
+        render->getNextMidiBlock (renderMidi, nframes);
+
+        if (render->getSourceType() == SourceType::AudioPlugin)
+        {
+            if (auto* const proc = processor.get())
+            {
+                AudioSampleBuffer buffer (channels, totalNumChans, nframes);
+                ScopedLock slp (proc->getCallbackLock());
+                proc->processBlock (buffer, renderMidi);
+            }
+        }
+        else
+        {
+            if (auto* const out = devices->getDefaultMidiOutput())
+            {
+                out->sendBlockOfMessages (renderMidi,
+                    Time::getMillisecondCounterHiRes() + 1.0,
+                    sampleRate);
+            }
+        }
+
+        render->renderCycleEnd();
+        renderMidi.clear();
+        incomingMidi.clear();
     }
 
     void audioDeviceAboutToStart (AudioIODevice* device) override
@@ -120,7 +149,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         sampleRate  = 0.0;
         bufferSize  = 0;
         tempBuffer.setSize (1, 1);
-        channels.free();        
+        channels.free();
     }
 
     void audioDeviceError (const String& errorMessage) override
@@ -130,7 +159,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
 
     void handleIncomingMidiMessage (MidiInput*, const MidiMessage& message) override
     {
-        ignoreUnused (message);
+        messageCollector.addMessageToQueue (message);
     }
 
     void handlePartialSysexMessage (MidiInput* source, const uint8* messageData,
@@ -157,6 +186,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     HeapBlock<float*> channels;
     AudioSampleBuffer tempBuffer;
     MidiBuffer incomingMidi;
+    MidiBuffer renderMidi;
     MidiMessageCollector messageCollector;
 };
 
@@ -304,7 +334,6 @@ void Versicap::loadPlugin (const PluginDescription& type)
             {
                 ScopedLock sl (impl->render->getCallbackLock());
                 impl->processor.swap (processor);
-                impl->render->setAudioProcessor (impl->processor.get());
             }
 
             showPluginWindow();
@@ -330,7 +359,6 @@ void Versicap::closePlugin()
     {
         ScopedLock sl (impl->render->getCallbackLock());
         oldProc.swap (impl->processor);
-        impl->render->setAudioProcessor (nullptr);
     }
 
     if (oldProc)

@@ -12,6 +12,12 @@ public:
 
     void prepare (double newSampleRate, int newBlockSize);
     void process (int nframes);
+
+    void renderCycleBegin();
+    void getNextMidiBlock (MidiBuffer& midi, int nframes);
+    void writeAudioFrames (AudioSampleBuffer& audio);
+    void renderCycleEnd();
+
     void release();
 
     void start (const RenderContext& newContext);
@@ -19,17 +25,18 @@ public:
 
     bool isRendering() const { return rendering.get() == 1; }
     CriticalSection& getCallbackLock() { return lock; }
-
-    void setAudioProcessor (AudioProcessor* newProcessor);
     
     void handleAsyncUpdate() override;
+
+    const RenderContext& getContext() const { return context; }
+    int getSourceType() const { return context.source; }
 
 private:
     TimeSliceThread thread;
     AudioFormatManager& formats;
-    RenderContext context;
-    AudioProcessor* processor { nullptr };
+    
     CriticalSection lock;
+    RenderContext context;
     bool prepared = false;
     double sampleRate = 0.0;
     int blockSize = 0;
@@ -40,9 +47,11 @@ private:
     int64 frame = 0;
     int event = 0;
     int layer = 0;
+    HeapBlock<float*> channels;
     OwnedArray<LayerRenderDetails> details;
 
     MidiBuffer renderMidi;
+
     void reset();
 };
 
