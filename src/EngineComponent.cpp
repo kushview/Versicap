@@ -2,6 +2,7 @@
 #include "Versicap.h"
 #include "EngineComponent.h"
 #include "MainComponent.h"
+#include "PluginManager.h"
 
 namespace vcp {
 
@@ -191,6 +192,66 @@ void EngineComponent::ensureCorrectMidiOutput()
         int index = midiOutputs.indexOf (devices.getDefaultMidiOutputName());
         midiOutputCombo.setSelectedItemIndex (index >= 0 ? index : -1, dontSendNotification);
     }
+}
+
+void EngineComponent::pluginChosen (int result, EngineComponent* component)
+{
+    if (component && result > 0)
+        component->pluginChosen (result);
+}
+
+void EngineComponent::pluginChosen (int result)
+{
+    auto& plugins = versicap.getPluginManager();
+    auto& list = plugins.getKnownPlugins();
+
+    if (const auto* const type = list.getType (list.getIndexChosenByMenu (result)))
+    {
+        plugin = *type;
+        versicap.loadPlugin (plugin);
+        updatePluginButton();
+    }
+
+#if 0
+    String errorMessage;
+    std::unique_ptr<AudioProcessor> processor;
+
+    if (const auto* const type = list.getType (list.getIndexChosenByMenu (result)))
+    {
+        plugin = *type;
+        processor.reset (plugins.createAudioPlugin (plugin, errorMessage));
+    }
+
+    if (errorMessage.isNotEmpty())
+    {
+        AlertWindow::showNativeDialogBox ("Versicap", "Could not create plugin", false);
+        plugin = PluginDescription();
+        processor.reset();
+    }
+    else
+    {
+        if (processor)
+        {
+            DBG("[VCP] loaded: " << processor->getName());
+        }
+        else
+        {
+            AlertWindow::showNativeDialogBox ("Versicap", "Could not instantiate plugin", false);
+        }
+
+        processor.reset(); // TODO: assign to versicap
+    }
+#endif
+}
+
+void EngineComponent::choosePlugin()
+{
+    auto& plugins = versicap.getPluginManager();
+    auto& list = plugins.getKnownPlugins();
+    PopupMenu menu;
+    list.addToMenu (menu, KnownPluginList::sortByManufacturer);
+    menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&pluginButton),
+                        ModalCallbackFunction::forComponent (EngineComponent::pluginChosen, this));
 }
 
 }

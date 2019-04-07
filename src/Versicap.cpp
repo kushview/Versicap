@@ -1,10 +1,48 @@
 
 #include "Exporter.h"
+#include "PluginManager.h"
 #include "Render.h"
 #include "Versicap.h"
 #include "UnlockStatus.h"
 
 namespace vcp {
+
+class PluginWindow : public DocumentWindow
+{
+public:
+    PluginWindow (std::unique_ptr<PluginWindow>& o, AudioProcessorEditor* ed)
+        : DocumentWindow (ed->getAudioProcessor()->getName(),
+                          Colours::black, DocumentWindow::closeButton),
+          owner (o)
+    {
+        owner.reset (this);
+        editor.reset (ed);
+        setUsingNativeTitleBar (true);
+        setContentNonOwned (editor.get(), true);
+        setResizable (editor->isResizable(), false);
+        centreWithSize (getWidth(), getHeight());
+        setVisible (true);
+    }
+
+    ~PluginWindow()
+    {
+        if (editor)
+        {
+            if (auto* proc = editor->getAudioProcessor())
+                proc->editorBeingDeleted (editor.get());
+            editor.reset();
+        }
+    }
+
+    void closeButtonPressed() override
+    {
+        owner.reset();
+    }
+
+private:
+    std::unique_ptr<PluginWindow>& owner;
+    std::unique_ptr<AudioProcessorEditor> editor;
+};
 
 struct Versicap::Impl
 {
@@ -16,8 +54,13 @@ struct Versicap::Impl
     OwnedArray<Exporter> exporters;
     OptionalScopedPointer<AudioDeviceManager> devices;
     OptionalScopedPointer<AudioFormatManager> formats;
-    OptionalScopedPointer<AudioPluginFormatManager> plugins;
+    OptionalScopedPointer<PluginManager> plugins;
     std::unique_ptr<UnlockStatus> unlock;
+    std::unique_ptr<AudioProcessor> processor;
+    std::unique_ptr<PluginWindow> window;
+
+    double sampleRate { 44100.0 };
+    int bufferSize = 1024;
 };
 
 Versicap::Versicap()
@@ -25,7 +68,7 @@ Versicap::Versicap()
     impl.reset (new Impl());
     impl->devices.setOwned (new AudioDeviceManager ());
     impl->formats.setOwned (new AudioFormatManager ());
-    impl->plugins.setOwned (new AudioPluginFormatManager());
+    impl->plugins.setOwned (new PluginManager());
     impl->unlock.reset (new UnlockStatus (impl->settings));
     render.reset (new Render (*impl->formats));
 }
@@ -35,6 +78,17 @@ Versicap::~Versicap()
     render.reset();
     impl->formats->clearFormats();
     impl.reset();
+}
+
+File Versicap::getApplicationDataDir() 
+{
+   #if JUCE_MAC
+    return File::getSpecialLocation (File::userApplicationDataDirectory)
+        .getChildFile ("Application Support/Versicap");
+   #else
+    return File::getSpecialLocation (File::userApplicationDataDirectory)
+        .getChildFile ("Versicap");
+   #endif
 }
 
 void Versicap::initializeExporters()
@@ -68,18 +122,10 @@ void Versicap::initializeAudioDevice()
 
 void Versicap::initializePlugins()
 {
-    auto& settings = impl->settings;
     auto& plugins = getPluginManager();
     plugins.addDefaultFormats();
-    if (auto* const props = settings.getUserSettings())
-    {
-        const auto file = props->getFile().getParentDirectory().getChildFile("plugins.xml");
-        if (auto* xml = XmlDocument::parse (file))
-        {
-            impl->knownPlugins.recreateFromXml (*xml);
-            deleteAndZero (xml);
-        }
-    }
+    const auto file = getApplicationDataDir().getChildFile ("plugins.xml");
+    plugins.restoreAudioPlugins (file);
 }
 
 void Versicap::shutdown()
@@ -98,20 +144,19 @@ void Versicap::saveSettings()
     auto& formats  = getAudioFormats();
     auto& unlock   = getUnlockStatus();
 
+    if (auto xml = std::unique_ptr<XmlElement> (plugins.getKnownPlugins().createXml()))
+    {
+        const auto file = getApplicationDataDir().getChildFile ("plugins.xml");
+        xml->writeToFile (file, String());
+    }
+    
     if (auto* const props = settings.getUserSettings())
     {
         if (auto* devicesXml = devices.createStateXml())
         {
             props->setValue ("devices", devicesXml);
             deleteAndZero (devicesXml);
-        }
-
-        if (auto* knownPlugins = impl->knownPlugins.createXml())
-        {
-            const auto file = props->getFile().getParentDirectory().getChildFile("plugins.xml");
-            knownPlugins->writeToFile (file, String());
-            deleteAndZero (knownPlugins);
-        }
+        }    
     }
 
     unlock.save();
@@ -137,8 +182,97 @@ const OwnedArray<Exporter>& Versicap::getExporters() const  { return impl->expor
 Settings& Versicap::getSettings()                           { return impl->settings; }
 AudioDeviceManager& Versicap::getDeviceManager()            { return *impl->devices; }
 AudioFormatManager& Versicap::getAudioFormats()             { return *impl->formats; }
-AudioPluginFormatManager& Versicap::getPluginManager()      { return *impl->plugins; }
-UnlockStatus& Versicap::getUnlockStatus() { return *impl->unlock; }
+PluginManager& Versicap::getPluginManager()                 { return *impl->plugins; }
+UnlockStatus& Versicap::getUnlockStatus()                   { return *impl->unlock; }
+
+void Versicap::loadPlugin (const PluginDescription& type)
+{
+    auto& plugins = getPluginManager();
+    String errorMessage;
+    std::unique_ptr<AudioProcessor> processor;
+    processor.reset (plugins.createAudioPlugin (type, errorMessage));
+    
+    if (errorMessage.isNotEmpty())
+    {
+        AlertWindow::showNativeDialogBox ("Versicap", "Could not create plugin", false);
+    }
+    else
+    {
+        if (processor)
+        {
+            impl->window.reset();
+            DBG("[VCP] loaded: " << processor->getName());
+            processor->prepareToPlay (impl->sampleRate, impl->bufferSize);
+
+            {
+                ScopedLock sl (render->getCallbackLock());
+                impl->processor.swap (processor);
+                render->setAudioProcessor (impl->processor.get());
+            }
+
+            showPluginWindow();
+        }
+        else
+        {
+            AlertWindow::showNativeDialogBox ("Versicap", "Could not instantiate plugin", false);
+        }
+    }
+
+    if (processor)
+    {
+        processor->releaseResources();
+        processor.reset();
+    }
+}
+
+void Versicap::closePlugin()
+{
+    impl->window.reset();
+    std::unique_ptr<AudioProcessor> oldProc;
+
+    {
+        ScopedLock sl (render->getCallbackLock());
+        oldProc.swap (impl->processor);
+        render->setAudioProcessor (nullptr);
+    }
+
+    if (oldProc)
+    {
+        oldProc->releaseResources();
+        oldProc.reset();
+    }
+}
+
+void Versicap::closePluginWindow()
+{
+    impl->window.reset();
+}
+
+void Versicap::showPluginWindow()
+{
+    if (impl->processor == nullptr)
+        return;
+
+    if (impl->window)
+    {
+        impl->window->toFront (false);
+        return;
+    }
+
+    PluginWindow* window = nullptr;
+    if (auto* editor = impl->processor->createEditorIfNeeded())
+    {
+        window = new PluginWindow (impl->window, editor);
+    }
+    else
+    {
+        window = new PluginWindow (impl->window,
+            new GenericAudioProcessorEditor (impl->processor.get()));
+    }
+
+    if (window)
+        window->toFront (false);
+}
 
 Result Versicap::startRendering (const RenderContext& context)
 {
@@ -162,8 +296,13 @@ void Versicap::audioDeviceIOCallback (const float** input, int numInputs,
 
 void Versicap::audioDeviceAboutToStart (AudioIODevice* device)
 {
-    ScopedLock sl (render->getCallbackLock());
-    render->prepare (device->getCurrentSampleRate(), device->getCurrentBufferSizeSamples());
+    {
+        ScopedLock sl (render->getCallbackLock());
+        impl->sampleRate = device->getCurrentSampleRate();
+        impl->bufferSize = device->getCurrentBufferSizeSamples();
+        impl->plugins->setPlayConfig (impl->sampleRate, impl->bufferSize);
+        render->prepare (impl->sampleRate, impl->bufferSize);
+    }
 }
 
 void Versicap::audioDeviceStopped()

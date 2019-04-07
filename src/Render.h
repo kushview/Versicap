@@ -20,11 +20,15 @@ public:
     bool isRendering() const { return rendering.get() == 1; }
     CriticalSection& getCallbackLock() { return lock; }
 
+    void setAudioProcessor (AudioProcessor* newProcessor);
+    
     void handleAsyncUpdate() override;
+
 private:
     TimeSliceThread thread;
     AudioFormatManager& formats;
     RenderContext context;
+    AudioProcessor* processor { nullptr };
     CriticalSection lock;
     bool prepared = false;
     double sampleRate = 0.0;
@@ -38,6 +42,7 @@ private:
     int layer = 0;
     OwnedArray<LayerRenderDetails> details;
 
+    MidiBuffer renderMidi;
     void reset();
 };
 

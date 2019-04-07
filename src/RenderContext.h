@@ -1,6 +1,7 @@
 #pragma once
 
 #include "JuceHeader.h"
+#include "Types.h"
 
 namespace vcp {
 
@@ -41,6 +42,8 @@ struct LayerRenderDetails
 
 struct RenderContext
 {
+    int source                  = SourceType::MidiDevice;
+
     int keyStart                = 36;   // C2
     int keyEnd                  = 60;   // C4
     int keyStride               = 4;
@@ -63,7 +66,8 @@ struct RenderContext
     ValueTree createValueTree() const
     {
         ValueTree versicap ("versicap");
-        versicap.setProperty ("keyStart",   keyStart, nullptr)
+        versicap.setProperty ("source",     source, nullptr)
+                .setProperty ("keyStart",   keyStart, nullptr)
                 .setProperty ("keyEnd",     keyEnd, nullptr)
                 .setProperty ("keyStride",  keyStride, nullptr)
                 .setProperty ("baseName",   baseName, nullptr)
@@ -102,8 +106,8 @@ struct RenderContext
         if (auto* xml = XmlDocument::parse (file))
         {
             auto tree = ValueTree::fromXml (*xml);
-            
             RenderContext& ctx = *this;
+            ctx.source              = tree.getProperty ("source", ctx.source);
             ctx.baseName            = tree.getProperty ("baseName", ctx.baseName);
             ctx.crossfadeLength     = tree.getProperty ("crossfadeLength", ctx.crossfadeLength);;
             ctx.instrumentName      = tree.getProperty ("instrumentName", ctx.instrumentName);;

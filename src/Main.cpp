@@ -1,28 +1,36 @@
 
 #include "JuceHeader.h"
 #include "MainComponent.h"
+#include "PluginManager.h"
 #include "Versicap.h"
 #include "UnlockStatus.h"
 
 namespace vcp {
 
-class VersicapApplication  : public JUCEApplication
+class Application : public JUCEApplication
 {
 public:
-    VersicapApplication() { }
+     Application() { }
 
     const String getApplicationName() override       { return ProjectInfo::projectName; }
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }
-    bool moreThanOneInstanceAllowed() override       { return false; }
+    bool moreThanOneInstanceAllowed() override       { return true; }
 
     void initialise (const String& commandLine) override
     {
         versicap.reset (new Versicap());
-        
+        if (maybeLaunchSlave (commandLine))
+            return;
+
+        if (sendCommandLineToPreexistingInstance())
+        {
+            quit();
+            return;
+        }
+
         setupGlobals();
 
-        auto& unlock = versicap->getUnlockStatus();
-        unlock.load();
+
 
         look.setColour (Slider::backgroundColourId, kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
         LookAndFeel::setDefaultLookAndFeel (&look);
@@ -44,6 +52,9 @@ public:
 
     void anotherInstanceStarted (const String& commandLine) override
     {
+        ignoreUnused (commandLine);
+        if (mainWindow)
+            mainWindow->toFront (true);
     }
 
     class MainWindow : public DocumentWindow
@@ -114,6 +125,7 @@ private:
     std::unique_ptr<MainWindow> mainWindow;
     kv::LookAndFeel_KV1 look;
     std::unique_ptr<Versicap> versicap;
+    OwnedArray<kv::ChildProcessSlave>   slaves;
 
     void setupGlobals()
     {
@@ -122,10 +134,16 @@ private:
         versicap->initializeExporters();
         versicap->initializePlugins();
         versicap->initializeAudioDevice();
+        versicap->getUnlockStatus().load();
+
+        auto& plugins = versicap->getPluginManager();
+        plugins.scanAudioPlugins ({ "AudioUnit", "VST", "VST3" });
     }
 
     void shutdownGui()
     {
+        versicap->closePluginWindow();
+        
         if (mainWindow != nullptr)
         {
             mainWindow->savePersistentData();
@@ -134,8 +152,31 @@ private:
 
         LookAndFeel::setDefaultLookAndFeel (nullptr);
     }
+
+    bool maybeLaunchSlave (const String& commandLine)
+    {
+        slaves.clearQuick (true);
+        slaves.add (versicap->getPluginManager().createAudioPluginScannerSlave());
+        StringArray processIds = { VCP_PLUGIN_SCANNER_PROCESS_ID };
+        for (auto* slave : slaves)
+        {
+            for (const auto& pid : processIds)
+            {
+                if (slave->initialiseFromCommandLine (commandLine, pid))
+                {
+				   #if JUCE_MAC
+                    Process::setDockIconVisible (false);
+				   #endif
+                    juce::shutdownJuce_GUI();
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
 };
 
 }
 
-START_JUCE_APPLICATION (vcp::VersicapApplication)
+START_JUCE_APPLICATION (vcp::Application)

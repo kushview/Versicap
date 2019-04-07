@@ -3,13 +3,18 @@
 
 namespace vcp {
 
-Render::Render (AudioFormatManager& f) : formats (f), thread("vcprt") { }
+Render::Render (AudioFormatManager& f) : formats (f), thread ("vcprt") { }
 Render::~Render() { thread.stopThread (2 * 1000); }
 
 void Render::reset()
 {
     frame       = 0;
     layer       = 0;
+}
+
+void Render::setAudioProcessor (AudioProcessor* newProcessor)
+{
+    processor = newProcessor;
 }
 
 void Render::prepare (double sr, int block)
@@ -21,6 +26,7 @@ void Render::prepare (double sr, int block)
     sampleRate  = sr;
     blockSize   = block;
     thread.startThread();
+    renderMidi.ensureSize (256);
     prepared = true;
 }
 
@@ -44,6 +50,8 @@ void Render::process (int nframes)
     if (! isRendering())
         return;
 
+    ScopedLock sl (getCallbackLock());
+
     if (! context.layerEnabled [layer])
     {
         frame = 0;
@@ -66,6 +74,7 @@ void Render::process (int nframes)
     const double end    = static_cast<double> (endFrame);
     bool layerChanged   = false;
     int i;
+    renderMidi.clear();
     for (i = midi.getNextIndexAtTime (start); i < numEvents;)
     {
         const auto* const ev = midi.getEventPointer (i);
@@ -74,6 +83,8 @@ void Render::process (int nframes)
         const int localFrame = roundToInt (timestamp - start);
         if (timestamp >= end)
             break;
+        
+        renderMidi.addEvent (msg, localFrame);
         
         if (msg.isNoteOn())
         {
@@ -91,10 +102,20 @@ void Render::process (int nframes)
         ++i;
     }
 
-    const auto lastStop = detail->getHighestEndFrame();
-    const int numDetails = detail->getNumRenderLayers();
     AudioSampleBuffer dummy (2, nframes);
     dummy.clear();
+    if (context.source == SourceType::AudioPlugin && processor != nullptr)
+    {
+        processor->processBlock (dummy, renderMidi);
+    }
+    else
+    {
+
+    }
+    
+    const auto lastStop = detail->getHighestEndFrame();
+    const int numDetails = detail->getNumRenderLayers();
+    
     for (int i = detail->getNextRenderLayerIndex (frame); i < numDetails;)
     {
         auto* const render = detail->getRenderLayer (i);
@@ -104,8 +125,8 @@ void Render::process (int nframes)
         if (render->start >= frame && render->start < endFrame)
         {
             // started recording
-            DBG("======= last stop: " << lastStop << " ========");
-            DBG("======= start writing =======");
+            // DBG("======= last stop: " << lastStop << " ========");
+            // DBG("======= start writing =======");
             int localFrame = render->start - frame;
             int numSamples = endFrame - render->start;
             render->writer->write (dummy.getArrayOfReadPointers(), numSamples);
@@ -113,7 +134,7 @@ void Render::process (int nframes)
         else if (render->stop >= frame && render->stop < endFrame)
         {
             // stop writing
-            DBG("======= stop writing " << render->stop << " =======");
+            // DBG("======= stop writing " << render->stop << " =======");
             int localFrame = 0;
             int numSamples = render->stop - frame;
             render->writer->write (dummy.getArrayOfReadPointers(), numSamples);

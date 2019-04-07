@@ -5,6 +5,7 @@
 namespace vcp {
 
 class Exporter;
+class PluginManager;
 class Render;
 class RenderContext;
 class UnlockStatus;
@@ -22,6 +23,9 @@ public:
         virtual ~Listener() = default;
         virtual void renderStarted() { }
     };
+
+    //=========================================================================
+    static File getApplicationDataDir();
 
     //=========================================================================
     void initializeExporters();
@@ -45,8 +49,14 @@ public:
 
     //=========================================================================
     AudioDeviceManager& getDeviceManager();
-    AudioPluginFormatManager& getPluginManager();
+    PluginManager& getPluginManager();
     AudioFormatManager& getAudioFormats();
+
+    //=========================================================================
+    void loadPlugin (const PluginDescription&);
+    void closePlugin();
+    void closePluginWindow();
+    void showPluginWindow();
 
     //=========================================================================
     Result startRendering (const RenderContext& context);

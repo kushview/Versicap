@@ -1,5 +1,6 @@
 
 #include "Versicap.h"
+#include "RenderContext.h"
 #include "MainComponent.h"
 #include "MainTabs.h"
 #include "UnlockStatus.h"

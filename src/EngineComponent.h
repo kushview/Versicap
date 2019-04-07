@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "PluginPicker.h"
 #include "SettingGroup.h"
 #include "Types.h"
 
@@ -33,8 +34,9 @@ public:
         addAndMakeVisible (pluginLabel);
         pluginLabel.setText ("Plugin", dontSendNotification);
         addAndMakeVisible (pluginButton);
-        pluginButton.onClick = std::bind (&EngineComponent::choosePlugin, this);
-        pluginButton.setTriggeredOnMouseDown (true);
+        pluginButton.onChoose = std::bind (&EngineComponent::choosePlugin, this);
+        pluginButton.onEditor = std::bind (&Versicap::showPluginWindow, &versicap);
+        pluginButton.onClose  = std::bind (&Versicap::closePlugin, &versicap);
 
         auto applyAudioDeviceSettingsCallback = std::bind (
             &EngineComponent::applyAudioDeviceSettings, this);
@@ -78,13 +80,28 @@ public:
     }
 
     int getSourceType() const { return sourceCombo.getSelectedId() - 1; }
-    void stabilizeSettings() override
+
+    void fillSettings (RenderContext& ctx) override 
+    {
+        ctx.source = getSourceType();
+    }
+    
+    void updateSettings (const RenderContext& ctx) override
+    {
+        sourceCombo.setSelectedId (1 + ctx.source, dontSendNotification);
+    }
+
+    void updatePluginButton()
     {
         if (plugin.name.isEmpty())
-            pluginButton.setButtonText ("Select a Plugin");
+            pluginButton.setPluginName (String());
         else
-            pluginButton.setButtonText (plugin.name);
-          
+            pluginButton.setPluginName (plugin.name);
+    }
+
+    void stabilizeSettings() override
+    {
+        updatePluginButton();
         switch (getSourceType())
         {
             case SourceType::MidiDevice:
@@ -144,6 +161,8 @@ public:
         layout (r, bufferSizeLabel, bufferSizeCombo);
     }
 
+    static void pluginChosen (int, EngineComponent*);
+
 private:
     PluginDescription plugin;
     StringArray midiInputs, midiOutputs;
@@ -160,7 +179,7 @@ private:
     ComboBox sourceCombo;
     ComboBox midiInputCombo;
     ComboBox midiOutputCombo;
-    TextButton pluginButton;
+    PluginPicker pluginButton;
     ComboBox sampleRateCombo;
     ComboBox bufferSizeCombo;
     ComboBox inputDeviceCombo;
@@ -179,11 +198,8 @@ private:
     void ensureCorrectMidiOutput();
     void ensureTimings();
 
-    void choosePlugin()
-    {
-        AlertWindow::showMessageBoxAsync (AlertWindow::NoIcon, 
-            "Choose a plugin", "Choose a plugin with the browser");
-    }
+    void choosePlugin();
+    void pluginChosen (int);
 };
 
 }

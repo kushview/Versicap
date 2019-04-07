@@ -1,10 +1,9 @@
 #pragma once
 
 #include "Versicap.h"
+#include "RenderContext.h"
 
 namespace vcp {
-
-struct RenderContext;
 
 class SettingGroup : public Component
 {
