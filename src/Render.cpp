@@ -91,11 +91,10 @@ void Render::getNextMidiBlock (MidiBuffer& buffer, int nframes)
         const auto* const ev = midi.getEventPointer (i);
         const auto& msg = ev->message;
         const double timestamp = msg.getTimeStamp();
-        const int localFrame = roundToInt (timestamp - start);
         if (timestamp >= end)
             break;
         
-        buffer.addEvent (msg, localFrame);
+        buffer.addEvent (msg, roundToInt (timestamp - start));
         
        #if 0
         if (msg.isNoteOn())
@@ -129,9 +128,11 @@ void Render::writeAudioFrames (AudioSampleBuffer& audio)
 
     ScopedLock sl (getCallbackLock());
 
+   #if 0
     if (delay->getNumSamplesDelay() > 0)
         delay->process (audio);
-
+   #endif
+   
     const int nframes           = audio.getNumSamples();
     auto* const detail          = details.getUnchecked (layer);
     const int numDetails        = detail->getNumRenderLayers();

@@ -337,6 +337,8 @@ void Versicap::loadPlugin (const PluginDescription& type)
         {
             impl->window.reset();
             DBG("[VCP] loaded: " << processor->getName());
+            DBG("[VCP] latency: " << processor->getLatencySamples());
+            
             processor->prepareToPlay (impl->sampleRate, impl->bufferSize);
 
             {

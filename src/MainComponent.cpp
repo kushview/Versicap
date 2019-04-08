@@ -94,7 +94,7 @@ public:
 
         addAndMakeVisible (tabs);
 
-        addAndMakeVisible (progress, 9999);
+        // addAndMakeVisible (progress, 9999);
         setSize (440, 340);
     }
 

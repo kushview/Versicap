@@ -21,7 +21,7 @@ public:
 
     void release();
 
-    void start (const RenderContext& newContext, int delaySamples = 0);
+    void start (const RenderContext& newContext, int latencySamples = 0);
     void stop();
 
     bool isRendering() const { return renderingRequest.get() == 1 || rendering.get() == 1; }
