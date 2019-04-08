@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ChannelDelay.h"
 #include "RenderContext.h"
 
 namespace vcp {
@@ -20,10 +21,10 @@ public:
 
     void release();
 
-    void start (const RenderContext& newContext);
+    void start (const RenderContext& newContext, int delaySamples = 0);
     void stop();
 
-    bool isRendering() const { return rendering.get() == 1; }
+    bool isRendering() const { return renderingRequest.get() == 1 || rendering.get() == 1; }
     CriticalSection& getCallbackLock() { return lock; }
     
     void handleAsyncUpdate() override;
@@ -43,15 +44,17 @@ private:
 
     Atomic<int> rendering { 0 };
     Atomic<int> renderingRequest { 0 };
+    int writerDelay = 0;
 
     int64 frame = 0;
     int event = 0;
     int layer = 0;
+    
     HeapBlock<float*> channels;
     OwnedArray<LayerRenderDetails> details;
 
-    MidiBuffer renderMidi;
-
+    std::unique_ptr<ChannelDelay> delay;
+    
     void reset();
 };
 

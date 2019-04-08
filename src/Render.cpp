@@ -3,13 +3,21 @@
 
 namespace vcp {
 
-Render::Render (AudioFormatManager& f) : formats (f), thread ("vcprt") { }
-Render::~Render() { thread.stopThread (2 * 1000); }
+Render::Render (AudioFormatManager& f)
+    : formats (f), 
+      thread ("vcprt"),
+      delay (new ChannelDelay())
+{ }
+
+Render::~Render()
+{
+    thread.stopThread (2 * 1000);
+}
 
 void Render::reset()
 {
-    frame       = 0;
-    layer       = 0;
+    frame = 0;
+    layer = 0;
 }
 
 void Render::prepare (double newSampleRate, int newBufferSize)
@@ -21,7 +29,6 @@ void Render::prepare (double newSampleRate, int newBufferSize)
     sampleRate  = newSampleRate;
     blockSize   = newBufferSize;
     thread.startThread();
-    renderMidi.ensureSize (256);
     prepared = true;
 
     const int sampleFileNumChans = 2;
@@ -114,42 +121,50 @@ void Render::writeAudioFrames (AudioSampleBuffer& audio)
     if (! isRendering())
         return;
 
+    if (layer >= 4)
+    {
+        renderingRequest.compareAndSetBool (0, 1);
+        return;
+    }
+
     ScopedLock sl (getCallbackLock());
+
+    if (delay->getNumSamplesDelay() > 0)
+        delay->process (audio);
 
     const int nframes           = audio.getNumSamples();
     auto* const detail          = details.getUnchecked (layer);
     const int numDetails        = detail->getNumRenderLayers();
     const auto lastStopFrame    = detail->getHighestEndFrame();
-    const int64 endFrame        = frame + nframes;
+    const int64 startFrame      = frame - writerDelay;
+    const int64 endFrame        = startFrame + nframes;
     
-    bool layerChanged           = false;
-
-    for (int i = detail->getNextRenderLayerIndex (frame); i < numDetails;)
+    for (int i = detail->getNextRenderLayerIndex (startFrame); i < numDetails;)
     {
         auto* const render = detail->getRenderLayer (i);
         if (render->start >= endFrame)
             break;
    
-        if (render->start >= frame && render->start < endFrame)
+        if (render->start >= startFrame && render->start < endFrame)
         {
             // started recording
             // DBG("======= last stop: " << lastStop << " ========");
             // DBG("======= start writing =======");
            
-            int localFrame = render->start - frame;
+            int localFrame = render->start - startFrame;
             channels[0] = audio.getWritePointer (0, localFrame);
             channels[1] = audio.getWritePointer (1, localFrame);
             render->writer->write (channels.get(), endFrame - render->start);
         }
-        else if (render->stop >= frame && render->stop < endFrame)
+        else if (render->stop >= startFrame && render->stop < endFrame)
         {
             // stop writing
             // DBG("======= stop writing " << render->stop << " =======");
             channels[0] = audio.getWritePointer (0);
             channels[1] = audio.getWritePointer (1);
-            render->writer->write (channels, render->stop - frame);
+            render->writer->write (channels, render->stop - startFrame);
         }
-        else if (frame >= render->start && frame < render->stop)
+        else if (startFrame >= render->start && startFrame < render->stop)
         {
             // in the middle
             // DBG("======= middle =======");
@@ -161,21 +176,16 @@ void Render::writeAudioFrames (AudioSampleBuffer& audio)
         ++i;
     }
     
-    if (lastStopFrame >= frame && lastStopFrame < endFrame)
+    if (lastStopFrame >= startFrame && lastStopFrame < endFrame)
     {
-        layerChanged = true;
         ++layer;
         frame = 0;
         event = 0;
     }
-
-    if (layerChanged)
+    else
     {
-        DBG("[VCP] layer will change: " << layer);
-        return; // bail and don't inc. the frame counter
+        frame += nframes;
     }
-
-    frame += nframes;
 }
 
 void Render::renderCycleEnd()
@@ -185,6 +195,7 @@ void Render::renderCycleEnd()
 
 void Render::process (int nframes)
 {
+   #if 0
     if (renderingRequest.get() != rendering.get())
     {
         rendering.set (renderingRequest.get());
@@ -309,6 +320,7 @@ void Render::process (int nframes)
     }
 
     frame += nframes;
+   #endif
 }
 
 void Render::release()
@@ -336,13 +348,15 @@ void Render::handleAsyncUpdate()
             frame->writer.reset();
 }
 
-void Render::start (const RenderContext& newContext)
+void Render::start (const RenderContext& newContext, int delaySamples)
 {
     if (isRendering())
         return;
-    
+
     OwnedArray<LayerRenderDetails> newSeq;
-    
+    std::unique_ptr<ChannelDelay> newDelay (new ChannelDelay());
+    newDelay->resize (2, jmax (0, delaySamples));
+
     for (int i = 0; i < 4; ++i)
     {
         if (! newContext.layerEnabled [i])
@@ -358,6 +372,7 @@ void Render::start (const RenderContext& newContext)
     {
         ScopedLock sl (getCallbackLock());
         details.swapWith (newSeq);
+        delay.swap (newDelay);
         context = newContext;
     }
 
@@ -366,6 +381,7 @@ void Render::start (const RenderContext& newContext)
         DBG("[VCP] render start requested");
     }
 
+    newDelay.reset();
     newSeq.clear();
 }
 

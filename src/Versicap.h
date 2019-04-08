@@ -20,7 +20,8 @@ public:
     {
         Listener() = default;
         virtual ~Listener() = default;
-        virtual void renderStarted() { }
+        virtual void renderStarted() {}
+        virtual void renderStopped() {}
     };
 
     //=========================================================================

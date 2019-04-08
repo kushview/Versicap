@@ -7,6 +7,7 @@
 
 namespace vcp {
 
+//=============================================================================
 class PluginWindow : public DocumentWindow
 {
 public:
@@ -55,12 +56,12 @@ struct Versicap::Impl : public AudioIODeviceCallback,
                                 int nframes) override
     {
         jassert (sampleRate > 0 && bufferSize > 0);
-        int totalNumChans = 0;
+    
         ScopedNoDenormals denormals;
         messageCollector.removeNextBlockOfMessages (incomingMidi, nframes);
+        ScopedLock slr (render->getCallbackLock());
 
-        ScopedLock sl (render->getCallbackLock());
-
+        int totalNumChans = 0;
         if (numInputs > numOutputs)
         {
             // if there aren't enough output channels for the number of
@@ -101,12 +102,14 @@ struct Versicap::Impl : public AudioIODeviceCallback,
 
         render->renderCycleBegin();
         render->getNextMidiBlock (renderMidi, nframes);
-
+        AudioSampleBuffer buffer (channels, totalNumChans, nframes);
         if (render->getSourceType() == SourceType::AudioPlugin)
         {
+            for (int c = 0; c < numInputs; ++c)
+                buffer.clear (c, 0, nframes);
+            
             if (auto* const proc = processor.get())
             {
-                AudioSampleBuffer buffer (channels, totalNumChans, nframes);
                 ScopedLock slp (proc->getCallbackLock());
                 proc->processBlock (buffer, renderMidi);
             }
@@ -121,7 +124,9 @@ struct Versicap::Impl : public AudioIODeviceCallback,
             }
         }
 
+        render->writeAudioFrames (buffer);
         render->renderCycleEnd();
+
         renderMidi.clear();
         incomingMidi.clear();
     }
@@ -135,17 +140,19 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         numOutputChans    = device->getActiveInputChannels().countNumberOfSetBits();;
 
         plugins->setPlayConfig (sampleRate, bufferSize);
-
         messageCollector.reset (sampleRate);
         channels.calloc ((size_t) jmax (numInputChans, numOutputChans) + 2);
-
         render->prepare (sampleRate, bufferSize);
+
+        if (auto* const out = devices->getDefaultMidiOutput())
+            out->startBackgroundThread();
     }
 
     void audioDeviceStopped() override
     {
         const ScopedLock sl (render->getCallbackLock());
         render->stop();
+        render->release();
         sampleRate  = 0.0;
         bufferSize  = 0;
         tempBuffer.setSize (1, 1);
@@ -178,6 +185,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     std::unique_ptr<AudioProcessor> processor;
     std::unique_ptr<PluginWindow> window;
 
+    RenderContext context;
     std::unique_ptr<Render> render;
 
     double sampleRate { 44100.0 };
@@ -404,6 +412,7 @@ Result Versicap::startRendering (const RenderContext& context)
     if (impl->render->isRendering())
         return Result::fail ("Versicap is already rendering");
     impl->render->start (context);
+    listeners.call ([](Listener& listener) { listener.renderStarted(); });
     return Result::ok();
 }
 

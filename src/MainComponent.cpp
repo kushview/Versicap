@@ -8,6 +8,54 @@
 
 namespace vcp {
 
+class RenderProgress : public Component
+{
+public:
+    RenderProgress()
+        : progress (0.0),
+          bar (progress)
+    {
+        addAndMakeVisible (bar);
+        addAndMakeVisible (text);
+        text.setText ("Waiting...", dontSendNotification);
+        addAndMakeVisible (cancelButton);
+        cancelButton.setButtonText ("Cancel");
+
+        setSize (300, 140);
+    }
+
+    void paint (Graphics& g) override
+    {
+        g.fillAll (kv::LookAndFeel_KV1::widgetBackgroundColor);
+    }
+
+    void resized() override
+    {
+        auto r = getLocalBounds();
+        r = r.withWidth (jmax (240, r.getWidth()))
+             .withHeight (jmax (140, r.getHeight()))
+             .reduced (30, 0);
+
+        r.removeFromTop (getHeight() / 3);
+        bar.setBounds (r.removeFromTop (28));
+        r.removeFromTop (8);
+        text.setBounds (r.removeFromTop (64));
+        
+        int buttonSize = 22;
+        r.removeFromBottom (40);
+        cancelButton.changeWidthToFitText (buttonSize);
+        cancelButton.setBounds (r.removeFromBottom (buttonSize)
+                                 .withWidth (cancelButton.getWidth())
+                                 .withX ((getWidth() / 2) - (cancelButton.getWidth() / 2)));
+    }
+
+private:
+    double progress;
+    ProgressBar bar;
+    Label text;
+    TextButton cancelButton;
+};
+
 class MainComponent::Content : public Component
 {
 public:
@@ -45,6 +93,8 @@ public:
         };
 
         addAndMakeVisible (tabs);
+
+        addAndMakeVisible (progress, 9999);
         setSize (440, 340);
     }
 
@@ -76,6 +126,7 @@ public:
 
         r.removeFromTop (1);
         tabs.setBounds (r);
+        progress.setBounds (r);
     }
 
     MainTabs& getTabs() { return tabs; }
@@ -86,6 +137,7 @@ private:
     TextButton clearButton;
     TextButton importButton;
     TextButton exportButton;
+    RenderProgress progress;
 };
 
 MainComponent::MainComponent (Versicap& vc)

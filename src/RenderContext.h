@@ -7,9 +7,11 @@ namespace vcp {
 
 struct RenderLayer
 {
-    int index;
-    int64 start;
-    int64 stop;
+    int index   = 0;
+    int64 start = 0;
+    int64 stop  = 0;
+
+    File file;
     std::unique_ptr<AudioFormatWriter::ThreadedWriter> writer;
 };
 
@@ -17,6 +19,7 @@ struct LayerRenderDetails
 {
     MidiMessageSequence sequence;
     OwnedArray<RenderLayer> frames;
+    
     int getNumRenderLayers() const { return frames.size(); }
     RenderLayer* getRenderLayer (const int i) { return frames.getUnchecked (i); }
     int getNextRenderLayerIndex (const int64 frame)
@@ -30,6 +33,7 @@ struct LayerRenderDetails
 
         return i;
     }
+
     int64 getHighestEndFrame() const
     {
         int64 frame = 0;
@@ -46,7 +50,7 @@ struct RenderContext
 
     int keyStart                = 36;   // C2
     int keyEnd                  = 60;   // C4
-    int keyStride               = 4;
+    int keyStride               = 4;    // 4 semi tones
 
     String baseName             = "Sample";
     int noteLength              = 3000;
@@ -62,7 +66,8 @@ struct RenderContext
 
     String instrumentName       = "Instrument";
     String outputPath           = String();
-    
+    int outputChannels          = 2;
+
     ValueTree createValueTree() const
     {
         ValueTree versicap ("versicap");
@@ -77,7 +82,8 @@ struct RenderContext
                 .setProperty ("loopStart",  loopStart, nullptr)
                 .setProperty ("crossfadeLength", crossfadeLength, nullptr)
                 .setProperty ("instrumentName", instrumentName, nullptr)
-                .setProperty ("outputPath", outputPath, nullptr);
+                .setProperty ("outputPath", outputPath, nullptr)
+                .setProperty ("outputChannels", outputChannels, nullptr);
         
         auto layers = versicap.getOrCreateChildWithName ("layers", nullptr);
         for (int i = 0; i < 4; ++i)
@@ -118,8 +124,9 @@ struct RenderContext
             ctx.loopMode            = tree.getProperty ("loopMode", ctx.loopMode);;
             ctx.loopStart           = tree.getProperty ("loopStart", ctx.loopStart);;
             ctx.noteLength          = tree.getProperty ("noteLength", ctx.noteLength);;
-            ctx.outputPath          = tree.getProperty ("outputPath", ctx.outputPath);;
             ctx.tailLength          = tree.getProperty ("tailLength", ctx.tailLength);;
+            ctx.outputPath          = tree.getProperty ("outputPath", ctx.outputPath);;
+            ctx.outputChannels      = tree.getProperty ("outputChannels", ctx.outputChannels);
             auto layers = tree.getChildWithName ("layers");
             
             for (int i = 0; i < 4; ++i)
@@ -133,7 +140,8 @@ struct RenderContext
         }
     }
 
-    LayerRenderDetails* createLayerRenderDetails (const int layer, const double sampleRate,
+    LayerRenderDetails* createLayerRenderDetails (const int layer,
+                                                  const double sampleRate,
                                                   AudioFormatManager& formats,
                                                   TimeSliceThread& thread) const
     {
@@ -198,10 +206,6 @@ struct RenderContext
             {
 
             }
-           
-                
-
-            
 
             const auto velocity = static_cast<uint8> (layerVelocities [layer]);
             auto noteOn  = MidiMessage::noteOn (1, key, velocity);
