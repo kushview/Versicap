@@ -16,10 +16,17 @@ public:
           bar (progress)
     {
         addAndMakeVisible (bar);
+
         addAndMakeVisible (text);
         text.setText ("Waiting...", dontSendNotification);
+        text.setJustificationType (Justification::topLeft);
+        text.setFont (Font (13.f));
+
         addAndMakeVisible (cancelButton);
         cancelButton.setButtonText ("Cancel");
+
+        // shadow.setShadowProperties (DropShadow (Colours::black.withAlpha (0.7f), 6, Point<int> (0, 1)));
+        // setComponentEffect (&shadow);
 
         setSize (300, 140);
     }
@@ -27,6 +34,8 @@ public:
     void paint (Graphics& g) override
     {
         g.fillAll (kv::LookAndFeel_KV1::widgetBackgroundColor);
+        g.setColour (kv::LookAndFeel_KV1::widgetBackgroundColor.brighter());
+        g.drawRect (getLocalBounds().toFloat(), 1.5);
     }
 
     void resized() override
@@ -39,18 +48,15 @@ public:
         r.removeFromTop (getHeight() / 3);
         bar.setBounds (r.removeFromTop (28));
         r.removeFromTop (8);
-        text.setBounds (r.removeFromTop (64));
+        text.setBounds (r.removeFromTop (30));
         
-        int buttonSize = 22;
-        r.removeFromBottom (40);
+        int buttonSize = 24;
+        r.removeFromBottom (30);
         cancelButton.changeWidthToFitText (buttonSize);
         cancelButton.setBounds (r.removeFromBottom (buttonSize)
                                  .withWidth (cancelButton.getWidth())
                                  .withX ((getWidth() / 2) - (cancelButton.getWidth() / 2)));
-        cancelButton.onClick = [this]() {
-            if (onCancel)
-                onCancel();
-        };
+        cancelButton.onClick = [this]() { if (onCancel) onCancel(); };
     }
 
     std::function<void()> onCancel;
@@ -60,13 +66,15 @@ private:
     ProgressBar bar;
     Label text;
     TextButton cancelButton;
+    DropShadowEffect shadow;
 };
 
 class MainComponent::Content : public Component
 {
 public:
     Content (MainComponent& o, Versicap& vc)
-        : owner (o),
+        : versicap (vc),
+          owner (o),
           tabs (vc)
     {
         setOpaque (true);
@@ -106,7 +114,8 @@ public:
 
     ~Content()
     {
-
+        if (auto* _unlock = unlock.getComponent())
+            delete _unlock;
     }
 
     void paint (Graphics& g) override
@@ -132,16 +141,36 @@ public:
 
         r.removeFromTop (1);
         tabs.setBounds (r);
-        progress.setBounds (r);
+        if (overlay.isVisible())
+        {
+            overlay.setBounds (getLocalBounds());
+        }
+
+        if (progress.isVisible())
+        {
+            progress.setBounds (getAlertBounds());
+        }
+
+        if (unlock != nullptr && unlock->isVisible())
+        {
+            unlock->setBounds (getAlertBounds());
+        }
     }
 
     MainTabs& getTabs() { return tabs; }
 
+    Rectangle<int> getAlertBounds() const
+    {
+        return getLocalBounds().reduced (40, 60);
+    }
+
     void showProgress (bool showIt)
     {
+        showOverlay (showIt);
+
         if (showIt)
         {
-            addAndMakeVisible (progress);
+            addAndMakeVisible (progress, 9999);
         }
         else
         {
@@ -150,13 +179,61 @@ public:
 
         resized();
     }
+
+    void showOverlay (bool showIt)
+    {
+        if (showIt)
+        {
+            addAndMakeVisible (overlay, 9998);
+        }
+        else
+        {
+            removeChildComponent (&overlay);
+        }
+
+        resized();
+    }
+
+    void showUnlockForm()
+    {
+        showOverlay (true);
+        unlock = new UnlockForm (versicap.getUnlockStatus(), 
+            "Sign in to your account to unlock Versicap", false, true);
+        addAndMakeVisible (unlock.getComponent(), 10000);
+        resized();
+    }
+
 private:
+    Versicap& versicap;
     MainComponent& owner;
     MainTabs tabs;
     TextButton clearButton;
     TextButton importButton;
     TextButton exportButton;
     RenderProgress progress;
+
+    Component::SafePointer<UnlockForm> unlock;
+
+    struct Overlay : public Component
+    {
+        Overlay()
+        {
+            setInterceptsMouseClicks (true, false);
+        }
+
+        bool hitTest (int, int) override
+        {
+            return true;
+        }
+
+        void paint (Graphics& g) override
+        {
+            g.setColour (Colours::black);
+            g.setOpacity (0.24f);
+            g.fillAll();
+        }
+
+    } overlay;
 };
 
 MainComponent::MainComponent (Versicap& vc)
@@ -183,20 +260,31 @@ MainComponent::MainComponent (Versicap& vc)
     tabs.updateSettings (ctx);
 
     versicap.addListener (this);
+    versicap.getUnlockStatus().addChangeListener (this);
     if (! (bool) versicap.getUnlockStatus().isUnlocked())
-    {
-        unlock = new UnlockForm (versicap.getUnlockStatus(), 
-            "Sign in to your account to unlock Versicap", false, true);
-        addAndMakeVisible (unlock.getComponent(), 9999);
-    }
+        content->showUnlockForm();
 }
 
 MainComponent::~MainComponent()
 {
     versicap.removeListener (this);
+    versicap.getUnlockStatus().removeChangeListener (this);
     content.reset();
-    if (auto* overlay = unlock.getComponent())
-        delete overlay;
+}
+
+void MainComponent::changeListenerCallback (ChangeBroadcaster* bcaster)
+{
+    if (bcaster == &versicap.getUnlockStatus())
+    {
+        if ((bool) versicap.getUnlockStatus().isUnlocked())
+        {
+            content->showOverlay (false);
+        }
+        else
+        {
+            content->showUnlockForm();
+        }
+    }
 }
 
 void MainComponent::renderWillStart()
@@ -256,8 +344,6 @@ void MainComponent::paint (Graphics& g)
 void MainComponent::resized()
 {
     content->setBounds (getLocalBounds());
-    if (auto* overlay = unlock.getComponent())
-        overlay->setBounds (getLocalBounds());
 }
 
 }

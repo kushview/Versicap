@@ -37,7 +37,9 @@ struct Spinner  : public Component,
 
     void paint (Graphics& g) override
     {
-        getLookAndFeel().drawSpinningWaitAnimation (g, Colours::darkgrey, 0, 0, getWidth(), getHeight());
+        getLookAndFeel().drawSpinningWaitAnimation (g, 
+            kv::LookAndFeel_KV1::widgetBackgroundColor.brighter(), 
+            0, 0, getWidth(), getHeight());
     }
 };
 
@@ -71,7 +73,9 @@ struct UnlockForm::OverlayComp  : public Component,
 
     void paint (Graphics& g) override
     {
-        g.fillAll (kv::LookAndFeel_KV1::widgetBackgroundColor.darker().withAlpha (0.92f));
+        g.fillAll (kv::LookAndFeel_KV1::widgetBackgroundColor);
+        g.setColour (kv::LookAndFeel_KV1::widgetBackgroundColor.brighter());
+        g.drawRect (getLocalBounds().toFloat(), 1.5);
 
         g.setColour (kv::LookAndFeel_KV1::textColor);
         g.setFont (15.0f);
@@ -121,13 +125,14 @@ struct UnlockForm::OverlayComp  : public Component,
 
         // (local copies because we're about to delete this)
         const bool worked = result.succeeded;
-        UnlockForm& f = form;
+        UnlockForm& f = form;        
         f.status.sendChangeMessage();
         
         delete this;
 
         if (worked)
             f.dismiss();
+
     }
 
     void buttonClicked (Button* button) override
@@ -208,7 +213,9 @@ UnlockForm::~UnlockForm()
 
 void UnlockForm::paint (Graphics& g)
 {
-    g.fillAll (kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
+    g.fillAll (kv::LookAndFeel_KV1::widgetBackgroundColor);
+    g.setColour (kv::LookAndFeel_KV1::widgetBackgroundColor.brighter());
+    g.drawRect (getLocalBounds().toFloat(), 1.5);
 }
 
 void UnlockForm::resized()
