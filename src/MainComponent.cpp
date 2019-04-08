@@ -47,7 +47,13 @@ public:
         cancelButton.setBounds (r.removeFromBottom (buttonSize)
                                  .withWidth (cancelButton.getWidth())
                                  .withX ((getWidth() / 2) - (cancelButton.getWidth() / 2)));
+        cancelButton.onClick = [this]() {
+            if (onCancel)
+                onCancel();
+        };
     }
+
+    std::function<void()> onCancel;
 
 private:
     double progress;
@@ -94,7 +100,7 @@ public:
 
         addAndMakeVisible (tabs);
 
-        // addAndMakeVisible (progress, 9999);
+        progress.onCancel = std::bind (&Versicap::stopRendering, &vc);
         setSize (440, 340);
     }
 
@@ -131,6 +137,19 @@ public:
 
     MainTabs& getTabs() { return tabs; }
 
+    void showProgress (bool showIt)
+    {
+        if (showIt)
+        {
+            addAndMakeVisible (progress);
+        }
+        else
+        {
+            removeChildComponent (&progress);
+        }
+
+        resized();
+    }
 private:
     MainComponent& owner;
     MainTabs tabs;
@@ -163,6 +182,7 @@ MainComponent::MainComponent (Versicap& vc)
 
     tabs.updateSettings (ctx);
 
+    versicap.addListener (this);
     if (! (bool) versicap.getUnlockStatus().isUnlocked())
     {
         unlock = new UnlockForm (versicap.getUnlockStatus(), 
@@ -173,9 +193,20 @@ MainComponent::MainComponent (Versicap& vc)
 
 MainComponent::~MainComponent()
 {
+    versicap.removeListener (this);
     content.reset();
     if (auto* overlay = unlock.getComponent())
         delete overlay;
+}
+
+void MainComponent::renderWillStart()
+{
+    content->showProgress (true);
+}
+
+void MainComponent::renderWillStop()
+{
+    content->showProgress (false);
 }
 
 void MainComponent::saveSettings()

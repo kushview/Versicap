@@ -32,6 +32,9 @@ public:
     const RenderContext& getContext() const { return context; }
     int getSourceType() const { return context.source; }
 
+    std::function<void()> onStopped;
+    std::function<void()> onStarted;
+
 private:
     TimeSliceThread thread;
     AudioFormatManager& formats;
@@ -55,6 +58,20 @@ private:
 
     std::unique_ptr<ChannelDelay> delay;
     
+    struct Started : public AsyncUpdater
+    {
+        Started (Render& r) : render (r) {}
+        void handleAsyncUpdate() { if (render.onStarted) render.onStarted(); }
+        Render& render;
+    } started;
+
+    struct Stopped : public AsyncUpdater
+    {
+        Stopped (Render& r) : render (r) {}
+        void handleAsyncUpdate()  { if (render.onStopped) render.onStopped(); }
+        Render& render;
+    } stopped;
+
     void reset();
 };
 

@@ -6,7 +6,9 @@ namespace vcp {
 Render::Render (AudioFormatManager& f)
     : formats (f), 
       thread ("vcprt"),
-      delay (new ChannelDelay())
+      delay (new ChannelDelay()),
+      started (*this),
+      stopped (*this)
 { }
 
 Render::~Render()
@@ -43,11 +45,16 @@ void Render::renderCycleBegin()
         if (isRendering())
         {
             DBG("[VCP] rendering started");
+            stopped.cancelPendingUpdate();
+            started.cancelPendingUpdate();
+            started.triggerAsyncUpdate();
             reset();
         }
         else
         {
             DBG("[VCP] rendering stopped");
+            started.cancelPendingUpdate();
+            stopped.cancelPendingUpdate();
             triggerAsyncUpdate();
         }
     }
@@ -347,6 +354,8 @@ void Render::handleAsyncUpdate()
     for (auto* detail : old)
         for (auto* frame : detail->frames)
             frame->writer.reset();
+    
+    stopped.triggerAsyncUpdate();
 }
 
 void Render::start (const RenderContext& newContext, int delaySamples)

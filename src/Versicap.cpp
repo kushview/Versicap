@@ -206,6 +206,20 @@ Versicap::Versicap()
     impl->plugins.setOwned (new PluginManager());
     impl->unlock.reset (new UnlockStatus (impl->settings));
     impl->render.reset (new Render (*impl->formats));
+    
+    impl->render->onStarted = [this]()
+    {
+        listeners.call ([](Listener& l) { l.renderStarted(); });
+    };
+    
+    impl->render->onStopped = [this]()
+    {
+        listeners.call ([](Listener& l) 
+        { 
+            l.renderWillStop();
+            l.renderStopped();
+        });
+    };
 }
 
 Versicap::~Versicap()
@@ -226,9 +240,24 @@ File Versicap::getApplicationDataDir()
    #endif
 }
 
+File Versicap::getSamplesDir()
+{
+    return File::getSpecialLocation(File::userMusicDirectory)
+        .getChildFile("Versicap/Samples");
+}
+
+void Versicap::initializeDataPath()
+{
+    if (! getApplicationDataDir().exists())
+        getApplicationDataDir().createDirectory();
+    if (! getSamplesDir().exists())
+        getSamplesDir().createDirectory();
+}
+
 void Versicap::initializeExporters()
 {
     Exporter::createExporters (impl->exporters);
+    getAudioFormats().registerBasicFormats();
 }
 
 void Versicap::initializeAudioDevice()
@@ -261,6 +290,20 @@ void Versicap::initializePlugins()
     plugins.addDefaultFormats();
     const auto file = getApplicationDataDir().getChildFile ("plugins.xml");
     plugins.restoreAudioPlugins (file);
+}
+
+void Versicap::initializeUnlockStatus()
+{
+    getUnlockStatus().load();
+}
+
+void Versicap::initialize()
+{
+    initializeDataPath();
+    initializeExporters();
+    initializePlugins();
+    initializeAudioDevice();
+    initializeUnlockStatus();
 }
 
 void Versicap::shutdown()
@@ -414,13 +457,14 @@ Result Versicap::startRendering (const RenderContext& context)
     if (impl->render->isRendering())
         return Result::fail ("Versicap is already rendering");
     impl->render->start (context);
-    listeners.call ([](Listener& listener) { listener.renderStarted(); });
+    listeners.call ([](Listener& listener) { listener.renderWillStart(); });
     return Result::ok();
 }
 
 void Versicap::stopRendering()
 {
     impl->render->stop();
+    listeners.call ([](Listener& listener) { listener.renderWillStop(); });
 }
 
 }

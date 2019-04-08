@@ -30,8 +30,6 @@ public:
 
         setupGlobals();
 
-
-
         look.setColour (Slider::backgroundColourId, kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
         LookAndFeel::setDefaultLookAndFeel (&look);
         mainWindow.reset (new MainWindow (getApplicationName(), *versicap));
@@ -129,13 +127,7 @@ private:
 
     void setupGlobals()
     {
-        auto& formats = versicap->getAudioFormats();
-        formats.registerBasicFormats();
-        versicap->initializeExporters();
-        versicap->initializePlugins();
-        versicap->initializeAudioDevice();
-        versicap->getUnlockStatus().load();
-
+        versicap->initialize();
         auto& plugins = versicap->getPluginManager();
         plugins.scanAudioPlugins ({ "AudioUnit", "VST", "VST3" });
     }

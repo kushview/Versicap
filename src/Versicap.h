@@ -20,17 +20,18 @@ public:
     {
         Listener() = default;
         virtual ~Listener() = default;
+        virtual void renderWillStart() {}
         virtual void renderStarted() {}
+        virtual void renderWillStop() {}
         virtual void renderStopped() {}
     };
 
     //=========================================================================
     static File getApplicationDataDir();
+    static File getSamplesDir();
 
     //=========================================================================
-    void initializeExporters();
-    void initializeAudioDevice();
-    void initializePlugins();
+    void initialize();
     void shutdown();
 
     //=========================================================================
@@ -69,6 +70,13 @@ public:
 private:
     struct Impl; std::unique_ptr<Impl> impl;
     ListenerList<Listener> listeners;
+
+    //=========================================================================
+    void initializeDataPath();
+    void initializeExporters();
+    void initializeAudioDevice();
+    void initializePlugins();
+    void initializeUnlockStatus();
 };
 
 }

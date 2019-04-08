@@ -1,14 +1,15 @@
 
 #pragma once
 
-#include "JuceHeader.h"
+#include "Versicap.h"
 
 namespace vcp {
 
 class Versicap;
 class UnlockForm;
 
-class MainComponent   : public Component
+class MainComponent   : public Component,
+                        public Versicap::Listener
 {
 public:
     MainComponent (Versicap&);
@@ -25,6 +26,9 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     
+    void renderWillStart() override;
+    void renderWillStop() override;
+
 private:
     Versicap& versicap;
     class Content;
