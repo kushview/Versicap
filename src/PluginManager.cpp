@@ -289,7 +289,7 @@ public:
             pluginList, plugins->getDeadAudioPluginsFile());
         
         plugins->addDefaultFormats();
-        auto pluginsFile = Versicap::getApplicationDataDir().getChildFile ("plugins.xml");
+        auto pluginsFile = Versicap::getApplicationDataPath().getChildFile ("plugins.xml");
         if (auto xml = std::unique_ptr<XmlElement> (XmlDocument::parse (pluginsFile)))
             plugins->restoreUserPlugins (*xml);
         
@@ -524,7 +524,7 @@ public:
 	Private (PluginManager& o)
         : owner(o)
 	{
-		deadAudioPlugins = Versicap::getApplicationDataDir()
+		deadAudioPlugins = Versicap::getApplicationDataPath()
             .getChildFile (VCP_DEAD_AUDIO_PLUGINS_FILENAME);
 	}
 
@@ -781,18 +781,10 @@ const File& PluginScanner::getSlavePluginListFile()
 {
     static File _listTempFile;
 
-   
-
     if (_listTempFile == File())
     {
-       #if JUCE_MAC
-        const File appDir = File::getSpecialLocation (File::userApplicationDataDirectory)
-            .getChildFile ("Application Support/Versicap");
-       #else
-        const File appDir = File::getSpecialLocation (File::userApplicationDataDirectory)
-            .getChildFile ("Versicap");
-       #endif
-        _listTempFile = appDir.getChildFile (VCP_PLUGIN_SCANNER_SLAVE_LIST_PATH);
+        _listTempFile = Versicap::getApplicationDataPath()
+            .getChildFile (VCP_PLUGIN_SCANNER_SLAVE_LIST_PATH);
     }
 
     return _listTempFile;

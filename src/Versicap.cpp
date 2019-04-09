@@ -51,6 +51,18 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     Impl() { }
     ~Impl() { }
 
+    void prepare (AudioProcessor& plugin)
+    {
+        plugin.prepareToPlay (sampleRate, bufferSize);
+        pluginLatency = plugin.getLatencySamples();
+    }
+
+    void release (AudioProcessor& plugin)
+    {
+        pluginLatency = 0;
+        plugin.releaseResources();
+    }
+
     void audioDeviceIOCallback (const float** input, int numInputs, 
                                 float** output, int numOutputs,
                                 int nframes) override
@@ -138,6 +150,8 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         bufferSize        = device->getCurrentBufferSizeSamples();
         numInputChans     = device->getActiveInputChannels().countNumberOfSetBits();
         numOutputChans    = device->getActiveInputChannels().countNumberOfSetBits();;
+        inputLatency      = device->getInputLatencyInSamples();
+        outputLatency     = device->getOutputLatencyInSamples();
 
         plugins->setPlayConfig (sampleRate, bufferSize);
         messageCollector.reset (sampleRate);
@@ -146,7 +160,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
 
         if (processor)
         {
-            processor->prepareToPlay (sampleRate, bufferSize);
+            prepare (*processor);
         }
 
         if (auto* const out = devices->getDefaultMidiOutput())
@@ -156,14 +170,17 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     void audioDeviceStopped() override
     {
         const ScopedLock sl (render->getCallbackLock());
+
         render->stop();
         render->release();
 
         if (processor)
         {
-            processor->releaseResources();
+            release (*processor);
         }
 
+        inputLatency = 0;
+        outputLatency = 0;
         sampleRate  = 0.0;
         bufferSize  = 0;
         tempBuffer.setSize (1, 1);
@@ -171,8 +188,8 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     }
 
     void audioDeviceError (const String& errorMessage) override
-    { 
-        ignoreUnused (errorMessage); 
+    {
+        ignoreUnused (errorMessage);
     }
 
     void handleIncomingMidiMessage (MidiInput*, const MidiMessage& message) override
@@ -193,17 +210,22 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     OptionalScopedPointer<AudioFormatManager> formats;
     OptionalScopedPointer<PluginManager> plugins;
     std::unique_ptr<UnlockStatus> unlock;
+    
     std::unique_ptr<AudioProcessor> processor;
     std::unique_ptr<PluginWindow> window;
+    int pluginLatency = 0;
 
     RenderContext context;
     std::unique_ptr<Render> render;
 
+    int inputLatency = 0;
+    int outputLatency = 0;
     double sampleRate { 44100.0 };
     int bufferSize = 1024;
     int numInputChans = 0, numOutputChans = 0;
     HeapBlock<float*> channels;
     AudioSampleBuffer tempBuffer;
+    
     MidiBuffer incomingMidi;
     MidiBuffer renderMidi;
     MidiMessageCollector messageCollector;
@@ -240,7 +262,7 @@ Versicap::~Versicap()
     impl.reset();
 }
 
-File Versicap::getApplicationDataDir() 
+File Versicap::getApplicationDataPath() 
 {
    #if JUCE_MAC
     return File::getSpecialLocation (File::userApplicationDataDirectory)
@@ -251,18 +273,20 @@ File Versicap::getApplicationDataDir()
    #endif
 }
 
-File Versicap::getSamplesDir()
-{
-    return File::getSpecialLocation(File::userMusicDirectory)
-        .getChildFile("Versicap/Samples");
-}
+File Versicap::getUserDataPath()    { return File::getSpecialLocation(File::userMusicDirectory).getChildFile ("Versicap"); }
+File Versicap::getPresetsPath()     { return getUserDataPath().getChildFile ("Presets"); }
+File Versicap::getSamplesPath()     { return getUserDataPath().getChildFile ("Samples"); }
 
 void Versicap::initializeDataPath()
 {
-    if (! getApplicationDataDir().exists())
-        getApplicationDataDir().createDirectory();
-    if (! getSamplesDir().exists())
-        getSamplesDir().createDirectory();
+    if (! getApplicationDataPath().exists())
+        getApplicationDataPath().createDirectory();
+    if (! getUserDataPath().exists())
+        getUserDataPath().createDirectory();
+    if (! getSamplesPath().exists())
+        getSamplesPath().createDirectory();
+    if (! getPresetsPath().exists())
+        getPresetsPath().createDirectory();
 }
 
 void Versicap::initializeExporters()
@@ -273,7 +297,7 @@ void Versicap::initializeExporters()
 
 void Versicap::initializeRenderContext()
 {
-    File contextFile = getApplicationDataDir().getChildFile ("context.versicap");
+    File contextFile = getApplicationDataPath().getChildFile ("context.versicap");
     if (contextFile.existsAsFile())
         impl->context.restoreFromFile (contextFile);
 }
@@ -306,7 +330,7 @@ void Versicap::initializePlugins()
 {
     auto& plugins = getPluginManager();
     plugins.addDefaultFormats();
-    const auto file = getApplicationDataDir().getChildFile ("plugins.xml");
+    const auto file = getApplicationDataPath().getChildFile ("plugins.xml");
     plugins.restoreAudioPlugins (file);
 }
 
@@ -343,7 +367,7 @@ void Versicap::saveSettings()
 
     if (auto xml = std::unique_ptr<XmlElement> (plugins.getKnownPlugins().createXml()))
     {
-        const auto file = getApplicationDataDir().getChildFile ("plugins.xml");
+        const auto file = getApplicationDataPath().getChildFile ("plugins.xml");
         xml->writeToFile (file, String());
     }
     
@@ -361,34 +385,10 @@ void Versicap::saveSettings()
 
 void Versicap::saveRenderContext()
 {
-    File contextFile = getApplicationDataDir().getChildFile("context.versicap");
+    File contextFile = getApplicationDataPath().getChildFile("context.versicap");
     if (! contextFile.getParentDirectory().exists())
         contextFile.getParentDirectory().createDirectory();
     impl->context.writeToFile (contextFile);
-}
-
-File Versicap::getUserDataPath()
-{
-    auto path = File::getSpecialLocation (File::userMusicDirectory).getChildFile ("Versicap");
-    if (! path.exists())
-        path.createDirectory();
-    return path;
-}
-
-File Versicap::getSamplesPath()
-{
-    auto path = getUserDataPath().getChildFile ("Samples");
-    if (! path.exists())
-        path.createDirectory();
-    return path;
-}
-
-File Versicap::getPresetsPath()
-{
-    auto path = getUserDataPath().getChildFile ("Presets");
-    if (! path.exists())
-        path.createDirectory();
-    return path;
 }
 
 void Versicap::setRenderContext (const RenderContext& context) { impl->context = context; }
@@ -489,12 +489,32 @@ void Versicap::showPluginWindow()
         window->toFront (false);
 }
 
-Result Versicap::startRendering (const RenderContext& ctx)
+Result Versicap::startRendering (const RenderContext& newContext)
 {
-    impl->context = ctx;
+    setRenderContext (newContext);
     if (impl->render->isRendering())
         return Result::fail ("Versicap is already rendering");
-    impl->render->start (impl->context);
+    
+    int latency = 0;
+    const auto context = getRenderContext();
+    if (context.source == SourceType::AudioPlugin)
+    {
+        if (impl->processor == nullptr)
+            return Result::fail ("No plugin selected to render");
+        if (nullptr == getDeviceManager().getCurrentAudioDevice())
+            return Result::fail ("Audio engine is not running");
+        latency = impl->pluginLatency = impl->processor->getLatencySamples();
+    }
+    else
+    {
+        if (nullptr == getDeviceManager().getDefaultMidiOutput())
+            return Result::fail ("No MIDI output device slected for rendering");
+        if (nullptr == getDeviceManager().getCurrentAudioDevice())
+            return Result::fail ("Audio engine is not running");
+        latency = impl->inputLatency;
+    }
+    
+    impl->render->start (context, jmax (0, latency));
     listeners.call ([](Listener& listener) { listener.renderWillStart(); });
     return Result::ok();
 }

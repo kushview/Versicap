@@ -1,8 +1,51 @@
 
 #include "RenderContext.h"
 #include "Versicap.h"
+/*
 
+source  = 22050
+dest    = 44100
+ratio   = 0.5                   = source / dest
+provide = 1024                  = produce * ratio
+produce = 2048                  = provide / ratio
+
+source  = 48000
+dest    = 44100
+ratio   = 1.08843537414966      = source / dest
+provide = 1024                  = produce * ratio
+produce = 940.799999999999882   = provide / ratio
+
+*/
 namespace vcp {
+
+ValueTree RenderContext::createValueTree() const
+{
+    ValueTree versicap ("versicap");
+    versicap.setProperty ("source",     source, nullptr)
+            .setProperty ("keyStart",   keyStart, nullptr)
+            .setProperty ("keyEnd",     keyEnd, nullptr)
+            .setProperty ("keyStride",  keyStride, nullptr)
+            .setProperty ("baseName",   baseName, nullptr)
+            .setProperty ("noteLength", noteLength, nullptr)
+            .setProperty ("tailLength", tailLength, nullptr)
+            .setProperty ("loopMode",   loopMode, nullptr)
+            .setProperty ("loopStart",  loopStart, nullptr)
+            .setProperty ("crossfadeLength", crossfadeLength, nullptr)
+            .setProperty ("instrumentName", instrumentName, nullptr)
+            .setProperty ("outputPath", outputPath, nullptr)
+            .setProperty ("outputChannels", outputChannels, nullptr);
+    
+    auto layers = versicap.getOrCreateChildWithName ("layers", nullptr);
+    for (int i = 0; i < 4; ++i)
+    {
+        ValueTree layer ("layer");
+        layer.setProperty ("enabled", layerEnabled [i], nullptr)
+                .setProperty ("velocity", layerVelocities [i], nullptr);
+        layers.appendChild (layer, nullptr);
+    }
+
+    return versicap;
+}
 
 LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
                                                              const double sampleRate,
@@ -36,7 +79,7 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
         String path = outputPath;
         
         if (! File::isAbsolutePath (path))
-            path = Versicap::getSamplesDir().getFullPathName();
+            path = Versicap::getSamplesPath().getFullPathName();
 
         if (File::isAbsolutePath (path))
         {
@@ -52,6 +95,7 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
             file = file.getChildFile (fileName);
             std::unique_ptr<FileOutputStream> stream;
             stream.reset (file.createOutputStream());
+            
             if (stream)
             {
                 if (auto* writer = format->createWriterFor (
@@ -89,6 +133,49 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
     }
     
     return details.release();
+}
+
+void RenderContext::writeToFile (const File& file) const
+{
+    const auto tree = createValueTree();
+    if (auto* xml = tree.createXml())
+    {
+        xml->writeToFile (file, String());
+        deleteAndZero (xml);
+    }
+}
+
+void RenderContext::restoreFromFile (const File& file)
+{
+    if (auto* xml = XmlDocument::parse (file))
+    {
+        auto tree = ValueTree::fromXml (*xml);
+        RenderContext& ctx = *this;
+        ctx.source              = tree.getProperty ("source", ctx.source);
+        ctx.baseName            = tree.getProperty ("baseName", ctx.baseName);
+        ctx.crossfadeLength     = tree.getProperty ("crossfadeLength", ctx.crossfadeLength);;
+        ctx.instrumentName      = tree.getProperty ("instrumentName", ctx.instrumentName);;
+        ctx.keyEnd              = tree.getProperty ("keyEnd", ctx.keyEnd);;
+        ctx.keyStart            = tree.getProperty ("keyStart", ctx.keyStart);;
+        ctx.keyStride           = tree.getProperty ("keyStride", ctx.keyStride);;
+        ctx.loopEnd             = tree.getProperty ("loopEnd", ctx.loopEnd);;
+        ctx.loopMode            = tree.getProperty ("loopMode", ctx.loopMode);;
+        ctx.loopStart           = tree.getProperty ("loopStart", ctx.loopStart);;
+        ctx.noteLength          = tree.getProperty ("noteLength", ctx.noteLength);;
+        ctx.tailLength          = tree.getProperty ("tailLength", ctx.tailLength);;
+        ctx.outputPath          = tree.getProperty ("outputPath", ctx.outputPath);;
+        ctx.outputChannels      = tree.getProperty ("outputChannels", ctx.outputChannels);
+        auto layers = tree.getChildWithName ("layers");
+        
+        for (int i = 0; i < 4; ++i)
+        {
+            auto l = layers.getChild (i);
+            ctx.layerEnabled[i]     = (bool) l.getProperty("enabled", ctx.layerEnabled [i]);
+            ctx.layerVelocities[i]  = l.getProperty("velocity", ctx.layerVelocities [i]);
+        }
+
+        deleteAndZero (xml);
+    }
 }
 
 }

@@ -357,24 +357,25 @@ void Render::start (const RenderContext& newContext, int latencySamples)
     if (isRendering())
         return;
 
-    OwnedArray<LayerRenderDetails> newSeq;
+    OwnedArray<LayerRenderDetails> newDetails;
 
     for (int i = 0; i < 4; ++i)
     {
         if (! newContext.layerEnabled [i])
         {
-            newSeq.add (new LayerRenderDetails());
+            newDetails.add (new LayerRenderDetails());
         }
         else
         {
-            newSeq.add (context.createLayerRenderDetails (i, sampleRate, formats, thread));
+            newDetails.add (newContext.createLayerRenderDetails (
+                        i, sampleRate, formats, thread));
         }
     }
     
     {
         ScopedLock sl (getCallbackLock());
         writerDelay = jmax (0, latencySamples);
-        details.swapWith (newSeq);
+        details.swapWith (newDetails);
         context = newContext;
     }
 
@@ -383,7 +384,7 @@ void Render::start (const RenderContext& newContext, int latencySamples)
         DBG("[VCP] render start requested");
     }
 
-    newSeq.clear();
+    newDetails.clear();
 }
 
 void Render::stop()

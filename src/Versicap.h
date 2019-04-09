@@ -25,10 +25,12 @@ public:
         virtual void renderWillStop() {}
         virtual void renderStopped() {}
     };
-
+    
     //=========================================================================
-    static File getApplicationDataDir();
-    static File getSamplesDir();
+    static File getApplicationDataPath();
+    static File getUserDataPath();
+    static File getSamplesPath();
+    static File getPresetsPath();
 
     //=========================================================================
     void initialize();
@@ -40,11 +42,6 @@ public:
     
     //=========================================================================
     UnlockStatus& getUnlockStatus();
-
-    //=========================================================================
-    static File getUserDataPath();
-    static File getSamplesPath();
-    static File getPresetsPath();
     
     //=========================================================================
     const OwnedArray<Exporter>& getExporters() const;
