@@ -23,7 +23,8 @@ public:
         addAndMakeVisible (directoryLabel);
         directoryLabel.setText ("Output Path", dontSendNotification);
         addAndMakeVisible (directory);
-        directory.setCurrentFile ({}, false, dontSendNotification);
+        directory.setCurrentFile (Versicap::getSamplesPath(),
+                                  false, dontSendNotification);
 
         for (auto* const exporter : versicap.getExporters())
         {
