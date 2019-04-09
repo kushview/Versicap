@@ -144,6 +144,11 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         channels.calloc ((size_t) jmax (numInputChans, numOutputChans) + 2);
         render->prepare (sampleRate, bufferSize);
 
+        if (processor)
+        {
+            processor->prepareToPlay (sampleRate, bufferSize);
+        }
+
         if (auto* const out = devices->getDefaultMidiOutput())
             out->startBackgroundThread();
     }
@@ -153,6 +158,12 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         const ScopedLock sl (render->getCallbackLock());
         render->stop();
         render->release();
+
+        if (processor)
+        {
+            processor->releaseResources();
+        }
+
         sampleRate  = 0.0;
         bufferSize  = 0;
         tempBuffer.setSize (1, 1);
@@ -260,6 +271,13 @@ void Versicap::initializeExporters()
     getAudioFormats().registerBasicFormats();
 }
 
+void Versicap::initializeRenderContext()
+{
+    File contextFile = getApplicationDataDir().getChildFile ("context.versicap");
+    if (contextFile.existsAsFile())
+        impl->context.restoreFromFile (contextFile);
+}
+
 void Versicap::initializeAudioDevice()
 {
     auto& devices = getDeviceManager();
@@ -304,6 +322,7 @@ void Versicap::initialize()
     initializePlugins();
     initializeAudioDevice();
     initializeUnlockStatus();
+    initializeRenderContext();
 }
 
 void Versicap::shutdown()
@@ -340,6 +359,14 @@ void Versicap::saveSettings()
     unlock.save();
 }
 
+void Versicap::saveRenderContext()
+{
+    File contextFile = getApplicationDataDir().getChildFile("context.versicap");
+    if (! contextFile.getParentDirectory().exists())
+        contextFile.getParentDirectory().createDirectory();
+    impl->context.writeToFile (contextFile);
+}
+
 File Versicap::getUserDataPath()
 {
     auto path = File::getSpecialLocation (File::userMusicDirectory).getChildFile ("Versicap");
@@ -356,6 +383,8 @@ File Versicap::getSamplesPath()
     return path;
 }
 
+void Versicap::setRenderContext (const RenderContext& context) { impl->context = context; }
+const RenderContext& Versicap::getRenderContext() const     { return impl->context; }
 const OwnedArray<Exporter>& Versicap::getExporters() const  { return impl->exporters; }
 Settings& Versicap::getSettings()                           { return impl->settings; }
 AudioDeviceManager& Versicap::getDeviceManager()            { return *impl->devices; }
@@ -452,11 +481,12 @@ void Versicap::showPluginWindow()
         window->toFront (false);
 }
 
-Result Versicap::startRendering (const RenderContext& context)
+Result Versicap::startRendering (const RenderContext& ctx)
 {
+    impl->context = ctx;
     if (impl->render->isRendering())
         return Result::fail ("Versicap is already rendering");
-    impl->render->start (context);
+    impl->render->start (impl->context);
     listeners.call ([](Listener& listener) { listener.renderWillStart(); });
     return Result::ok();
 }

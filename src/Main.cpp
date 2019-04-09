@@ -39,6 +39,7 @@ public:
     {
         shutdownGui();
         versicap->saveSettings();
+        versicap->saveRenderContext();
         versicap->shutdown();
         versicap.reset();
     }
@@ -92,15 +93,9 @@ public:
         void savePersistentData()
         {
             if (auto* props = versicap.getSettings().getUserSettings())
-            {
                 props->setValue ("windowPosition", getWindowStateAsString());
-            }
-
             if (auto* const comp = dynamic_cast<MainComponent*> (getContentComponent()))
-            {
                 comp->saveSettings();
-                comp->saveContextFile();
-            }
         }
 
         void closeButtonPressed() override

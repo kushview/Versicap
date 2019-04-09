@@ -247,16 +247,10 @@ MainComponent::MainComponent (Versicap& vc)
     auto& tabs = content->getTabs();
     tabs.refresh();
 
-    RenderContext ctx;
-    File contextFile;
     if (auto* props = versicap.getSettings().getUserSettings())
-    {
         tabs.setCurrentTabIndex (props->getIntValue ("currentTab", 0));
-        contextFile = props->getFile().getParentDirectory().getChildFile("context.versicap");
-        if (contextFile.existsAsFile())
-            ctx.restoreFromFile (contextFile);
-    }
 
+    const auto ctx = versicap.getRenderContext();
     tabs.updateSettings (ctx);
 
     versicap.addListener (this);
@@ -267,6 +261,8 @@ MainComponent::MainComponent (Versicap& vc)
 
 MainComponent::~MainComponent()
 {
+    const auto ctx = content->getTabs().getRenderContext();
+    versicap.setRenderContext (ctx);
     versicap.removeListener (this);
     versicap.getUnlockStatus().removeChangeListener (this);
     content.reset();
@@ -301,21 +297,6 @@ void MainComponent::saveSettings()
 {
     if (auto* props = versicap.getSettings().getUserSettings())
         props->setValue ("currentTab", content->getTabs().getCurrentTabIndex());
-}
-
-void MainComponent::saveContextFile()
-{
-    const auto ctx = content->getTabs().getRenderContext();
-    File contextFile;
-
-    if (auto* props = versicap.getSettings().getUserSettings())
-        contextFile = props->getFile().getParentDirectory()
-            .getChildFile ("context.versicap");
-
-    if (! contextFile.getParentDirectory().exists())
-        contextFile.getParentDirectory().createDirectory();
-
-    ctx.writeToFile (contextFile);
 }
 
 void MainComponent::startRendering()

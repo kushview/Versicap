@@ -37,7 +37,7 @@ public:
     //=========================================================================
     Settings& getSettings();
     void saveSettings();
-
+    
     //=========================================================================
     UnlockStatus& getUnlockStatus();
 
@@ -60,6 +60,9 @@ public:
     void showPluginWindow();
 
     //=========================================================================
+    const RenderContext& getRenderContext() const;
+    void setRenderContext (const RenderContext& context);
+    void saveRenderContext();
     Result startRendering (const RenderContext& context);
     void stopRendering();
 
@@ -77,6 +80,7 @@ private:
     void initializeAudioDevice();
     void initializePlugins();
     void initializeUnlockStatus();
+    void initializeRenderContext();
 };
 
 }
