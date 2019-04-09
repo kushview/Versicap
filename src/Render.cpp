@@ -6,7 +6,6 @@ namespace vcp {
 Render::Render (AudioFormatManager& f)
     : formats (f), 
       thread ("vcprt"),
-      delay (new ChannelDelay()),
       started (*this),
       stopped (*this)
 { }
@@ -134,11 +133,6 @@ void Render::writeAudioFrames (AudioSampleBuffer& audio)
     }
 
     ScopedLock sl (getCallbackLock());
-
-   #if 0
-    if (delay->getNumSamplesDelay() > 0)
-        delay->process (audio);
-   #endif
    
     const int nframes           = audio.getNumSamples();
     auto* const detail          = details.getUnchecked (layer);
@@ -358,14 +352,12 @@ void Render::handleAsyncUpdate()
     stopped.triggerAsyncUpdate();
 }
 
-void Render::start (const RenderContext& newContext, int delaySamples)
+void Render::start (const RenderContext& newContext, int latencySamples)
 {
     if (isRendering())
         return;
 
     OwnedArray<LayerRenderDetails> newSeq;
-    std::unique_ptr<ChannelDelay> newDelay (new ChannelDelay());
-    newDelay->resize (2, jmax (0, delaySamples));
 
     for (int i = 0; i < 4; ++i)
     {
@@ -381,8 +373,8 @@ void Render::start (const RenderContext& newContext, int delaySamples)
     
     {
         ScopedLock sl (getCallbackLock());
+        writerDelay = jmax (0, latencySamples);
         details.swapWith (newSeq);
-        delay.swap (newDelay);
         context = newContext;
     }
 
@@ -391,7 +383,6 @@ void Render::start (const RenderContext& newContext, int delaySamples)
         DBG("[VCP] render start requested");
     }
 
-    newDelay.reset();
     newSeq.clear();
 }
 

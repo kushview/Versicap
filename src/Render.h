@@ -55,8 +55,6 @@ private:
     
     HeapBlock<float*> channels;
     OwnedArray<LayerRenderDetails> details;
-
-    std::unique_ptr<ChannelDelay> delay;
     
     struct Started : public AsyncUpdater
     {
