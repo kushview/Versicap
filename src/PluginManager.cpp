@@ -108,17 +108,17 @@ public:
         {
             if (! isRunning())
             {
-                DBG("[EL] a plugin crashed or timed out during scan");
+                DBG("[VCP] a plugin crashed or timed out during scan");
                 updateListAndLaunchSlave();
             }
             else
             {
-                DBG("[EL] scanning... and running....");
+                DBG("[VCP] scanning... and running....");
             }
         }
 		else if (state == "finished")
 		{
-			DBG("[EL] slave finished scanning");
+			DBG("[VCP] slave finished scanning");
 			{
 				ScopedLock sl(lock);
 				running = false;
@@ -130,7 +130,7 @@ public:
         {
             if (! isRunning())
             {
-                DBG("[EL] waiting for plugin scanner");
+                DBG("[VCP] waiting for plugin scanner");
                 updateListAndLaunchSlave();
             }
         }
@@ -140,7 +140,7 @@ public:
 		}
         else
         {
-            DBG("[EL] invalid slave state: " << state);
+            DBG("[VCP] invalid slave state: " << state);
         }
     }
     
@@ -604,7 +604,7 @@ private:
 
 	void audioPluginScanStarted (const String& plugin) override
 	{
-		DBG("[EL] scanning: " << plugin);
+		DBG("[VCP] scanning: " << plugin);
 		ScopedLock sl (lock);
 		scannedPlugin = plugin;
 	}
