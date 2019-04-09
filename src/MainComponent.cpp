@@ -322,7 +322,6 @@ void MainComponent::startRendering()
 {
     auto& tabs = content->getTabs();
     auto ctx = tabs.getRenderContext();
-
     auto result = versicap.startRendering (ctx);
     if (result.failed())
     {
