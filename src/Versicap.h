@@ -44,6 +44,7 @@ public:
     //=========================================================================
     static File getUserDataPath();
     static File getSamplesPath();
+    static File getPresetsPath();
     
     //=========================================================================
     const OwnedArray<Exporter>& getExporters() const;

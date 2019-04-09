@@ -383,6 +383,14 @@ File Versicap::getSamplesPath()
     return path;
 }
 
+File Versicap::getPresetsPath()
+{
+    auto path = getUserDataPath().getChildFile ("Presets");
+    if (! path.exists())
+        path.createDirectory();
+    return path;
+}
+
 void Versicap::setRenderContext (const RenderContext& context) { impl->context = context; }
 const RenderContext& Versicap::getRenderContext() const     { return impl->context; }
 const OwnedArray<Exporter>& Versicap::getExporters() const  { return impl->exporters; }

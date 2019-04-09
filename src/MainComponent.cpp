@@ -80,13 +80,19 @@ public:
         setOpaque (true);
         
         addAndMakeVisible (clearButton);
-        clearButton.setButtonText ("C");
-        clearButton.onClick = [this]() { tabs.updateSettings (RenderContext()); };
+        clearButton.setButtonText ("Clear");
+        clearButton.onClick = [this]()
+        {
+            versicap.setRenderContext (RenderContext());
+            tabs.updateSettings (versicap.getRenderContext()); 
+        };
 
         addAndMakeVisible (importButton);
-        importButton.setButtonText ("I");
-        importButton.onClick = [this]() {
-            FileChooser chooser ("Open Versicap File", File(), "*.versicap", true, false, this);
+        importButton.setButtonText ("Open");
+        importButton.onClick = [this]()
+        {
+            FileChooser chooser ("Open Versicap File", Versicap::getPresetsPath(), 
+                "*.versicap", true, false, this);
             if (chooser.browseForFileToOpen())
             {
                 auto ctx = tabs.getRenderContext();
@@ -96,10 +102,12 @@ public:
         };
 
         addAndMakeVisible (exportButton);
-        exportButton.setButtonText ("S");
-        exportButton.onClick = [this]() {
-            FileChooser chooser ("Save Versicap File", File(), "*.versicap", true, false, this);
-            if (chooser.browseForFileToSave(true))
+        exportButton.setButtonText ("Save");
+        exportButton.onClick = [this]()
+        {
+            FileChooser chooser ("Save Versicap File", Versicap::getPresetsPath(), 
+                "*.versicap", true, false, this);
+            if (chooser.browseForFileToSave (true))
             {
                 auto ctx = tabs.getRenderContext();
                 ctx.writeToFile (chooser.getResult());
@@ -135,7 +143,7 @@ public:
         r2.removeFromLeft (2);
         for (int i = 0; i < 3; ++i)
         {
-            buttons[i]->setBounds (r2.removeFromLeft (20));
+            buttons[i]->setBounds (r2.removeFromLeft (60));
             r2.removeFromLeft (1);
         }
 
