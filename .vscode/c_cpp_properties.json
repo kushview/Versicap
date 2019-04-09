@@ -12,7 +12,7 @@
                 "${workspaceRoot}/jucer/JuceLibraryCode",
                 "${workspaceRoot}/src",
                 "${workspaceRoot}/libs/kv/modules",
-                "~/SDKs/JUCE/modules"
+                "${HOME}/SDKs/JUCE/modules"
             ],
             "defines": [ ],
             "forcedInclude": [ ],
@@ -27,11 +27,10 @@
                     "${workspaceRoot}/jucer/JuceLibraryCode",
                     "${workspaceRoot}/src",
                     "${workspaceRoot}/libs/kv/modules",
-                    "~/SDKs/JUCE/modules"
+                    "${HOME}/SDKs/JUCE/modules"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
-                "databaseFilename": "",
-                "defines": [ ]
+                "databaseFilename": ""
             },
             "macFrameworkPath": [
                 "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.12.sdk/System/Library/Frameworks"

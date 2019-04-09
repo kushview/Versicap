@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "AudioDeviceSelect.h"
 #include "PluginPicker.h"
 #include "SettingGroup.h"
 #include "Types.h"
@@ -36,7 +37,11 @@ public:
         addAndMakeVisible (pluginButton);
         pluginButton.onChoose = std::bind (&EngineComponent::choosePlugin, this);
         pluginButton.onEditor = std::bind (&Versicap::showPluginWindow, &versicap);
-        pluginButton.onClose  = std::bind (&Versicap::closePlugin, &versicap);
+        pluginButton.onClose  = [this]()
+        {
+            versicap.closePlugin();
+            pluginButton.setPluginName (String());
+        };
 
         auto applyAudioDeviceSettingsCallback = std::bind (
             &EngineComponent::applyAudioDeviceSettings, this);
@@ -68,13 +73,63 @@ public:
 
         addAndMakeVisible (inputDeviceLabel);
         inputDeviceLabel.setText ("Audio In", dontSendNotification);
-        addAndMakeVisible (inputDeviceCombo);
-        inputDeviceCombo.onChange = applyAudioDeviceSettingsCallback;
+        addAndMakeVisible (inputDevice);
+        inputDevice.device.onChange = applyAudioDeviceSettingsCallback;
+        inputDevice.channels.onClick = [this]()
+        {
+            auto* device = versicap.getDeviceManager().getCurrentAudioDevice();
+            if (! device) return;
+            PopupMenu menu, stereo, mono;
+            auto chans = device->getInputChannelNames();
+            
+            for (int i = 0; i < chans.size(); ++i)
+            {
+                String name = String (i + 1);
+                mono.addItem (i + 100, name);
+            }
+
+            for (int i = 0; i < chans.size(); i += 2)
+            {
+                String name = String (i + 1);
+                name << " - " << int (i + 2);
+                stereo.addItem (i + 200, name);
+            }
+
+            menu.addSubMenu ("Mono", mono);
+            menu.addSubMenu ("Stereo", stereo);
+            menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&inputDevice.channels),
+                                ModalCallbackFunction::forComponent (EngineComponent::inputChannelChosen, this));
+        };
 
         addAndMakeVisible (outputDeviceLabel);
         outputDeviceLabel.setText ("Audio Out", dontSendNotification);
-        addAndMakeVisible (outputDeviceCombo);
-        outputDeviceCombo.onChange = applyAudioDeviceSettingsCallback;
+        addAndMakeVisible (outputDevice);
+        outputDevice.device.onChange = applyAudioDeviceSettingsCallback;
+        outputDevice.channels.onClick = [this]()
+        {
+            auto* device = versicap.getDeviceManager().getCurrentAudioDevice();
+            if (! device) return;
+            PopupMenu menu, stereo, mono;
+            auto chans = device->getOutputChannelNames();
+            
+            for (int i = 0; i < chans.size(); ++i)
+            {
+                String name = String (i + 1);
+                mono.addItem (i + 100, name);
+            }
+
+            for (int i = 0; i < chans.size(); i += 2)
+            {
+                String name = String (i + 1);
+                name << " - " << int (i + 2);
+                stereo.addItem (i + 200, name);
+            }
+
+            menu.addSubMenu ("Mono", mono);
+            menu.addSubMenu ("Stereo", stereo);
+            menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&inputDevice.channels),
+                                ModalCallbackFunction::forComponent (EngineComponent::outputChannelChosen, this));
+        };
 
         setSize (300, 300);
     }
@@ -106,8 +161,8 @@ public:
         {
             case SourceType::MidiDevice:
             {
-                midiInputLabel.setVisible (true);
-                midiInputCombo.setVisible (true);
+                // midiInputLabel.setVisible (true);
+                // midiInputCombo.setVisible (true);
                 midiOutputLabel.setVisible (true);
                 midiOutputCombo.setVisible (true);
                 pluginLabel.setVisible (false);
@@ -116,8 +171,8 @@ public:
 
             case SourceType::AudioPlugin:
             {
-                midiInputLabel.setVisible (false);
-                midiInputCombo.setVisible (false);
+                // midiInputLabel.setVisible (false);
+                // midiInputCombo.setVisible (false);
                 midiOutputLabel.setVisible (false);
                 midiOutputCombo.setVisible (false);
                 pluginLabel.setVisible (true);
@@ -130,6 +185,7 @@ public:
         ensureCorrectMidiInput();
         ensureCorrectMidiOutput();
         ensureTimings();
+        ensureCorrectChannels();
 
         resized();
     }
@@ -145,23 +201,25 @@ public:
         auto r = getLocalBounds().reduced (8, 10);
         layout (r, sourceLabel, sourceCombo);
         
+        layout (r, midiInputLabel, midiInputCombo, 0, 22, 4);
         if (SourceType::MidiDevice == sourceCombo.getSelectedId() - 1)
-        {
-            layout (r, midiInputLabel, midiInputCombo, 0, 22, 4);
+        {    
             layout (r, midiOutputLabel, midiOutputCombo);
         }
         else
         {
             layout (r, pluginLabel, pluginButton);
-        }            
+        }
         
-        layout (r, inputDeviceLabel, inputDeviceCombo, 0, 22, 4);
-        layout (r, outputDeviceLabel, outputDeviceCombo, 0, 22, 4);
+        layout (r, inputDeviceLabel, inputDevice, 0, 22, 4);
+        layout (r, outputDeviceLabel, outputDevice);
         layout (r, sampleRateLabel, sampleRateCombo, 0, 22, 4);
         layout (r, bufferSizeLabel, bufferSizeCombo);
     }
 
     static void pluginChosen (int, EngineComponent*);
+    static void inputChannelChosen (int, EngineComponent*);
+    static void outputChannelChosen (int, EngineComponent*);
 
 private:
     PluginDescription plugin;
@@ -182,8 +240,10 @@ private:
     PluginPicker pluginButton;
     ComboBox sampleRateCombo;
     ComboBox bufferSizeCombo;
-    ComboBox inputDeviceCombo;
-    ComboBox outputDeviceCombo;
+    AudioDeviceSelect inputDevice;
+    AudioDeviceSelect outputDevice;
+    TextButton inputChannelButton;
+    TextButton outputChannelButton;
 
     void refreshAudioDevices();
     void refreshMidiDevices();
@@ -197,9 +257,12 @@ private:
     void ensureCorrectMidiInput();
     void ensureCorrectMidiOutput();
     void ensureTimings();
+    void ensureCorrectChannels();
 
     void choosePlugin();
     void pluginChosen (int);
+    void inputChannelChosen (int);
+    void outputChannelChosen (int);
 };
 
 }

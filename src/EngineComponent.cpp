@@ -25,71 +25,77 @@ void EngineComponent::refreshMidiDevices()
 
 void EngineComponent::refreshAudioDevices()
 {
-    if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
-    {
-        auto& versicap = main->getVersicap();
-        auto& devices = versicap.getDeviceManager();
-        const auto setup = devices.getAudioDeviceSetup();
-        const auto currentIn = setup.inputDeviceName;
-        const auto currentOut = setup.outputDeviceName;
-        StringArray inNames, outNames;
-        inputDeviceCombo.clear (dontSendNotification);
-        outputDeviceCombo.clear (dontSendNotification);
-        
-        if (auto* const type = devices.getCurrentDeviceTypeObject())
-        {
-            int i = 1;
-            inNames  = type->getDeviceNames (true);
-            outNames = type->getDeviceNames (false);
-            for (const auto& device : inNames)
-                inputDeviceCombo.addItem (device, i++);
-            inputDeviceCombo.addSeparator();
-            inputDeviceCombo.addItem ("No Device", 9999);
-            for (const auto& device : outNames)
-                outputDeviceCombo.addItem (device, i++);
-            outputDeviceCombo.addSeparator();
-            outputDeviceCombo.addItem ("No Device", 9999);
-        }
+    auto& devices = versicap.getDeviceManager();
+    const auto setup = devices.getAudioDeviceSetup();
+    const auto currentIn = setup.inputDeviceName;
+    const auto currentOut = setup.outputDeviceName;
+    StringArray inNames, outNames;
 
-        ensureCorrectAudioInput();
-        ensureCorrectAudioOutput();
-        ensureTimings();
+    inputDevice.device.clear (dontSendNotification);
+    outputDevice.device.clear (dontSendNotification);
+    sampleRateCombo.clear (dontSendNotification);
+    bufferSizeCombo.clear (dontSendNotification);
+
+    if (auto* const type = devices.getCurrentDeviceTypeObject())
+    {
+        int i = 1;
+        inNames  = type->getDeviceNames (true);
+        outNames = type->getDeviceNames (false);
+        for (const auto& device : inNames)
+            inputDevice.device.addItem (device, i++);
+        inputDevice.device.addSeparator();
+        inputDevice.device.addItem ("No Device", 9999);
+        for (const auto& device : outNames)
+            outputDevice.device.addItem (device, i++);
+        outputDevice.device.addSeparator();
+        outputDevice.device.addItem ("No Device", 9999);
     }
+
+    if (auto* const device = devices.getCurrentAudioDevice())
+    {
+        for (const auto& rate : device->getAvailableSampleRates())
+            sampleRateCombo.addItem (String (roundToInt (rate)), roundToInt (rate));
+        for (const auto& bufferSize : device->getAvailableBufferSizes())
+            bufferSizeCombo.addItem (String (bufferSize), bufferSize);
+    }
+
+    ensureCorrectAudioInput();
+    ensureCorrectAudioOutput();
+    ensureTimings();
+    ensureCorrectChannels();
 }
 
 void EngineComponent::applyAudioDeviceSettings()
 {
-    if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
+    auto& devices = versicap.getDeviceManager();
+    auto setup = devices.getAudioDeviceSetup();
+
+    setup.inputDeviceName = inputDevice.device.getSelectedId() != 9999
+        ? inputDevice.device.getText() : String();
+    setup.outputDeviceName = outputDevice.device.getSelectedId() != 9999 
+        ? outputDevice.device.getText() : String();
+    setup.bufferSize = bufferSizeCombo.getSelectedId();
+    setup.sampleRate = (double) sampleRateCombo.getSelectedId();
+
+    if (setup.inputDeviceName.isEmpty() && setup.outputDeviceName.isEmpty())
     {
-        auto& versicap = main->getVersicap();
-        auto& devices = versicap.getDeviceManager();
-        auto setup = devices.getAudioDeviceSetup();
-        bool treatAsChosen = true;
-        setup.inputDeviceName = inputDeviceCombo.getSelectedId() != 9999
-            ? inputDeviceCombo.getText() : String();
-        setup.outputDeviceName = outputDeviceCombo.getSelectedId() != 9999 
-            ? outputDeviceCombo.getText() : String();
-        setup.bufferSize = bufferSizeCombo.getSelectedId();
-        setup.sampleRate = (double) sampleRateCombo.getSelectedId();
-        setup.useDefaultInputChannels = setup.useDefaultOutputChannels = true;
+        devices.closeAudioDevice();
+        stabilizeSettings();
+        return;
+    }
 
-        if (setup.inputDeviceName.isEmpty() && setup.outputDeviceName.isEmpty())
-        {
-            devices.closeAudioDevice();
-            stabilizeSettings();
-            return;
-        }
+    setup.useDefaultInputChannels = false;
+    setup.useDefaultOutputChannels = false;
+    const auto error = devices.setAudioDeviceSetup (setup, true);
 
-        const auto error = devices.setAudioDeviceSetup (setup, treatAsChosen);
-
-        if (error.isNotEmpty())
-        {
-            ensureCorrectAudioInput();
-            ensureCorrectAudioOutput();
-            ensureTimings();
-            AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
-                "Audio Device", error);
-        }
+    if (error.isNotEmpty())
+    {
+        ensureCorrectAudioInput();
+        ensureCorrectAudioOutput();
+        ensureTimings();
+        ensureCorrectChannels();
+        AlertWindow::showMessageBoxAsync (AlertWindow::WarningIcon,
+            "Audio Device", error);
     }
 }
 
@@ -119,14 +125,10 @@ void EngineComponent::applyMidiOutput()
 
 void EngineComponent::ensureTimings()
 {
-    if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
-    {
-        auto& versicap = main->getVersicap();
-        auto& devices = versicap.getDeviceManager();
-        const auto setup = devices.getAudioDeviceSetup();
-        sampleRateCombo.setSelectedId (roundToInt (setup.sampleRate), dontSendNotification);
-        bufferSizeCombo.setSelectedId (roundToInt (setup.bufferSize), dontSendNotification);
-    }
+    auto& devices = versicap.getDeviceManager();
+    const auto setup = devices.getAudioDeviceSetup();
+    sampleRateCombo.setSelectedId (roundToInt (setup.sampleRate), dontSendNotification);
+    bufferSizeCombo.setSelectedId (roundToInt (setup.bufferSize), dontSendNotification);
 }
 
 void EngineComponent::ensureCorrectAudioInput()
@@ -140,10 +142,10 @@ void EngineComponent::ensureCorrectAudioInput()
         const auto currentIn = setup.inputDeviceName;
         const auto inNames = type != nullptr ? type->getDeviceNames (true) : StringArray();
         int inputIdx = currentIn.isNotEmpty() ? inNames.indexOf (currentIn) : -1;
-        inputDeviceCombo.setSelectedItemIndex (inputIdx >= 0 ? inputIdx : 9999, 
+        inputDevice.device.setSelectedItemIndex (inputIdx >= 0 ? inputIdx : 9999, 
                                                 dontSendNotification);
-        if (inputDeviceCombo.getSelectedItemIndex() < 0)
-            inputDeviceCombo.setSelectedId (9999, dontSendNotification);
+        if (inputDevice.device.getSelectedItemIndex() < 0)
+            inputDevice.device.setSelectedId (9999, dontSendNotification);
     }
 }
 
@@ -158,10 +160,10 @@ void EngineComponent::ensureCorrectAudioOutput()
         const auto currentOut = setup.outputDeviceName;
         const auto outNames = type != nullptr ? type->getDeviceNames (false) : StringArray();
         int outputIdx = currentOut.isNotEmpty() ? outNames.indexOf (currentOut) : -1;
-        outputDeviceCombo.setSelectedItemIndex (outputIdx >= 0 ? outputIdx : 9999, 
+        outputDevice.device.setSelectedItemIndex (outputIdx >= 0 ? outputIdx : 9999, 
                                                 dontSendNotification);
-        if (outputDeviceCombo.getSelectedItemIndex() < 0)
-            outputDeviceCombo.setSelectedId (9999, dontSendNotification);
+        if (outputDevice.device.getSelectedItemIndex() < 0)
+            outputDevice.device.setSelectedId (9999, dontSendNotification);
     }
 }
 
@@ -242,6 +244,97 @@ void EngineComponent::pluginChosen (int result)
         processor.reset(); // TODO: assign to versicap
     }
 #endif
+}
+
+void EngineComponent::inputChannelChosen (int result, EngineComponent* comp)
+{
+    if (comp && result > 0)
+        comp->inputChannelChosen (result);
+}
+
+void EngineComponent::inputChannelChosen (int result)
+{
+    auto& devices = versicap.getDeviceManager();
+    auto setup = devices.getAudioDeviceSetup();
+    if (result >= 100 && result < 200)
+    {
+        int channel = result - 100;
+        setup.useDefaultInputChannels = false;
+        setup.inputChannels.setRange (0, 32, false);
+        setup.inputChannels.setBit (channel, true);
+    }
+    else if (result >= 200 && result < 300)
+    {
+        int channel = result - 200;
+        setup.useDefaultInputChannels = false;
+        setup.inputChannels.setRange (0, 32, false);
+        setup.inputChannels.setBit (channel, true);
+        setup.inputChannels.setBit (channel + 1, true);
+    }
+    
+    devices.setAudioDeviceSetup (setup, true);
+    ensureCorrectChannels();
+}
+
+void EngineComponent::outputChannelChosen (int result, EngineComponent* comp)
+{
+    if (comp && result > 0)
+        comp->outputChannelChosen (result);
+}
+
+void EngineComponent::outputChannelChosen (int result)
+{
+    auto& devices = versicap.getDeviceManager();
+    auto setup = devices.getAudioDeviceSetup();
+    if (result >= 100 && result < 200)
+    {
+        int channel = result - 100;
+        setup.useDefaultOutputChannels = false;
+        setup.outputChannels.setRange (0, 32, false);
+        setup.outputChannels.setBit (channel, true);
+    }
+    else if (result >= 200 && result < 300)
+    {
+        int channel = result - 200;
+        setup.useDefaultOutputChannels = false;
+        setup.outputChannels.setRange (0, 32, false);
+        setup.outputChannels.setBit (channel, true);
+        setup.outputChannels.setBit (channel + 1, true);
+    }
+
+    devices.setAudioDeviceSetup (setup, true);
+    ensureCorrectChannels();
+}
+
+void EngineComponent::ensureCorrectChannels()
+{
+    auto& devices = versicap.getDeviceManager();
+    auto setup = devices.getAudioDeviceSetup();
+    // DBG("ins  : " << setup.inputChannels.toString(2));
+    // DBG("outs : " << setup.outputChannels.toString(2));
+    for (int i = 0; i < 32; ++i)
+    {
+        if (setup.inputChannels [i])
+        {
+            String name = String (i + 1);
+            if (setup.inputChannels [i + 1])
+                name << " - " << int (i + 2);
+            inputDevice.channels.setButtonText (name);
+            break;
+        }
+    }
+
+    for (int i = 0; i < 32; ++i)
+    {
+        if (setup.outputChannels [i])
+        {
+            String name = String (i + 1);
+            if (setup.outputChannels [i + 1])
+                name << " - " << int (i + 2);
+            outputDevice.channels.setButtonText (name);
+            break;
+        }
+    }
 }
 
 void EngineComponent::choosePlugin()
