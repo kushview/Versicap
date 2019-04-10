@@ -48,7 +48,10 @@ private:
 struct Versicap::Impl : public AudioIODeviceCallback,
                         public MidiInputCallback
 {
-    Impl() { }
+    Impl()
+    { 
+    }
+
     ~Impl() { }
 
     void prepare (AudioProcessor& plugin)
@@ -117,13 +120,19 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         AudioSampleBuffer buffer (channels, totalNumChans, nframes);
         if (render->getSourceType() == SourceType::AudioPlugin)
         {
-            for (int c = 0; c < numInputs; ++c)
-                buffer.clear (c, 0, nframes);
-            
             if (auto* const proc = processor.get())
             {
-                ScopedLock slp (proc->getCallbackLock());
-                proc->processBlock (buffer, renderMidi);
+                pluginBuffer.setSize (jmax (processor->getTotalNumInputChannels(), processor->getTotalNumOutputChannels()),
+                                      nframes, false, false, true);
+                {
+                    ScopedLock slp (proc->getCallbackLock());
+                    proc->processBlock (pluginBuffer, renderMidi);
+                }
+                
+            }
+            else
+            {
+
             }
         }
         else
@@ -161,6 +170,8 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         if (processor)
         {
             prepare (*processor);
+            pluginBuffer.setSize (jmax (processor->getTotalNumInputChannels(), processor->getTotalNumOutputChannels()),
+                                  bufferSize, false, false, true);
         }
 
         if (auto* const out = devices->getDefaultMidiOutput())
@@ -225,6 +236,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     int numInputChans = 0, numOutputChans = 0;
     HeapBlock<float*> channels;
     AudioSampleBuffer tempBuffer;
+    AudioSampleBuffer pluginBuffer;
     
     MidiBuffer incomingMidi;
     MidiBuffer renderMidi;
