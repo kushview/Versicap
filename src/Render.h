@@ -12,7 +12,6 @@ public:
     ~Render();
 
     void prepare (double newSampleRate, int newBlockSize);
-    void process (int nframes);
 
     void renderCycleBegin();
     void getNextMidiBlock (MidiBuffer& midi, int nframes);

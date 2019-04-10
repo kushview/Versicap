@@ -152,26 +152,28 @@ void Render::writeAudioFrames (AudioSampleBuffer& audio)
             // started recording
             // DBG("======= last stop: " << lastStop << " ========");
             // DBG("======= start writing =======");
-           
-            int localFrame = render->start - startFrame;
-            channels[0] = audio.getWritePointer (0, localFrame);
-            channels[1] = audio.getWritePointer (1, localFrame);
+
+            // start = 0
+            // -100 <-> 924
+            const int localFrame = render->start - startFrame;
+            for (int c = 0; c < context.outputChannels; ++c)
+                channels[c] = audio.getWritePointer (c, localFrame);
             render->writer->write (channels.get(), endFrame - render->start);
         }
         else if (render->stop >= startFrame && render->stop < endFrame)
         {
             // stop writing
             // DBG("======= stop writing " << render->stop << " =======");
-            channels[0] = audio.getWritePointer (0);
-            channels[1] = audio.getWritePointer (1);
-            render->writer->write (channels, render->stop - startFrame);
+            for (int c = 0; c < context.outputChannels; ++c)
+                channels[c] = audio.getWritePointer (c);
+            render->writer->write (channels.get(), render->stop - startFrame);
         }
         else if (startFrame >= render->start && startFrame < render->stop)
         {
             // in the middle
             // DBG("======= middle =======");
-            channels[0] = audio.getWritePointer (0);
-            channels[1] = audio.getWritePointer (1);
+            for (int c = 0; c < context.outputChannels; ++c)
+                channels[c] = audio.getWritePointer (c);
             render->writer->write (channels.get(), nframes);
         }
 
@@ -193,136 +195,6 @@ void Render::writeAudioFrames (AudioSampleBuffer& audio)
 void Render::renderCycleEnd()
 {
 
-}
-
-void Render::process (int nframes)
-{
-   #if 0
-    if (renderingRequest.get() != rendering.get())
-    {
-        rendering.set (renderingRequest.get());
-        if (isRendering())
-        {
-            DBG("[VCP] rendering started");
-            reset();
-        }
-        else
-        {
-            DBG("[VCP] rendering stopped");
-            triggerAsyncUpdate();
-        }
-    }
-
-    if (! isRendering())
-        return;
-
-    ScopedLock sl (getCallbackLock());
-
-    if (! context.layerEnabled [layer])
-    {
-        frame = 0;
-        event = 0;
-        ++layer;
-        return;
-    }
-
-    if (layer >= 4)
-    {
-        renderingRequest.compareAndSetBool (0, 1);
-        return;
-    }
-
-    auto* const detail  = details.getUnchecked (layer);
-    const auto& midi    = detail->sequence;
-    const int numEvents = midi.getNumEvents();
-    const double start  = static_cast<double> (frame);
-    const int64 endFrame  = frame + nframes;
-    const double end    = static_cast<double> (endFrame);
-    bool layerChanged   = false;
-    int i;
-    renderMidi.clear();
-    for (i = midi.getNextIndexAtTime (start); i < numEvents;)
-    {
-        const auto* const ev = midi.getEventPointer (i);
-        const auto& msg = ev->message;
-        const double timestamp = msg.getTimeStamp();
-        const int localFrame = roundToInt (timestamp - start);
-        if (timestamp >= end)
-            break;
-        
-        renderMidi.addEvent (msg, localFrame);
-        
-        if (msg.isNoteOn())
-        {
-            DBG("note on: " << MidiMessage::getMidiNoteName (msg.getNoteNumber(), true, true, 4) << " - "
-                << static_cast<int64> (msg.getTimeStamp()));
-            DBG("local frame: " << localFrame);
-        }
-        else if (msg.isNoteOff())
-        {
-            DBG("note off: " << MidiMessage::getMidiNoteName (msg.getNoteNumber(), true, true, 4) << " - "
-                << static_cast<int64> (msg.getTimeStamp()));
-            DBG("local frame: " << localFrame);
-        }
-
-        ++i;
-    }
-
-    AudioSampleBuffer dummy (2, nframes);
-    dummy.clear();
-    
-    const auto lastStop = detail->getHighestEndFrame();
-    const int numDetails = detail->getNumRenderLayers();
-    
-    for (int i = detail->getNextRenderLayerIndex (frame); i < numDetails;)
-    {
-        auto* const render = detail->getRenderLayer (i);
-        if (render->start >= endFrame)
-            break;
-   
-        if (render->start >= frame && render->start < endFrame)
-        {
-            // started recording
-            // DBG("======= last stop: " << lastStop << " ========");
-            // DBG("======= start writing =======");
-            int localFrame = render->start - frame;
-            int numSamples = endFrame - render->start;
-            render->writer->write (dummy.getArrayOfReadPointers(), numSamples);
-        }
-        else if (render->stop >= frame && render->stop < endFrame)
-        {
-            // stop writing
-            // DBG("======= stop writing " << render->stop << " =======");
-            int localFrame = 0;
-            int numSamples = render->stop - frame;
-            render->writer->write (dummy.getArrayOfReadPointers(), numSamples);
-        }
-        else if (frame >= render->start && frame < render->stop)
-        {
-            // in the middle
-            // DBG("======= middle =======");
-            render->writer->write (dummy.getArrayOfReadPointers(), nframes);
-        }
-
-        ++i;
-    }
-    
-    if (lastStop >= frame && lastStop < endFrame)
-    {
-        layerChanged = true;
-        ++layer;
-        frame = 0;
-        event = 0;
-    }
-
-    if (layerChanged)
-    {
-        DBG("[VCP] layer will change: " << layer);
-        return; // bail and don't inc. the frame counter
-    }
-
-    frame += nframes;
-   #endif
 }
 
 void Render::release()
