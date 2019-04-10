@@ -27,6 +27,7 @@ public:
     void resized() override;
     
     void renderWillStart() override;
+    void renderStarted() override;
     void renderWillStop() override;
 
     void changeListenerCallback (ChangeBroadcaster*) override;

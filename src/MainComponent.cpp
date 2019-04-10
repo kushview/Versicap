@@ -12,7 +12,7 @@ class RenderProgress : public Component
 {
 public:
     RenderProgress()
-        : progress (0.0),
+        : progress (-1.0),
           bar (progress)
     {
         addAndMakeVisible (bar);
@@ -29,6 +29,12 @@ public:
         // setComponentEffect (&shadow);
 
         setSize (300, 140);
+    }
+
+    void setProgressText (const String& newText)
+    {
+        jassert(newText.isNotEmpty());
+        text.setText (newText, dontSendNotification);
     }
 
     void paint (Graphics& g) override
@@ -50,7 +56,7 @@ public:
         r.removeFromTop (8);
         text.setBounds (r.removeFromTop (30));
         
-        int buttonSize = 24;
+        int buttonSize = 26;
         r.removeFromBottom (30);
         cancelButton.changeWidthToFitText (buttonSize);
         cancelButton.setBounds (r.removeFromBottom (buttonSize)
@@ -211,6 +217,7 @@ public:
         resized();
     }
 
+    RenderProgress& getRenderProgress() { return progress; }
 private:
     Versicap& versicap;
     MainComponent& owner;
@@ -293,7 +300,15 @@ void MainComponent::changeListenerCallback (ChangeBroadcaster* bcaster)
 
 void MainComponent::renderWillStart()
 {
+    auto& progress = content->getRenderProgress();
+    progress.setProgressText ("Waiting...");
     content->showProgress (true);
+}
+
+void MainComponent::renderStarted()
+{
+    auto& progress = content->getRenderProgress();
+    progress.setProgressText ("Rendering...");
 }
 
 void MainComponent::renderWillStop()
