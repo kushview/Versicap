@@ -54,15 +54,27 @@ struct Versicap::Impl : public AudioIODeviceCallback,
 
     ~Impl() { }
 
+
+
+    void updatePluginProperties()
+    {
+        if (! processor)
+            return;
+        
+        ScopedLock psl (processor->getCallbackLock());
+        pluginLatency  = processor->getLatencySamples();
+        pluginNumIns   = processor->getTotalNumInputChannels();
+        pluginNumOuts  = processor->getTotalNumOutputChannels();
+        pluginChannels = jmax (pluginNumIns, pluginNumOuts);
+    }
+
     void prepare (AudioProcessor& plugin)
     {
         plugin.prepareToPlay (sampleRate, bufferSize);
-        pluginLatency = plugin.getLatencySamples();
     }
 
     void release (AudioProcessor& plugin)
     {
-        pluginLatency = 0;
         plugin.releaseResources();
     }
 
@@ -115,24 +127,45 @@ struct Versicap::Impl : public AudioIODeviceCallback,
             }
         }
 
+        const auto& renderCtx = render->getContext();
+        renderBuffer.setSize (renderCtx.outputChannels, nframes, false,false, true);
+
         render->renderCycleBegin();
+
         render->getNextMidiBlock (renderMidi, nframes);
         AudioSampleBuffer buffer (channels, totalNumChans, nframes);
+
         if (render->getSourceType() == SourceType::AudioPlugin)
         {
+            buffer.clear(); // prevent feedback and mixing of input audio with plugin output
+            pluginBuffer.setSize (pluginChannels, nframes, false, false, true);
+
             if (auto* const proc = processor.get())
             {
-                pluginBuffer.setSize (jmax (processor->getTotalNumInputChannels(), processor->getTotalNumOutputChannels()),
-                                      nframes, false, false, true);
                 {
                     ScopedLock slp (proc->getCallbackLock());
                     proc->processBlock (pluginBuffer, renderMidi);
                 }
-                
-            }
-            else
-            {
 
+                if (pluginNumOuts == renderCtx.outputChannels)
+                {
+                    // one-to-one channel match
+                    for (int c = renderCtx.outputChannels; --c >= 0;)
+                        renderBuffer.copyFrom (c, 0, pluginBuffer, c, 0, nframes);
+                }
+                else if (renderCtx.outputChannels == 1)
+                {
+                    // mix to mono
+                    const float reduction = Decibels::decibelsToGain (-3.f);
+                    for (int c = pluginNumOuts; --c >= 0;)
+                        renderBuffer.addFrom (0, 0, pluginBuffer, c, 0, nframes, reduction);
+                }
+                else
+                {
+                    // fall back - copy the lesser of the channels
+                    for (int c = jmin (pluginNumOuts, renderCtx.outputChannels); --c >= 0;)
+                        renderBuffer.copyFrom (c, 0, pluginBuffer, c, 0, nframes);
+                }
             }
         }
         else
@@ -145,7 +178,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
             }
         }
 
-        render->writeAudioFrames (buffer);
+        render->writeAudioFrames (renderBuffer);
         render->renderCycleEnd();
 
         renderMidi.clear();
@@ -170,8 +203,8 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         if (processor)
         {
             prepare (*processor);
-            pluginBuffer.setSize (jmax (processor->getTotalNumInputChannels(), processor->getTotalNumOutputChannels()),
-                                  bufferSize, false, false, true);
+            updatePluginProperties();
+            pluginBuffer.setSize (pluginChannels, bufferSize, false, false, true);
         }
 
         if (auto* const out = devices->getDefaultMidiOutput())
@@ -194,7 +227,10 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         outputLatency = 0;
         sampleRate  = 0.0;
         bufferSize  = 0;
+        pluginChannels = 0;
+        pluginLatency = 0;
         tempBuffer.setSize (1, 1);
+        pluginBuffer.setSize (1, 1);
         channels.free();
     }
 
@@ -225,9 +261,13 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     std::unique_ptr<AudioProcessor> processor;
     std::unique_ptr<PluginWindow> window;
     int pluginLatency = 0;
+    int pluginChannels = 0;
+    int pluginNumIns = 0;
+    int pluginNumOuts = 0;
 
-    RenderContext context;
     std::unique_ptr<Render> render;
+    RenderContext context;
+    AudioSampleBuffer renderBuffer;
 
     int inputLatency = 0;
     int outputLatency = 0;
