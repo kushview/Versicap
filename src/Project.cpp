@@ -14,15 +14,15 @@ Project::Project()
 
 Project::~Project() {}
 
-// AudioProcessor* Project::createAudioProcessor (PluginManager& plugins) const
-// {
-//     String errorMessage;
-//     auto plugin = objectData.getChildWithName (Tags::plugin);
-//     auto& list = plugins.getKnownPlugins();
-//     if (const auto* const desc = list.getTypeForIdentifierString (plugin.getProperty (Tags::identifier))
-//         return plugins.createAudioPlugin (*desc, errorMessage);
-//     return nullptr;
-// }
+void Project::clearPlugin()
+{
+    auto plugin = objectData.getChildWithName (Tags::plugin);
+    if (plugin.isValid())
+    {
+        plugin.removeAllChildren (nullptr);
+        plugin.removeAllProperties (nullptr);
+    }
+}
 
 bool Project::getPluginDescription (PluginManager& plugins, PluginDescription& desc) const
 {
@@ -40,7 +40,8 @@ bool Project::getPluginDescription (PluginManager& plugins, PluginDescription& d
 void Project::setPluginDescription (const PluginDescription& desc)
 {
     auto plugin = objectData.getChildWithName (Tags::plugin);
-    plugin.setProperty (Tags::format, desc.pluginFormatName, nullptr)
+    plugin.setProperty (Tags::name, desc.name, nullptr)
+          .setProperty (Tags::format, desc.pluginFormatName, nullptr)
           .setProperty (Tags::fileOrId, desc.fileOrIdentifier, nullptr)
           .setProperty (Tags::identifier, desc.createIdentifierString(), nullptr);
 }

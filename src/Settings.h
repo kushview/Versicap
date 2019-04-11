@@ -30,6 +30,9 @@ public:
     }
 
     ~Settings() { }
+
+    void setLastProject (const String& path);
+    File getLastProject();
 };
 
 }

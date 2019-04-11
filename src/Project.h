@@ -17,12 +17,12 @@ public:
     bool loadFile (const File&);
 
     //=========================================================================
-    //AudioProcessor* createAudioProcessor (PluginManager&) const;
     bool getPluginDescription (PluginManager&, PluginDescription&) const;
     void setPluginDescription (const PluginDescription&);
     void updatePluginState (AudioProcessor& processor);
     void applyPluginState (AudioProcessor& processor) const;
-
+    void clearPlugin();
+    
     inline Project& operator= (const Project& o)
     {
         this->objectData = o.objectData;

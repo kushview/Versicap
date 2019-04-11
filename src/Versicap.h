@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Settings.h"
+#include "Project.h"
 
 namespace vcp {
 
@@ -41,6 +42,11 @@ public:
     void saveSettings();
     
     //=========================================================================
+    Project getProject() const;
+    bool saveProject (const File& file);
+    bool loadProject (const File& file);
+    
+    //=========================================================================
     UnlockStatus& getUnlockStatus();
     
     //=========================================================================
@@ -53,7 +59,7 @@ public:
 
     //=========================================================================
     void loadPlugin (const PluginDescription&);
-    void closePlugin();
+    void closePlugin (bool clearProjectPlugin = true);
     void closePluginWindow();
     void showPluginWindow();
 

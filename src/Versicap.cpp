@@ -433,24 +433,13 @@ void Versicap::initialize()
     initializeAudioDevice();
     initializeUnlockStatus();
     initializeRenderContext();
-
-
-    auto project = impl->project;
-    project.loadFile (File ("/Users/mfisher/Desktop/project.versicap"));
-    PluginDescription desc;
-
-    if (project.getPluginDescription (getPluginManager(), desc))
-    {
-        loadPlugin (desc);
-        if (auto* proc = impl->processor.get())
-            project.applyPluginState (*proc);
-    }
 }
 
 void Versicap::shutdown()
 {
     if (auto* proc = impl->processor.get())
         impl->project.updatePluginState (*proc);
+
     impl->project.writeToFile (File ("/Users/mfisher/Desktop/project.versicap"));
 
     auto& devices = getDeviceManager();
@@ -506,8 +495,7 @@ void Versicap::loadPlugin (const PluginDescription& type)
 {
     auto& plugins = getPluginManager();
     String errorMessage;
-    std::unique_ptr<AudioProcessor> processor;
-    processor.reset (plugins.createAudioPlugin (type, errorMessage));
+    std::unique_ptr<AudioProcessor> processor (plugins.createAudioPlugin (type, errorMessage));
     
     if (errorMessage.isNotEmpty())
     {
@@ -545,15 +533,18 @@ void Versicap::loadPlugin (const PluginDescription& type)
     }
 }
 
-void Versicap::closePlugin()
+void Versicap::closePlugin (bool clearProjectPlugin)
 {
-    impl->window.reset();
+    closePluginWindow();
     std::unique_ptr<AudioProcessor> oldProc;
 
     {
         ScopedLock sl (impl->render->getCallbackLock());
         oldProc.swap (impl->processor);
     }
+
+    if (clearProjectPlugin)
+        impl->project.clearPlugin();
 
     if (oldProc)
     {
@@ -627,6 +618,34 @@ void Versicap::stopRendering()
 {
     impl->render->stop();
     listeners.call ([](Listener& listener) { listener.renderWillStop(); });
+}
+
+Project Versicap::getProject() const { return impl->project; }
+
+bool Versicap::saveProject (const File& file)
+{
+    auto project = getProject();
+    if (! project.getValueTree().isValid())
+        return false;
+
+    if (auto* processor = impl->processor.get())
+        project.updatePluginState (*processor);
+
+    return project.writeToFile (file);
+}
+
+bool Versicap::loadProject (const File& file)
+{
+    auto project = getProject();
+    project.loadFile (file);
+    PluginDescription desc;
+
+    if (project.getPluginDescription (getPluginManager(), desc))
+    {
+        loadPlugin (desc);
+        if (auto* proc = impl->processor.get())
+            project.applyPluginState (*proc);
+    }
 }
 
 }
