@@ -2,6 +2,7 @@
 #include "JuceHeader.h"
 #include "MainComponent.h"
 #include "PluginManager.h"
+#include "Project.h"
 #include "Versicap.h"
 #include "UnlockStatus.h"
 
@@ -18,6 +19,10 @@ public:
 
     void initialise (const String& commandLine) override
     {
+        Project dummy;
+        dummy.writeToFile (File("/Users/mfisher/Desktop/test.versicap"));
+        dummy.loadFile (File("/Users/mfisher/Desktop/test.versicap"));
+
         versicap.reset (new Versicap());
         if (maybeLaunchSlave (commandLine))
             return;
