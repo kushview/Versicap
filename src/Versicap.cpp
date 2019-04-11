@@ -246,14 +246,18 @@ struct Versicap::Impl : public AudioIODeviceCallback,
             release (*processor);
         }
 
-        inputLatency = 0;
-        outputLatency = 0;
-        sampleRate  = 0.0;
-        bufferSize  = 0;
-        pluginChannels = 0;
-        pluginLatency = 0;
+        inputLatency    = 0;
+        outputLatency   = 0;
+        sampleRate      = 0.0;
+        bufferSize      = 0;
+        pluginChannels  = 0;
+        pluginLatency   = 0;
+        pluginNumIns    = 0;
+        pluginNumOuts   = 0;
+        
         tempBuffer.setSize (1, 1);
         pluginBuffer.setSize (1, 1);
+        renderBuffer.setSize (1, 1);
         channels.free();
     }
 
