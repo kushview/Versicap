@@ -4,6 +4,58 @@
 
 namespace vcp {
 
+struct FormatType
+{
+    enum ID
+    {
+        WAVE,
+        AIFF
+    };
+
+    enum
+    {
+        NumTypes = 2,
+        Begin = 0,
+        End = NumTypes
+    };
+
+    static String getName (int t)
+    {
+        switch (t)
+        {
+            case WAVE: return "WAVE"; break;
+            case AIFF: return "AIFF"; break;
+        }
+
+        jassertfalse;
+        return "None";
+    }
+
+    static String getSlug (int t)
+    {
+        switch (t)
+        {
+            case WAVE: return "wave"; break;
+            case AIFF: return "aiff"; break;
+        }
+
+        jassertfalse;
+        return "none";
+    }
+
+    static String getFileExtension (int t)
+    {
+        switch (t)
+        {
+            case WAVE: return "wav"; break;
+            case AIFF: return "aiff"; break;
+        }
+
+        jassertfalse;
+        return {};
+    }
+};
+
 struct LoopType
 {
     enum ID

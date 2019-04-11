@@ -1,6 +1,26 @@
 
 #include "Render.h"
 
+/*
+source  = 22050
+dest    = 44100
+ratio   = 0.5                   = source / dest
+provide = 1024                  = produce * ratio
+produce = 2048                  = provide / ratio
+
+source  = 48000
+dest    = 44100
+ratio   = 1.08843537414966      = source / dest
+provide = 1024                  = produce * ratio
+produce = 940.799999999999882   = provide / ratio
+
+source  = 44100
+dest    = 48000
+ratio   = 0.91875               = source / dest
+provide = 1024                  = produce * ratio
+produce = 1114.557823129251701  = provide / ratio
+*/
+
 namespace vcp {
 
 Render::Render (AudioFormatManager& f)
@@ -133,7 +153,7 @@ void Render::writeAudioFrames (AudioSampleBuffer& audio)
     }
 
     ScopedLock sl (getCallbackLock());
-   
+
     const int nframes           = audio.getNumSamples();
     auto* const detail          = details.getUnchecked (layer);
     const int numDetails        = detail->getNumRenderLayers();
@@ -149,30 +169,20 @@ void Render::writeAudioFrames (AudioSampleBuffer& audio)
    
         if (render->start >= startFrame && render->start < endFrame)
         {
-            // started recording
-            // DBG("======= last stop: " << lastStop << " ========");
-            // DBG("======= start writing =======");
-
-            // start = 0
-            // -100 <-> 924
             const int localFrame = render->start - startFrame;
-            for (int c = 0; c < context.outputChannels; ++c)
+            for (int c = 0; c < context.channels; ++c)
                 channels[c] = audio.getWritePointer (c, localFrame);
             render->writer->write (channels.get(), endFrame - render->start);
         }
         else if (render->stop >= startFrame && render->stop < endFrame)
         {
-            // stop writing
-            // DBG("======= stop writing " << render->stop << " =======");
-            for (int c = 0; c < context.outputChannels; ++c)
+            for (int c = 0; c < context.channels; ++c)
                 channels[c] = audio.getWritePointer (c);
             render->writer->write (channels.get(), render->stop - startFrame);
         }
         else if (startFrame >= render->start && startFrame < render->stop)
         {
-            // in the middle
-            // DBG("======= middle =======");
-            for (int c = 0; c < context.outputChannels; ++c)
+            for (int c = 0; c < context.channels; ++c)
                 channels[c] = audio.getWritePointer (c);
             render->writer->write (channels.get(), nframes);
         }
@@ -229,6 +239,9 @@ void Render::start (const RenderContext& newContext, int latencySamples)
     if (isRendering())
         return;
 
+    jassert (sampleRate > 0.0);
+    jassert (blockSize > 0);
+
     OwnedArray<LayerRenderDetails> newDetails;
 
     for (int i = 0; i < 4; ++i)
@@ -240,10 +253,10 @@ void Render::start (const RenderContext& newContext, int latencySamples)
         else
         {
             newDetails.add (newContext.createLayerRenderDetails (
-                        i, sampleRate, formats, thread));
+                            i, sampleRate, formats, thread));
         }
     }
-    
+
     {
         ScopedLock sl (getCallbackLock());
         writerDelay = jmax (0, latencySamples);

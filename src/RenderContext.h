@@ -67,7 +67,8 @@ struct RenderContext
 
     String instrumentName       = "Instrument";
     String outputPath           = String();
-    int outputChannels          = 2;
+    String format               = "wave";
+    int channels                = 2;
     int bitDepth                = 16;
     double sampleRate           = 44100.0;
 
@@ -75,7 +76,8 @@ struct RenderContext
     void writeToFile (const File& file) const;
     void restoreFromFile (const File& file);
 
-    LayerRenderDetails* createLayerRenderDetails (const int layer, const double sampleRate,
+    LayerRenderDetails* createLayerRenderDetails (const int layer, 
+                                                  const double sourceSampleRate,
                                                   AudioFormatManager& formats,
                                                   TimeSliceThread& thread) const;
 };

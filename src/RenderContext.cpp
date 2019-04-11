@@ -1,21 +1,7 @@
 
 #include "RenderContext.h"
 #include "Versicap.h"
-/*
 
-source  = 22050
-dest    = 44100
-ratio   = 0.5                   = source / dest
-provide = 1024                  = produce * ratio
-produce = 2048                  = provide / ratio
-
-source  = 48000
-dest    = 44100
-ratio   = 1.08843537414966      = source / dest
-provide = 1024                  = produce * ratio
-produce = 940.799999999999882   = provide / ratio
-
-*/
 namespace vcp {
 
 ValueTree RenderContext::createValueTree() const
@@ -33,7 +19,7 @@ ValueTree RenderContext::createValueTree() const
             .setProperty ("crossfadeLength", crossfadeLength, nullptr)
             .setProperty ("instrumentName", instrumentName, nullptr)
             .setProperty ("outputPath", outputPath, nullptr)
-            .setProperty ("outputChannels", outputChannels, nullptr);
+            .setProperty ("channels",   channels, nullptr);
     
     auto layers = versicap.getOrCreateChildWithName ("layers", nullptr);
     for (int i = 0; i < 4; ++i)
@@ -48,7 +34,7 @@ ValueTree RenderContext::createValueTree() const
 }
 
 LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
-                                                             const double sampleRate,
+                                                             const double sourceSampleRate,
                                                              AudioFormatManager& formats,
                                                              TimeSliceThread& thread) const
 {
@@ -68,8 +54,8 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
 
     int key = keyStart;
     int64 frame = 0;
-    const int64 noteFrames = static_cast<int64> (sampleRate * ((double) noteLength / 1000.0));
-    const int64 tailFrames = static_cast<int64> (sampleRate * ((double) tailLength / 1000.0));
+    const int64 noteFrames = static_cast<int64> (sourceSampleRate * ((double) noteLength / 1000.0));
+    const int64 tailFrames = static_cast<int64> (sourceSampleRate * ((double) tailLength / 1000.0));
     
     while (key <= keyEnd)
     {
@@ -93,14 +79,20 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
                 << MidiMessage::getMidiNoteName (key, true, true, 4)
                 << "_" << baseName << ".wav";
             file = file.getChildFile (fileName);
+            if (file.existsAsFile())
+                file.deleteFile();
             std::unique_ptr<FileOutputStream> stream;
             stream.reset (file.createOutputStream());
             
             if (stream)
             {
                 if (auto* writer = format->createWriterFor (
-                        stream.get(), sampleRate, 2, 16,
-                        StringPairArray(), 0
+                        stream.get(),
+                        sourceSampleRate,
+                        this->channels,
+                        this->bitDepth,
+                        StringPairArray(),
+                        0
                     ))
                 {
                     renderLayer->file = file;
@@ -153,18 +145,18 @@ void RenderContext::restoreFromFile (const File& file)
         RenderContext& ctx = *this;
         ctx.source              = tree.getProperty ("source", ctx.source);
         ctx.baseName            = tree.getProperty ("baseName", ctx.baseName);
-        ctx.crossfadeLength     = tree.getProperty ("crossfadeLength", ctx.crossfadeLength);;
-        ctx.instrumentName      = tree.getProperty ("instrumentName", ctx.instrumentName);;
-        ctx.keyEnd              = tree.getProperty ("keyEnd", ctx.keyEnd);;
-        ctx.keyStart            = tree.getProperty ("keyStart", ctx.keyStart);;
-        ctx.keyStride           = tree.getProperty ("keyStride", ctx.keyStride);;
-        ctx.loopEnd             = tree.getProperty ("loopEnd", ctx.loopEnd);;
-        ctx.loopMode            = tree.getProperty ("loopMode", ctx.loopMode);;
-        ctx.loopStart           = tree.getProperty ("loopStart", ctx.loopStart);;
-        ctx.noteLength          = tree.getProperty ("noteLength", ctx.noteLength);;
-        ctx.tailLength          = tree.getProperty ("tailLength", ctx.tailLength);;
-        ctx.outputPath          = tree.getProperty ("outputPath", ctx.outputPath);;
-        ctx.outputChannels      = tree.getProperty ("outputChannels", ctx.outputChannels);
+        ctx.crossfadeLength     = tree.getProperty ("crossfadeLength", ctx.crossfadeLength);
+        ctx.instrumentName      = tree.getProperty ("instrumentName", ctx.instrumentName);
+        ctx.keyEnd              = tree.getProperty ("keyEnd", ctx.keyEnd);
+        ctx.keyStart            = tree.getProperty ("keyStart", ctx.keyStart);
+        ctx.keyStride           = tree.getProperty ("keyStride", ctx.keyStride);
+        ctx.loopEnd             = tree.getProperty ("loopEnd", ctx.loopEnd);
+        ctx.loopMode            = tree.getProperty ("loopMode", ctx.loopMode);
+        ctx.loopStart           = tree.getProperty ("loopStart", ctx.loopStart);
+        ctx.noteLength          = tree.getProperty ("noteLength", ctx.noteLength);
+        ctx.tailLength          = tree.getProperty ("tailLength", ctx.tailLength);
+        ctx.outputPath          = tree.getProperty ("outputPath", ctx.outputPath);
+        ctx.channels            = tree.getProperty ("channels", ctx.channels);
         auto layers = tree.getChildWithName ("layers");
         
         for (int i = 0; i < 4; ++i)

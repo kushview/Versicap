@@ -54,10 +54,10 @@ private:
     
     HeapBlock<float*> channels;
     OwnedArray<LayerRenderDetails> details;
-    
+
     struct Started : public AsyncUpdater
     {
-        Started (Render& r) : render (r) {}
+        Started (Render& r) : render (r) { }
         void handleAsyncUpdate() { if (render.onStarted) render.onStarted(); }
         Render& render;
     } started;
