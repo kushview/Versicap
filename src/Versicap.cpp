@@ -204,6 +204,9 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         for (int c = 0; c < numOutputs; ++c)
             memset (output [c], 0, nbytes);
         
+        for (int c = jmin(numOutputs, renderCtx.channels); --c >= 0;)
+            memcpy (output[c], renderBuffer.getReadPointer (c), nbytes);
+
         renderMidi.clear();
         incomingMidi.clear();
     }
@@ -287,6 +290,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     
     std::unique_ptr<AudioProcessor> processor;
     std::unique_ptr<PluginWindow> window;
+    
     int pluginLatency = 0;
     int pluginChannels = 0;
     int pluginNumIns = 0;
@@ -296,11 +300,13 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     RenderContext context;
     AudioSampleBuffer renderBuffer;
 
-    int inputLatency = 0;
+    int inputLatency  = 0;
     int outputLatency = 0;
-    double sampleRate { 44100.0 };
-    int bufferSize = 1024;
+    int extraLatency  = 0;
+    double sampleRate { 0.0 };
+    int bufferSize = 0;
     int numInputChans = 0, numOutputChans = 0;
+
     HeapBlock<float*> channels;
     AudioSampleBuffer tempBuffer;
     AudioSampleBuffer pluginBuffer;
@@ -591,9 +597,9 @@ Result Versicap::startRendering (const RenderContext& newContext)
             return Result::fail ("No MIDI output device slected for rendering");
         if (nullptr == getDeviceManager().getCurrentAudioDevice())
             return Result::fail ("Audio engine is not running");
-        latency = impl->inputLatency;
+        latency = impl->inputLatency + roundToInt (0.001 * impl->sampleRate);
     }
-    
+
     impl->render->start (context, jmax (0, latency));
     listeners.call ([](Listener& listener) { listener.renderWillStart(); });
     return Result::ok();

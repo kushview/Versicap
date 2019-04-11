@@ -131,19 +131,35 @@ public:
                                 ModalCallbackFunction::forComponent (EngineComponent::outputChannelChosen, this));
         };
 
+        addAndMakeVisible (latencyLabel);
+        latencyLabel.setText ("Latency", dontSendNotification);
+        addAndMakeVisible (latency);
+        latency.setRange (0.0, 9999.0, 1.0);
+        setupSlider (latency);
+        latency.setTextBoxIsEditable (true);
+        latency.textFromValueFunction = [](double value) -> String
+        {
+            String text = String (roundToInt (value));
+            text << " (samples)";
+            return text;
+        };
+        latency.updateText();
+
         setSize (300, 300);
     }
 
     int getSourceType() const { return sourceCombo.getSelectedId() - 1; }
 
-    void fillSettings (RenderContext& ctx) override 
+    void fillSettings (RenderContext& ctx) override
     {
-        ctx.source = getSourceType();
+        ctx.source      = getSourceType();
+        ctx.latency     = jlimit (0, 9999, roundToInt (latency.getValue()));
     }
     
     void updateSettings (const RenderContext& ctx) override
     {
         sourceCombo.setSelectedId (1 + ctx.source, dontSendNotification);
+        latency.setValue (static_cast<double> (ctx.latency), dontSendNotification);
     }
 
     void updatePluginButton()
@@ -215,6 +231,7 @@ public:
         layout (r, outputDeviceLabel, outputDevice);
         layout (r, sampleRateLabel, sampleRateCombo, 0, 22, 4);
         layout (r, bufferSizeLabel, bufferSizeCombo);
+        layout (r, latencyLabel, latency);
     }
 
     static void pluginChosen (int, EngineComponent*);
@@ -233,6 +250,7 @@ private:
     Label bufferSizeLabel;
     Label inputDeviceLabel;
     Label outputDeviceLabel;
+    Label latencyLabel;
 
     ComboBox sourceCombo;
     ComboBox midiInputCombo;
@@ -244,6 +262,7 @@ private:
     AudioDeviceSelect outputDevice;
     TextButton inputChannelButton;
     TextButton outputChannelButton;
+    Slider latency;
 
     void refreshAudioDevices();
     void refreshMidiDevices();

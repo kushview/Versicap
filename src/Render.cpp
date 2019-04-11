@@ -259,7 +259,7 @@ void Render::start (const RenderContext& newContext, int latencySamples)
 
     {
         ScopedLock sl (getCallbackLock());
-        writerDelay = jmax (0, latencySamples);
+        writerDelay = jmax (0, newContext.latency + latencySamples);
         details.swapWith (newDetails);
         context = newContext;
     }
@@ -267,6 +267,7 @@ void Render::start (const RenderContext& newContext, int latencySamples)
     if (renderingRequest.compareAndSetBool (1, 0))
     {
         DBG("[VCP] render start requested");
+        DBG("[VCP] writerDelay: " << writerDelay);
     }
 
     newDetails.clear();

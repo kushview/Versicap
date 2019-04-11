@@ -70,6 +70,7 @@ struct RenderContext
     String format               = "wave";
     int channels                = 2;
     int bitDepth                = 16;
+    int latency                 = 0;
     double sampleRate           = 44100.0;
 
     ValueTree createValueTree() const;
