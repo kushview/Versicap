@@ -1,6 +1,7 @@
 
 #include "Exporter.h"
 #include "PluginManager.h"
+#include "Project.h"
 #include "Render.h"
 #include "Versicap.h"
 #include "UnlockStatus.h"
@@ -53,8 +54,6 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     }
 
     ~Impl() { }
-
-
 
     void updatePluginProperties()
     {
@@ -280,6 +279,8 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         ignoreUnused (source, messageData, numBytesSoFar, timestamp);
     }
 
+    Project project;
+
     Settings settings;
     KnownPluginList knownPlugins;
     OwnedArray<Exporter> exporters;
@@ -432,10 +433,26 @@ void Versicap::initialize()
     initializeAudioDevice();
     initializeUnlockStatus();
     initializeRenderContext();
+
+
+    auto project = impl->project;
+    project.loadFile (File ("/Users/mfisher/Desktop/project.versicap"));
+    PluginDescription desc;
+
+    if (project.getPluginDescription (getPluginManager(), desc))
+    {
+        loadPlugin (desc);
+        if (auto* proc = impl->processor.get())
+            project.applyPluginState (*proc);
+    }
 }
 
 void Versicap::shutdown()
 {
+    if (auto* proc = impl->processor.get())
+        impl->project.updatePluginState (*proc);
+    impl->project.writeToFile (File ("/Users/mfisher/Desktop/project.versicap"));
+
     auto& devices = getDeviceManager();
     devices.removeAudioCallback (impl.get());
     devices.removeMidiInputCallback (String(), impl.get());
@@ -505,6 +522,7 @@ void Versicap::loadPlugin (const PluginDescription& type)
             DBG("[VCP] latency: " << processor->getLatencySamples());
             
             impl->prepare (*processor);
+            impl->project.setPluginDescription (type);
 
             {
                 ScopedLock sl (impl->render->getCallbackLock());
