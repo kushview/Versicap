@@ -63,7 +63,7 @@ void Project::getRenderContext (RenderContext& context) const
     context.loopStart       = 500;
     context.loopEnd         = 2500;
     context.crossfadeLength = 0;
-
+    
     context.instrumentName  = getProperty (Tags::name, "Instrument").toString();
     context.outputPath      = getProperty (Tags::dataPath).toString();
     context.format          = getFormatTypeSlug();
