@@ -13,7 +13,6 @@ void EngineComponent::updateSettings (const RenderContext& ctx)
     auto project = versicap.getProject();
     sourceCombo.setSelectedId (1 + project.getSourceType(), dontSendNotification);
     latency.getValueObject().referTo (project.getPropertyAsValue (Tags::latencyComp));
-    DBG("latency gui: " << latency.getValue());
 }
 
 void EngineComponent::sourceChanged()
