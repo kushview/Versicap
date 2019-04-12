@@ -2,3 +2,7 @@
 	path = libs/kv
 	url = https://github.com/kushview/kv-modules.git
 	branch = develop
+[submodule "libs/pybind11"]
+	path = libs/pybind11
+	url = https://github.com/pybind/pybind11
+	branch = stable
