@@ -4,12 +4,6 @@
 
 namespace vcp {
 
-void OutputComponent::startRendering()
-{
-    if (auto* const main = findParentComponentOfClass<MainComponent>())
-        main->startRendering();
-}
-
 void OutputComponent::updateFormatParams()
 {
     const auto ext = FormatType::getFileExtension (formatCombo.getSelectedId() - 1);

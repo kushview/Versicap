@@ -118,6 +118,10 @@ public:
             }
         };
 
+        addAndMakeVisible (recordButton);
+        recordButton.setButtonText ("Record");
+        recordButton.onClick = [this]() { owner.startRendering(); };
+
         addAndMakeVisible (tabs);
 
         progress.onCancel = std::bind (&Versicap::stopRendering, &vc);
@@ -150,6 +154,8 @@ public:
             buttons[i]->setBounds (r2.removeFromLeft (60));
             r2.removeFromLeft (1);
         }
+
+        recordButton.setBounds (r2.removeFromRight (60));
 
         r.removeFromTop (1);
         tabs.setBounds (r);
@@ -223,6 +229,7 @@ private:
     TextButton clearButton;
     TextButton importButton;
     TextButton exportButton;
+    TextButton recordButton;
     RenderProgress progress;
 
     Component::SafePointer<UnlockForm> unlock;

@@ -67,12 +67,6 @@ public:
             addAndMakeVisible (label);
         }
 
-        addAndMakeVisible (renderButton);
-        renderButton.setButtonText ("Render");
-        renderButton.onClick = [this]() {
-            startRendering();
-        };
-
         updateFormatParams();
     }
 
@@ -133,9 +127,6 @@ public:
         //     layout (r,  *exporterToggles [i], *exporterLabels [i],
         //             10, 22, 4);
         // }
-
-        r.removeFromTop (14);
-        renderButton.setBounds (r.removeFromTop (24).reduced (80, 0));
     }
 
 private:
@@ -155,9 +146,6 @@ private:
 
     OwnedArray<Label> exporterLabels;
     OwnedArray<TextButton> exporterToggles;
-
-    TextButton renderButton;
-    void startRendering();
 };
 
 }
