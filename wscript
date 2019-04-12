@@ -114,8 +114,8 @@ def build_mac (bld):
         env         = appEnv,
         use         = common_use_flags(),
         mac_app     = True,
-        mac_plist   = 'tools/macdeploy/Info.plist'
-        # mac_files   = [ 'project/Builds/MacOSX/Icon.icns' ]
+        mac_plist   = 'tools/macdeploy/Info.plist',
+        mac_files   = [ 'tools/macdeploy/Icon.icns' ]
     )
     
 def build (bld):

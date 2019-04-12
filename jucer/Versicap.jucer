@@ -5,6 +5,9 @@
               companyWebsite="https://kushview.net" companyEmail="support@kushview.net"
               bundleIdentifier="net.kushview.Versicap">
   <MAINGROUP id="BYhNP7" name="Versicap">
+    <GROUP id="{0AF932B7-4585-6AE9-DC1E-4291EAAEC5EF}" name="data">
+      <FILE id="EYE9Kw" name="versicap_v1.png" compile="0" resource="0" file="../data/versicap_v1.png"/>
+    </GROUP>
     <GROUP id="{CF3D9FD5-623B-929D-8445-AAA1B8D9FA7C}" name="src">
       <GROUP id="{794287C6-1115-74B1-FEC8-164C1B5F7768}" name="exporters">
         <FILE id="WZHXbV" name="EXS24Exporter.h" compile="0" resource="0" file="../src/exporters/EXS24Exporter.h"/>
@@ -52,7 +55,8 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <XCODE_MAC targetFolder="Builds/MacOSX" customPList="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&#10;&lt;plist version=&quot;1.0&quot;&gt;&#10;&lt;dict&gt;&#10;    &#9;&lt;key&gt;NSAppTransportSecurity&lt;/key&gt;&#10;    &lt;dict&gt;&#10;        &lt;key&gt;NSAllowsArbitraryLoads&lt;/key&gt;&#10;        &lt;true/&gt;&#10;    &lt;/dict&gt;&#10;&lt;/dict&gt;&#10;&lt;/plist&gt;&#10;">
+    <XCODE_MAC targetFolder="Builds/MacOSX" customPList="&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;&#10;&lt;!DOCTYPE plist PUBLIC &quot;-//Apple//DTD PLIST 1.0//EN&quot; &quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&quot;&gt;&#10;&lt;plist version=&quot;1.0&quot;&gt;&#10;&lt;dict&gt;&#10;    &#9;&lt;key&gt;NSAppTransportSecurity&lt;/key&gt;&#10;    &lt;dict&gt;&#10;        &lt;key&gt;NSAllowsArbitraryLoads&lt;/key&gt;&#10;        &lt;true/&gt;&#10;    &lt;/dict&gt;&#10;&lt;/dict&gt;&#10;&lt;/plist&gt;&#10;"
+               smallIcon="EYE9Kw" bigIcon="EYE9Kw">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="Versicap" codeSigningIdentity="9511F5241B78B0D38961CD756873066A5F0ED225"
                        osxCompatibility="10.8 SDK" osxArchitecture="64BitIntel"/>
@@ -78,7 +82,8 @@
         <MODULEPATH id="juce_product_unlocking" path="~/SDKs/JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
-    <VS2017 targetFolder="Builds/VisualStudio2017" toolset="v140_xp">
+    <VS2017 targetFolder="Builds/VisualStudio2017" toolset="v140_xp" smallIcon="EYE9Kw"
+            bigIcon="EYE9Kw">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="Versicap" headerPath="C:\SDKs\ASIOSDK2.3\common"
                        winArchitecture="x64"/>
