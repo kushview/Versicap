@@ -5,6 +5,8 @@
 #include "Tags.h"
 #include "Types.h"
 
+#define VCP_PROJECT_FILE_VERSION    0
+
 namespace vcp {
 
 //=========================================================================
@@ -198,11 +200,12 @@ bool Project::loadFile (const File& file)
 
 void Project::setMissingProperties()
 {
+    stabilizePropertyPOD (Tags::version, (int) VCP_PROJECT_FILE_VERSION);
     stabilizePropertyString (Tags::name, {});
     stabilizePropertyString (Tags::dataPath, {});
     
     RenderContext context;
-    stabilizePropertyString (Tags::source,  SourceType::getSlug (SourceType::MidiDevice));
+    stabilizePropertyString (Tags::source,      SourceType::getSlug (SourceType::MidiDevice));
     stabilizePropertyPOD (Tags::latencyComp,    context.latency);
     stabilizePropertyPOD (Tags::noteStart,      context.keyStart);
     stabilizePropertyPOD (Tags::noteEnd,        context.keyEnd);
