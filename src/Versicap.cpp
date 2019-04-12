@@ -386,6 +386,7 @@ void Versicap::initializeRenderContext()
     File contextFile = getApplicationDataPath().getChildFile ("context.versicap");
     if (contextFile.existsAsFile())
         loadProject (contextFile);
+    DBG(getProject().getValueTree().toXmlString());
 }
 
 void Versicap::initializeAudioDevice()
@@ -637,6 +638,7 @@ bool Versicap::saveProject (const File& file)
     if (auto* processor = impl->processor.get())
         project.updatePluginState (*processor);
 
+    DBG(project.getValueTree().toXmlString());
     return project.writeToFile (file);
 }
 

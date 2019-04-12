@@ -15,7 +15,7 @@ public:
         addAndMakeVisible (baseNameLabel);
         baseNameLabel.setText ("Base Name", dontSendNotification);
         addAndMakeVisible (baseName);
-        baseName.setText ("Sample");
+        // baseName.setText ("Sample");
 
         addAndMakeVisible (noteLengthLabel);
         noteLengthLabel.setText ("Note Length", dontSendNotification);

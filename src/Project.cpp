@@ -149,7 +149,7 @@ void Project::setMissingProperties()
     stabilizePropertyPOD (Tags::noteEnd,        context.keyEnd);
     stabilizePropertyPOD (Tags::noteStep,       context.keyStride);
     
-    stabilizePropertyString (Tags::baseName,    context.baseName);
+    stabilizePropertyString (Tags::baseName,    "Sample");
     stabilizePropertyPOD (Tags::noteLength,     context.noteLength);
     stabilizePropertyPOD (Tags::tailLength,     context.tailLength);
 
