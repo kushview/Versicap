@@ -137,44 +137,49 @@ struct Versicap::Impl : public AudioIODeviceCallback,
        #endif
 
         const auto& renderCtx = render->getContext();
+        const int source = sourceType.get();
         renderBuffer.setSize (renderCtx.channels, nframes, false, false, true);
+        pluginBuffer.setSize (pluginChannels, nframes, false, false, true);
+
         render->renderCycleBegin();
         render->getNextMidiBlock (renderMidi, nframes);
-        
-        if (render->getSourceType() == SourceType::AudioPlugin)
+        if (! render->isRendering())
+            renderMidi.addEvents (incomingMidi, 0, nframes, 0);
+
+        if (auto* const proc = processor.get())
         {
-            pluginBuffer.setSize (pluginChannels, nframes, false, false, true);
+            ScopedLock slp (proc->getCallbackLock());
+            proc->processBlock (pluginBuffer, renderMidi);
+        }
 
-            if (auto* const proc = processor.get())
+        if (source == SourceType::AudioPlugin)
+        {
+            if (pluginChannels == 0 || pluginNumOuts == 0)
             {
-                {
-                    ScopedLock slp (proc->getCallbackLock());
-                    proc->processBlock (pluginBuffer, renderMidi);
-                }
-
-                if (pluginNumOuts == renderCtx.channels)
-                {
-                    // one-to-one channel match
-                    for (int c = renderCtx.channels; --c >= 0;)
-                        renderBuffer.copyFrom (c, 0, pluginBuffer, c, 0, nframes);
-                }
-                else if (renderCtx.channels == 1)
-                {
-                    // mix to mono
-                    const float reduction = Decibels::decibelsToGain (-3.f);
-                    // for (int c = pluginNumOuts; --c >= 0;)
-                    //     renderBuffer.addFrom (0, 0, pluginBuffer, c, 0, nframes, reduction);
-                    renderBuffer.copyFrom (0, 0, pluginBuffer, 0, 0, nframes);
-                }
-                else
-                {
-                    // fall back - copy the lesser of the channels
-                    for (int c = jmin (pluginNumOuts, renderCtx.channels); --c >= 0;)
-                        renderBuffer.copyFrom (c, 0, pluginBuffer, c, 0, nframes);
-                }
+                // noop
+            }
+            else if (pluginNumOuts == renderCtx.channels)
+            {
+                // one-to-one channel match
+                for (int c = renderCtx.channels; --c >= 0;)
+                    renderBuffer.copyFrom (c, 0, pluginBuffer, c, 0, nframes);
+            }
+            else if (renderCtx.channels == 1)
+            {
+                // mix to mono
+                const float reduction = Decibels::decibelsToGain (-3.f);
+                // for (int c = pluginNumOuts; --c >= 0;)
+                //     renderBuffer.addFrom (0, 0, pluginBuffer, c, 0, nframes, reduction);
+                renderBuffer.copyFrom (0, 0, pluginBuffer, 0, 0, nframes);
+            }
+            else
+            {
+                // fall back - copy the lesser of the channels
+                for (int c = jmin (pluginNumOuts, renderCtx.channels); --c >= 0;)
+                    renderBuffer.copyFrom (c, 0, pluginBuffer, c, 0, nframes);
             }
         }
-        else
+        else if (source == SourceType::MidiDevice)
         {
             if (auto* const out = devices->getDefaultMidiOutput())
             {
@@ -203,14 +208,18 @@ struct Versicap::Impl : public AudioIODeviceCallback,
                     renderBuffer.copyFrom (c, 0, input[c], nframes);
             }
         }
-
+        else
+        {
+            // unkown source, clear
+            renderBuffer.clear (0, nframes);
+        }
+        
         render->writeAudioFrames (renderBuffer);
         render->renderCycleEnd();
 
-        const auto nbytes = sizeof(float) * static_cast<size_t>(nframes);
+        const auto nbytes = sizeof(float) * static_cast<size_t> (nframes);
         for (int c = 0; c < numOutputs; ++c)
-            memset (output [c], 0, nbytes);
-        
+            memset (output [c], 0, nbytes);        
         for (int c = jmin(numOutputs, renderCtx.channels); --c >= 0;)
             memcpy (output[c], renderBuffer.getReadPointer (c), nbytes);
 
@@ -317,6 +326,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     std::unique_ptr<PluginWindow> window;
     
     Atomic<int> shouldProcess { 0 };
+    Atomic<int> sourceType { SourceType::MidiDevice };
 
     int pluginLatency = 0;
     int pluginChannels = 0;
@@ -509,7 +519,12 @@ void Versicap::saveRenderContext()
     saveProject (contextFile);
 }
 
-void Versicap::setRenderContext (const RenderContext& context) { impl->context = context; }
+void Versicap::setRenderContext (const RenderContext& context)
+{ 
+    impl->context = context; 
+    impl->sourceType.set (impl->context.source);
+}
+
 const RenderContext& Versicap::getRenderContext() const     { return impl->context; }
 const OwnedArray<Exporter>& Versicap::getExporters() const  { return impl->exporters; }
 Settings& Versicap::getSettings()                           { return impl->settings; }
@@ -676,8 +691,13 @@ bool Versicap::loadProject (const File& file)
         return false;
     
     impl->project = newProject;
-    PluginDescription desc;
+    auto& project = impl->project;
 
+    RenderContext context;
+    project.getRenderContext (context);
+    setRenderContext (context);
+
+    PluginDescription desc;
     if (impl->project.getPluginDescription (getPluginManager(), desc))
     {
         loadPlugin (desc, false);
