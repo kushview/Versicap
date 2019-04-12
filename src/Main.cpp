@@ -1,4 +1,6 @@
 
+#ifndef VCP_TESTS
+
 #include "JuceHeader.h"
 #include "MainComponent.h"
 #include "PluginManager.h"
@@ -172,3 +174,4 @@ private:
 }
 
 START_JUCE_APPLICATION (vcp::Application)
+#endif
