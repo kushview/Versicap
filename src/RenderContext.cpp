@@ -41,8 +41,11 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
     jassert (sampleRate > 0.0);
     jassert (isPositiveAndBelow (layer, 4));
     jassert (keyStride > 0);
-    auto* const format = formats.findFormatForFileExtension ("wav");
-    if (! format)
+
+    const auto extension = FormatType::getFileExtension (FormatType::fromSlug (format));
+    auto* const audoFormat = formats.findFormatForFileExtension (extension);
+    
+    if (! audoFormat)
     {
         jassertfalse;
         return nullptr;
@@ -77,7 +80,7 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
             String fileName = "0";
             fileName << layer << "_" << "0" << renderLayer->index << "_"
                 << MidiMessage::getMidiNoteName (key, true, true, 4)
-                << "_" << baseName << ".wav";
+                << "_" << baseName << "." << extension;
             file = file.getChildFile (fileName);
             if (file.existsAsFile())
                 file.deleteFile();
@@ -86,7 +89,7 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
             
             if (stream)
             {
-                if (auto* writer = format->createWriterFor (
+                if (auto* writer = audoFormat->createWriterFor (
                         stream.get(),
                         sourceSampleRate,
                         this->channels,
