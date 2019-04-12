@@ -11,8 +11,7 @@ public:
     LayersComponent (Versicap&);
     ~LayersComponent();
 
-    void fillSettings (RenderContext&) override;
-    void updateSettings (const RenderContext&) override;
+    void updateSettings() override;
     void stabilizeSettings() override;
     
     void resized() override;

@@ -29,8 +29,7 @@ public:
     virtual ~SettingGroup() = default;
 
     virtual void refresh() {}
-    virtual void fillSettings (RenderContext&) { }
-    virtual void updateSettings (const RenderContext&) { }
+    virtual void updateSettings() { }
     virtual void stabilizeSettings() { }
 
     Versicap& getVersicap();

@@ -150,14 +150,8 @@ public:
     }
 
     int getSourceType() const { return sourceCombo.getSelectedId() - 1; }
-
-    void fillSettings (RenderContext& ctx) override
-    {
-        ctx.source      = getSourceType();
-        ctx.latency     = jlimit (0, 9999, roundToInt (latency.getValue()));
-    }
     
-    void updateSettings (const RenderContext& ctx) override;
+    void updateSettings() override;
 
     void updatePluginButton()
     {

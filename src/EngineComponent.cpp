@@ -8,7 +8,7 @@
 
 namespace vcp {
     
-void EngineComponent::updateSettings (const RenderContext& ctx)
+void EngineComponent::updateSettings()
 {
     auto project = versicap.getProject();
     sourceCombo.setSelectedId (1 + project.getSourceType(), dontSendNotification);

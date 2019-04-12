@@ -52,24 +52,15 @@ bool LayersComponent::hasLayers()
     return anythingToggled;
 }
 
-void LayersComponent::fillSettings (RenderContext& ctx)
+void LayersComponent::updateSettings()
 {
-    jassert (hasLayers());
-
-    for (int i = 0; i < 4; ++i)
-    {
-        ctx.layerEnabled[i]     = toggles[i]->getToggleState();
-        ctx.layerVelocities[i]  = roundToInt (sliders[i]->getValue());
-    }
-}
-
-void LayersComponent::updateSettings (const RenderContext& ctx)
-{
+    #if 0
     for (int i = 0; i < 4; ++i)
     {
         toggles[i]->setToggleState (ctx.layerEnabled[i], dontSendNotification);
         sliders[i]->setValue ((double) ctx.layerVelocities[i], dontSendNotification);
     }
+    #endif
 }
 
 void LayersComponent::stabilizeSettings()

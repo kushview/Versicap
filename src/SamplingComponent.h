@@ -34,14 +34,7 @@ public:
 
     ~SamplingComponent() = default;
 
-    void fillSettings (RenderContext& ctx) override 
-    { 
-        ctx.baseName    = baseName.getText();
-        ctx.noteLength  = roundToInt (noteLength.getValue());
-        ctx.tailLength  = roundToInt (tailLength.getValue());
-    }
-
-    void updateSettings (const RenderContext& ctx) override 
+    void updateSettings() override
     {
         auto project = versicap.getProject();
         baseName.getTextValue().referTo (project.getPropertyAsValue (Tags::baseName));

@@ -18,7 +18,8 @@ class MainTabs final : public TabbedComponent
 {
 public:
     MainTabs (Versicap& vc)
-        : TabbedComponent (TabbedButtonBar::TabsAtTop)
+        : TabbedComponent (TabbedButtonBar::TabsAtTop),
+          versicap (vc)
     {
         auto colour = kv::LookAndFeel_KV1::widgetBackgroundColor.darker();
         setColour (TabbedComponent::backgroundColourId, colour);
@@ -30,8 +31,7 @@ public:
         // addTab ("Looping",  colour, new LoopingComponent (vc),  true);
         addTab ("Output",   colour, new OutputComponent (vc),   true);
 
-        RenderContext ctx;
-        updateSettings (ctx);
+        updateSettings();
     }
 
     ~MainTabs() { }
@@ -46,23 +46,24 @@ public:
     RenderContext getRenderContext()
     {
         RenderContext ctx;
-        for (int i = 0; i < getNumTabs(); ++i)
-            if (auto* const group = dynamic_cast<SettingGroup*> (getTabContentComponent (i)))
-                group->fillSettings (ctx);
+        versicap.getProject().getRenderContext (ctx);
         return ctx;
     }
 
-    void updateSettings (const RenderContext& ctx)
+    void updateSettings()
     {
         for (int i = 0; i < getNumTabs(); ++i)
         {
             if (auto* const group = dynamic_cast<SettingGroup*> (getTabContentComponent (i)))
             {
-                group->updateSettings (ctx);
+                group->updateSettings();
                 group->stabilizeSettings();
             }
         }
     }
+
+private:
+    Versicap& versicap;
 };
 
 }

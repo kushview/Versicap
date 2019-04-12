@@ -74,17 +74,8 @@ public:
     {
 
     }
-
-    void fillSettings (RenderContext& ctx) override
-    {
-        ctx.instrumentName  = name.getText().trim();
-        ctx.outputPath      = directory.getCurrentFile().getFullPathName();
-        ctx.channels        = channelsCombo.getSelectedId();
-        ctx.bitDepth        = bitDepthCombo.getSelectedId();
-        ctx.sampleRate      = static_cast<double> (sampleRateCombo.getSelectedId());
-    }
     
-    void updateSettings (const RenderContext&) override
+    void updateSettings() override
     {
         auto project = versicap.getProject();
         name.getTextValue().referTo (project.getPropertyAsValue (Tags::name));

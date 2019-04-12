@@ -37,15 +37,8 @@ public:
     {
 
     }
-    
-    void fillSettings (RenderContext& ctx) override 
-    { 
-        ctx.keyStart    = roundToInt (keyStart.getValue());
-        ctx.keyEnd      = roundToInt (keyEnd.getValue());
-        ctx.keyStride   = roundToInt (keyStride.getValue());
-    }
 
-    void updateSettings (const RenderContext& ctx) override
+    void updateSettings() override
     {
         auto project = versicap.getProject();
         keyStart.getValueObject().referTo (project.getPropertyAsValue (Tags::noteStart));

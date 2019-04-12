@@ -50,20 +50,14 @@ public:
 
     }
 
-    void fillSettings (RenderContext& ctx) override
+    void updateSettings() override
     {
-        ctx.loopMode        = loopType.getSelectedId() - 1;
-        ctx.loopStart       = roundToInt (loopStart.getValue());
-        ctx.loopEnd         = roundToInt (loopEnd.getValue());
-        ctx.crossfadeLength = roundToInt (crossfadeLength.getValue());
-    }
-
-    void updateSettings (const RenderContext& ctx) override
-    {
+        #if 0
         loopType.setSelectedId (1 + ctx.loopMode, dontSendNotification);
         loopStart.setValue (static_cast<double> (ctx.loopStart), dontSendNotification);
         loopEnd.setValue (static_cast<double> (ctx.loopEnd), dontSendNotification);
-        crossfadeLength.setValue (static_cast<double> (ctx.crossfadeLength), dontSendNotification);     
+        crossfadeLength.setValue (static_cast<double> (ctx.crossfadeLength), dontSendNotification);
+        #endif    
     }
 
     void stabilizeSettings() override

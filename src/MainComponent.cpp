@@ -84,14 +84,6 @@ public:
           tabs (vc)
     {
         setOpaque (true);
-        
-        addAndMakeVisible (clearButton);
-        clearButton.setButtonText ("Clear");
-        clearButton.onClick = [this]()
-        {
-            versicap.setRenderContext (RenderContext());
-            tabs.updateSettings (versicap.getRenderContext()); 
-        };
 
         addAndMakeVisible (importButton);
         importButton.setButtonText ("Open");
@@ -144,12 +136,10 @@ public:
         auto r = getLocalBounds();
         r.removeFromTop (1);
         auto r2 = r.removeFromTop (18);
-        Component* buttons [3] = {
-            &clearButton, &importButton, &exportButton
-        };
+        Component* buttons [2] = { &importButton, &exportButton };
 
         r2.removeFromLeft (2);
-        for (int i = 0; i < 3; ++i)
+        for (int i = 0; i < 2; ++i)
         {
             buttons[i]->setBounds (r2.removeFromLeft (60));
             r2.removeFromLeft (1);
@@ -226,7 +216,6 @@ private:
     Versicap& versicap;
     MainComponent& owner;
     MainTabs tabs;
-    TextButton clearButton;
     TextButton importButton;
     TextButton exportButton;
     TextButton recordButton;
@@ -270,8 +259,7 @@ MainComponent::MainComponent (Versicap& vc)
     if (auto* props = versicap.getSettings().getUserSettings())
         tabs.setCurrentTabIndex (props->getIntValue ("currentTab", 0));
 
-    const auto ctx = versicap.getRenderContext();
-    tabs.updateSettings (ctx);
+    tabs.updateSettings();
 
     versicap.addListener (this);
     versicap.getUnlockStatus().addChangeListener (this);
