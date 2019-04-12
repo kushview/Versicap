@@ -386,7 +386,6 @@ void Versicap::initializeRenderContext()
     File contextFile = getApplicationDataPath().getChildFile ("context.versicap");
     if (contextFile.existsAsFile())
         loadProject (contextFile);
-    DBG(getProject().getValueTree().toXmlString());
 }
 
 void Versicap::initializeAudioDevice()
@@ -501,10 +500,7 @@ void Versicap::loadPlugin (const PluginDescription& type, bool clearProjectPlugi
     {
         if (processor)
         {
-            impl->window.reset();
-            DBG("[VCP] loaded: " << processor->getName());
-            DBG("[VCP] latency: " << processor->getLatencySamples());
-            
+            impl->window.reset();            
             impl->prepare (*processor);
             if (clearProjectPlugin)
                 impl->project.clearPlugin();
@@ -638,7 +634,6 @@ bool Versicap::saveProject (const File& file)
     if (auto* processor = impl->processor.get())
         project.updatePluginState (*processor);
 
-    DBG(project.getValueTree().toXmlString());
     return project.writeToFile (file);
 }
 

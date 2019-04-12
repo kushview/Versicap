@@ -44,7 +44,6 @@ public:
     void updateSettings (const RenderContext& ctx) override 
     {
         auto project = versicap.getProject();
-        DBG("[VCP] basename: " << project.getProperty(Tags::baseName).toString());
         baseName.getTextValue().referTo (project.getPropertyAsValue (Tags::baseName));
         noteLength.getValueObject().referTo (project.getPropertyAsValue (Tags::noteLength));
         tailLength.getValueObject().referTo (project.getPropertyAsValue (Tags::tailLength));
