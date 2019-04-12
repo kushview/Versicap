@@ -322,9 +322,7 @@ void MainComponent::saveSettings()
 
 void MainComponent::startRendering()
 {
-    auto& tabs = content->getTabs();
-    auto ctx = tabs.getRenderContext();
-    auto result = versicap.startRendering (ctx);
+    auto result = versicap.startRendering();
     if (result.failed())
     {
         AlertWindow::showNativeDialogBox ("Versicap", result.getErrorMessage(), false);

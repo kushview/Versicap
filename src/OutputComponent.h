@@ -31,7 +31,12 @@ public:
         addAndMakeVisible (formatCombo);
         for (int i = 0; i < FormatType::NumTypes; ++i)
             formatCombo.addItem (FormatType::getName(i), i + 1);
-        formatCombo.onChange = [this]() { updateFormatParams(); };
+        formatCombo.onChange = [this]()
+        {
+            versicap.getProject().setProperty (Tags::format,
+                FormatType::getSlug (formatCombo.getSelectedId() - 1)); 
+            updateFormatParams();
+        };
         formatCombo.setSelectedItemIndex (0, dontSendNotification);
         
         addAndMakeVisible (channelsLabel);
@@ -85,17 +90,24 @@ public:
         ctx.sampleRate      = static_cast<double> (sampleRateCombo.getSelectedId());
     }
     
-    void updateSettings (const RenderContext& ctx) override
+    void updateSettings (const RenderContext&) override
     {
-        if (File::isAbsolutePath (ctx.outputPath))
+        auto project = versicap.getProject();
+        name.getTextValue().referTo (project.getPropertyAsValue (Tags::name));
+        const auto dataPath = project.getProperty (Tags::dataPath).toString();
+        if (File::isAbsolutePath (dataPath))
         {
-            File file (ctx.outputPath);
+            File file (dataPath);
             if (file.exists() && ! file.isDirectory())
                 file = file.getParentDirectory();
             directory.setCurrentFile (file, true, dontSendNotification);
         }
 
-        name.setText (ctx.instrumentName.trim(), false);
+        formatCombo.setSelectedId (1 + project.getFormatType(), dontSendNotification);
+        channelsCombo.getSelectedIdAsValue().referTo (
+            project.getPropertyAsValue (Tags::channels));
+        bitDepthCombo.getSelectedIdAsValue().referTo (
+            project.getPropertyAsValue (Tags::bitDepth));
     }
     
     void updateFormatParams();
@@ -114,7 +126,7 @@ public:
         layout (r, formatLabel, formatCombo, 0, 22, 4);
         layout (r, channelsLabel, channelsCombo, 0, 22, 4);
         layout (r, bitDepthLabel, bitDepthCombo, 0, 22, 4);
-        layout (r, sampleRateLabel, sampleRateCombo);
+        // layout (r, sampleRateLabel, sampleRateCombo);
 
         // for (int i = 0; i < exporterLabels.size(); ++i)
         // {

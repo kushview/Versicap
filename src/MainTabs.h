@@ -27,7 +27,7 @@ public:
         addTab ("Notes",    colour, new NotesComponent (vc),    true);
         addTab ("Sampling", colour, new SamplingComponent (vc), true);
         addTab ("Layers",   colour, new LayersComponent (vc),   true);
-        addTab ("Looping",  colour, new LoopingComponent (vc),  true);
+        // addTab ("Looping",  colour, new LoopingComponent (vc),  true);
         addTab ("Output",   colour, new OutputComponent (vc),   true);
 
         RenderContext ctx;

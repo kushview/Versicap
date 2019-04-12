@@ -49,7 +49,7 @@ public:
         tailLength.getValueObject().referTo (project.getPropertyAsValue (Tags::tailLength));
     }
     
-    void stabilizeSettings() override {}
+    void stabilizeSettings() override { }
     
     void resized() override
     {

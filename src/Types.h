@@ -43,6 +43,15 @@ struct FormatType
         return "none";
     }
 
+    static int fromSlug (const String& t)
+    {
+        if (t == "wave" || t == "wav")  return WAVE;
+        if (t == "aiff" || t == "aif")  return AIFF;
+        
+        jassertfalse;
+        return -1;
+    }
+
     static String getFileExtension (int t)
     {
         switch (t)

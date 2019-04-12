@@ -32,6 +32,8 @@ public:
     ~Project();
     
     //=========================================================================
+    int getFormatType() const;
+    String getFormatTypeSlug() const;
     int getSourceType() const;
 
     //=========================================================================

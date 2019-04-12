@@ -24,6 +24,19 @@ Project::Project()
 Project::~Project() {}
 
 //=========================================================================
+int Project::getFormatType() const
+{
+    const int type = FormatType::fromSlug (getFormatTypeSlug());
+    jassert (type >= FormatType::Begin && type < FormatType::End);
+    return type >= FormatType::Begin && type < FormatType::End 
+        ? type : FormatType::WAVE;
+}
+
+String Project::getFormatTypeSlug() const
+{
+    return getProperty (Tags::format, FormatType::getSlug (FormatType::WAVE)).toString();
+}
+
 int Project::getSourceType() const
 {
     const int type = SourceType::fromSlug (getProperty (Tags::source));
@@ -35,8 +48,31 @@ int Project::getSourceType() const
 //=========================================================================
 void Project::getRenderContext (RenderContext& context) const
 {
-    context.source      = getSourceType();
-    context.latency     = (int) getProperty (Tags::latencyComp, 0);
+    context.source          = getSourceType();
+
+    context.keyStart        = (int) getProperty (Tags::noteStart, 36);
+    context.keyEnd          = (int) getProperty (Tags::noteEnd, 60);
+    context.keyStride       = (int) getProperty (Tags::noteStep, 4);
+    
+    context.baseName        = getProperty(Tags::baseName, "Sample").toString();
+    context.noteLength      = (int) getProperty (Tags::noteLength, 3000);
+    context.tailLength      = (int) getProperty (Tags::tailLength, 1000);
+    
+    // not currently used
+    context.loopMode        = LoopType::Forwards;
+    context.loopStart       = 500;
+    context.loopEnd         = 2500;
+    context.crossfadeLength = 0;
+
+    context.instrumentName  = getProperty (Tags::name, "Instrument").toString();
+    context.outputPath      = getProperty (Tags::dataPath).toString();
+    context.format          = getFormatTypeSlug();
+    context.channels        = (int) getProperty (Tags::channels, 2);
+    context.bitDepth        = (int) getProperty (Tags::bitDepth, 16);
+    context.latency         = (int) getProperty (Tags::latencyComp, 0);
+
+    // not currently used
+    context.sampleRate      = 44100.0;
 }
 
 //=========================================================================
@@ -139,8 +175,8 @@ bool Project::loadFile (const File& file)
 
 void Project::setMissingProperties()
 {
-    stabilizePropertyString (Tags::name, "");
-    stabilizePropertyString (Tags::dataPath, "");
+    stabilizePropertyString (Tags::name, {});
+    stabilizePropertyString (Tags::dataPath, {});
     
     RenderContext context;
     stabilizePropertyString (Tags::source,  SourceType::getSlug (SourceType::MidiDevice));
@@ -153,7 +189,9 @@ void Project::setMissingProperties()
     stabilizePropertyPOD (Tags::noteLength,     context.noteLength);
     stabilizePropertyPOD (Tags::tailLength,     context.tailLength);
 
-    stabilizePropertyPOD (Tags::bitDepth,   context.bitDepth);
+    stabilizePropertyString (Tags::format,      FormatType::getSlug (FormatType::WAVE));
+    stabilizePropertyPOD (Tags::channels,       context.channels);
+    stabilizePropertyPOD (Tags::bitDepth,       context.bitDepth);
 
     auto layers = objectData.getOrCreateChildWithName (Tags::layers, nullptr);
     if (layers.getNumChildren() <= 0)
@@ -162,7 +200,7 @@ void Project::setMissingProperties()
         layer.setProperty (Tags::velocity, 127, nullptr);
     }
 
-    auto plugin = objectData.getOrCreateChildWithName (Tags::plugin, nullptr);
+    objectData.getOrCreateChildWithName (Tags::plugin, nullptr);
 }
 
 }
