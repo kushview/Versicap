@@ -101,10 +101,7 @@ public:
                 "*.versicap", true, false, this);
             if (chooser.browseForFileToOpen())
             {
-                // auto ctx = tabs.getRenderContext();
-                // ctx.restoreFromFile (chooser.getResult());
-                // tabs.updateSettings (ctx);
-                versicap.loadProject (chooser.getFile());
+                versicap.loadProject (chooser.getResult());
             }
         };
 
@@ -116,9 +113,8 @@ public:
                 "*.versicap", true, false, this);
             if (chooser.browseForFileToSave (true))
             {
-                // auto ctx = tabs.getRenderContext();
-                // ctx.writeToFile (chooser.getResult());
                 versicap.saveProject (chooser.getResult());
+                DBG(versicap.getProject().getValueTree().toXmlString());
             }
         };
 

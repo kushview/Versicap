@@ -604,7 +604,7 @@ private:
 
 	void audioPluginScanStarted (const String& plugin) override
 	{
-		DBG("[VCP] scanning: " << plugin);
+		// DBG("[VCP] scanning: " << plugin);
 		ScopedLock sl (lock);
 		scannedPlugin = plugin;
 	}

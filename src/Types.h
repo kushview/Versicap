@@ -125,8 +125,34 @@ struct SourceType
     enum ID
     {
         MidiDevice  = 0,
-        AudioPlugin = 1
+        AudioPlugin
     };
+
+    enum
+    {
+        NumTypes = 2,
+        Begin = 0,
+        End = NumTypes
+    };
+
+    static String getSlug (int t)
+    {
+        switch (t)
+        {
+            case MidiDevice: return "midi"; break;
+            case AudioPlugin: return "plugin"; break;
+        }
+
+        return "none";
+    }
+
+    static int fromSlug (const String& t)
+    {
+        if (t == "midi")    return MidiDevice;
+        if (t == "plugin")  return AudioPlugin;
+        jassertfalse;
+        return -1;
+    }
 };
 
 }

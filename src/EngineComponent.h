@@ -19,7 +19,7 @@ public:
         addAndMakeVisible (sourceCombo);
         sourceCombo.addItem ("MIDI Device", 1 + SourceType::MidiDevice);
         sourceCombo.addItem ("Plugin", 1 + SourceType::AudioPlugin);
-        sourceCombo.onChange = [this]() { stabilizeSettings(); };
+        sourceCombo.onChange = [this]() { sourceChanged(); };
         sourceCombo.setSelectedId (1, dontSendNotification);
 
         addAndMakeVisible (midiInputLabel);
@@ -132,7 +132,8 @@ public:
         };
 
         addAndMakeVisible (latencyLabel);
-        latencyLabel.setText ("Latency", dontSendNotification);
+        latencyLabel.setText ("Latency Comp.", dontSendNotification);
+        latencyLabel.setTooltip ("Latency compensation of sample recordings");
         addAndMakeVisible (latency);
         latency.setRange (0.0, 9999.0, 1.0);
         setupSlider (latency);
@@ -156,14 +157,12 @@ public:
         ctx.latency     = jlimit (0, 9999, roundToInt (latency.getValue()));
     }
     
-    void updateSettings (const RenderContext& ctx) override
-    {
-        sourceCombo.setSelectedId (1 + ctx.source, dontSendNotification);
-        latency.setValue (static_cast<double> (ctx.latency), dontSendNotification);
-    }
+    void updateSettings (const RenderContext& ctx) override;
 
     void updatePluginButton()
     {
+        versicap.getProject().getPluginDescription (
+            versicap.getPluginManager(), plugin);
         if (plugin.name.isEmpty())
             pluginButton.setPluginName (String());
         else
@@ -282,6 +281,8 @@ private:
     void pluginChosen (int);
     void inputChannelChosen (int);
     void outputChannelChosen (int);
+
+    void sourceChanged();
 };
 
 }

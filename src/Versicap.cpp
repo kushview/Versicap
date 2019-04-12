@@ -385,7 +385,7 @@ void Versicap::initializeRenderContext()
 {
     File contextFile = getApplicationDataPath().getChildFile ("context.versicap");
     if (contextFile.existsAsFile())
-        impl->context.restoreFromFile (contextFile);
+        loadProject (contextFile);
 }
 
 void Versicap::initializeAudioDevice()
@@ -437,11 +437,6 @@ void Versicap::initialize()
 
 void Versicap::shutdown()
 {
-    if (auto* proc = impl->processor.get())
-        impl->project.updatePluginState (*proc);
-
-    impl->project.writeToFile (File ("/Users/mfisher/Desktop/project.versicap"));
-
     auto& devices = getDeviceManager();
     devices.removeAudioCallback (impl.get());
     devices.removeMidiInputCallback (String(), impl.get());
@@ -450,7 +445,7 @@ void Versicap::shutdown()
 
 void Versicap::saveSettings()
 {
-    auto& settings = impl->settings;
+    auto& settings = getSettings();
     auto& devices  = getDeviceManager();
     auto& plugins  = getPluginManager();
     auto& formats  = getAudioFormats();
@@ -468,7 +463,7 @@ void Versicap::saveSettings()
         {
             props->setValue ("devices", devicesXml);
             deleteAndZero (devicesXml);
-        }    
+        }
     }
 
     unlock.save();
@@ -479,7 +474,7 @@ void Versicap::saveRenderContext()
     File contextFile = getApplicationDataPath().getChildFile("context.versicap");
     if (! contextFile.getParentDirectory().exists())
         contextFile.getParentDirectory().createDirectory();
-    impl->context.writeToFile (contextFile);
+    saveProject (contextFile);
 }
 
 void Versicap::setRenderContext (const RenderContext& context) { impl->context = context; }
@@ -491,7 +486,7 @@ AudioFormatManager& Versicap::getAudioFormats()             { return *impl->form
 PluginManager& Versicap::getPluginManager()                 { return *impl->plugins; }
 UnlockStatus& Versicap::getUnlockStatus()                   { return *impl->unlock; }
 
-void Versicap::loadPlugin (const PluginDescription& type)
+void Versicap::loadPlugin (const PluginDescription& type, bool clearProjectPlugin)
 {
     auto& plugins = getPluginManager();
     String errorMessage;
@@ -510,6 +505,8 @@ void Versicap::loadPlugin (const PluginDescription& type)
             DBG("[VCP] latency: " << processor->getLatencySamples());
             
             impl->prepare (*processor);
+            if (clearProjectPlugin)
+                impl->project.clearPlugin();
             impl->project.setPluginDescription (type);
 
             {
@@ -584,14 +581,17 @@ void Versicap::showPluginWindow()
         window->toFront (false);
 }
 
-Result Versicap::startRendering (const RenderContext& newContext)
+Result Versicap::startRendering()
 {
-    setRenderContext (newContext);
+    const auto project = getProject();
+    RenderContext context;
+    project.getRenderContext (context);
+    setRenderContext (context);
     if (impl->render->isRendering())
         return Result::fail ("Versicap is already rendering");
     
     int latency = 0;
-    const auto context = getRenderContext();
+    context = getRenderContext();
     if (context.source == SourceType::AudioPlugin)
     {
         if (impl->processor == nullptr)
@@ -612,6 +612,12 @@ Result Versicap::startRendering (const RenderContext& newContext)
     impl->render->start (context, jmax (0, latency));
     listeners.call ([](Listener& listener) { listener.renderWillStart(); });
     return Result::ok();
+}
+
+Result Versicap::startRendering (const RenderContext&)
+{
+    jassertfalse;
+    return startRendering();
 }
 
 void Versicap::stopRendering()
@@ -636,16 +642,21 @@ bool Versicap::saveProject (const File& file)
 
 bool Versicap::loadProject (const File& file)
 {
-    auto project = getProject();
-    project.loadFile (file);
+    auto newProject = Project();
+    if (! newProject.loadFile (file))
+        return false;
+    
+    impl->project = newProject;
     PluginDescription desc;
 
-    if (project.getPluginDescription (getPluginManager(), desc))
+    if (impl->project.getPluginDescription (getPluginManager(), desc))
     {
-        loadPlugin (desc);
+        loadPlugin (desc, false);
         if (auto* proc = impl->processor.get())
-            project.applyPluginState (*proc);
+            impl->project.applyPluginState (*proc);
     }
+
+    return true;
 }
 
 }

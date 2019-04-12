@@ -47,7 +47,6 @@ struct LayerRenderDetails
 struct RenderContext
 {
     int source                  = SourceType::MidiDevice;
-    int sourceChannels          = 2;
 
     int keyStart                = 36;   // C2
     int keyEnd                  = 60;   // C4

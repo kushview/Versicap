@@ -1,10 +1,27 @@
 
 #include "Versicap.h"
+#include "Tags.h"
+#include "Types.h"
 #include "EngineComponent.h"
 #include "MainComponent.h"
 #include "PluginManager.h"
 
 namespace vcp {
+    
+void EngineComponent::updateSettings (const RenderContext& ctx)
+{
+    auto project = versicap.getProject();
+    sourceCombo.setSelectedId (1 + project.getSourceType(), dontSendNotification);
+    latency.getValueObject().referTo (project.getPropertyAsValue (Tags::latencyComp));
+    DBG("latency gui: " << latency.getValue());
+}
+
+void EngineComponent::sourceChanged()
+{
+    versicap.getProject().setProperty (Tags::source,
+        SourceType::getSlug (getSourceType()));
+    stabilizeSettings();
+}
 
 void EngineComponent::refreshMidiDevices()
 {
@@ -213,37 +230,6 @@ void EngineComponent::pluginChosen (int result)
         versicap.loadPlugin (plugin);
         updatePluginButton();
     }
-
-#if 0
-    String errorMessage;
-    std::unique_ptr<AudioProcessor> processor;
-
-    if (const auto* const type = list.getType (list.getIndexChosenByMenu (result)))
-    {
-        plugin = *type;
-        processor.reset (plugins.createAudioPlugin (plugin, errorMessage));
-    }
-
-    if (errorMessage.isNotEmpty())
-    {
-        AlertWindow::showNativeDialogBox ("Versicap", "Could not create plugin", false);
-        plugin = PluginDescription();
-        processor.reset();
-    }
-    else
-    {
-        if (processor)
-        {
-            DBG("[VCP] loaded: " << processor->getName());
-        }
-        else
-        {
-            AlertWindow::showNativeDialogBox ("Versicap", "Could not instantiate plugin", false);
-        }
-
-        processor.reset(); // TODO: assign to versicap
-    }
-#endif
 }
 
 void EngineComponent::inputChannelChosen (int result, EngineComponent* comp)

@@ -47,9 +47,10 @@ public:
 
     void updateSettings (const RenderContext& ctx) override
     {
-        keyStart.setValue ((double) ctx.keyStart, dontSendNotification);
-        keyEnd.setValue ((double) ctx.keyEnd, dontSendNotification);
-        keyStride.setValue ((double) ctx.keyStride, dontSendNotification);
+        auto project = versicap.getProject();
+        keyStart.getValueObject().referTo (project.getPropertyAsValue (Tags::noteStart));
+        keyEnd.getValueObject().referTo (project.getPropertyAsValue (Tags::noteEnd));
+        keyStride.getValueObject().referTo (project.getPropertyAsValue (Tags::noteStep));
     }
 
     void stabilizeSettings() override

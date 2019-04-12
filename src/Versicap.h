@@ -2,6 +2,7 @@
 
 #include "Settings.h"
 #include "Project.h"
+#include "Tags.h"
 
 namespace vcp {
 
@@ -58,7 +59,7 @@ public:
     AudioFormatManager& getAudioFormats();
 
     //=========================================================================
-    void loadPlugin (const PluginDescription&);
+    void loadPlugin (const PluginDescription&, bool clearProjectPlugin = true);
     void closePlugin (bool clearProjectPlugin = true);
     void closePluginWindow();
     void showPluginWindow();
@@ -68,6 +69,7 @@ public:
     void setRenderContext (const RenderContext& context);
     void saveRenderContext();
     Result startRendering (const RenderContext& context);
+    Result startRendering();
     void stopRendering();
 
     //=========================================================================

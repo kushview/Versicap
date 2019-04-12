@@ -43,9 +43,11 @@ public:
 
     void updateSettings (const RenderContext& ctx) override 
     {
-        baseName.setText (ctx.baseName, false);
-        noteLength.setValue ((double) ctx.noteLength, dontSendNotification);
-        tailLength.setValue ((double) ctx.tailLength, dontSendNotification);
+        auto project = versicap.getProject();
+        DBG("[VCP] basename: " << project.getProperty(Tags::baseName).toString());
+        baseName.getTextValue().referTo (project.getPropertyAsValue (Tags::baseName));
+        noteLength.getValueObject().referTo (project.getPropertyAsValue (Tags::noteLength));
+        tailLength.getValueObject().referTo (project.getPropertyAsValue (Tags::tailLength));
     }
     
     void stabilizeSettings() override {}
