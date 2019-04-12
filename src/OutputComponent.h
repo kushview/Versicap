@@ -21,7 +21,7 @@ public:
             findColour (TextEditor::textColourId).darker());
 
         addAndMakeVisible (directoryLabel);
-        directoryLabel.setText ("Output Path", dontSendNotification);
+        directoryLabel.setText ("Data Path", dontSendNotification);
         addAndMakeVisible (directory);
         directory.setCurrentFile (Versicap::getSamplesPath(),
                                   false, dontSendNotification);
