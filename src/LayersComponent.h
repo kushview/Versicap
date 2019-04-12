@@ -18,10 +18,13 @@ public:
     void buttonClicked (Button*) override;
 
 private:
+    TextButton addLayerButton;
     OwnedArray<TextButton> toggles;
     OwnedArray<Slider> sliders;
 
+    int lastVelocity = 127;
     bool hasLayers();
+    void addLayer();
 };
 
 }

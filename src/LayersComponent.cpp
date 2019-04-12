@@ -7,22 +7,9 @@ namespace vcp {
 LayersComponent::LayersComponent (Versicap& vc)
     : SettingGroup (vc)
 {
-    for (int i = 0; i < 4; ++i)
-    {
-        auto* const slider = sliders.add (new Slider());
-        addAndMakeVisible (slider);
-        slider->setRange (0.0, 127.0, 1);
-        setupSlider (*slider);
-        
-        auto* const toggle = toggles.add (new TextButton());
-        addAndMakeVisible (toggle);
-        if (i == 0)
-            toggle->setToggleState (true, dontSendNotification);
-        toggle->setClickingTogglesState (true);
-        toggle->setColour (TextButton::buttonOnColourId, Colours::greenyellow);
-        toggle->setButtonText (String ("Layer ") + String (i + 1));
-        toggle->addListener (this);
-    }
+    addAndMakeVisible (addLayerButton);
+    addLayerButton.setButtonText ("Add Layer");
+    addLayerButton.onClick = std::bind (&LayersComponent::addLayer, this);
 }
 
 LayersComponent::~LayersComponent()
@@ -33,49 +20,72 @@ LayersComponent::~LayersComponent()
 
 void LayersComponent::buttonClicked (Button* toggle)
 {
-    if (! hasLayers())
-        toggle->setToggleState (true, dontSendNotification);
-    stabilizeSettings();
+    auto project = versicap.getProject();
+    auto* removebtn = dynamic_cast<TextButton*> (toggle);
+    if (removebtn && toggles.contains (removebtn))
+    {
+        int index = toggles.indexOf (removebtn);
+        if (isPositiveAndBelow (index, project.getNumLayers()))
+        {
+            project.removeLayer (index);
+            updateSettings(); // slider / toggle will be deleted so bail
+            return;
+        }
+    }
 }
 
 bool LayersComponent::hasLayers()
 {
-    bool anythingToggled = false;
-    for (int i = 0; i < 4; ++i)
-    {
-        if (toggles[i]->getToggleState())
-        {
-            anythingToggled = true;
-            break;
-        }
-    }
-    return anythingToggled;
+    return sliders.size() > 0;
 }
 
 void LayersComponent::updateSettings()
 {
-    #if 0
-    for (int i = 0; i < 4; ++i)
+    for (auto* b : toggles)
+        b->removeListener (this);
+    toggles.clearQuick (true);
+    sliders.clearQuick (true);
+
+    auto project = versicap.getProject();
+    for (int i = 0; i < project.getNumLayers(); ++i)
     {
-        toggles[i]->setToggleState (ctx.layerEnabled[i], dontSendNotification);
-        sliders[i]->setValue ((double) ctx.layerVelocities[i], dontSendNotification);
+        auto layer = project.getLayer (i);
+        auto* const slider = sliders.add (new Slider());
+        addAndMakeVisible (slider);
+        slider->setRange (0, 127, 1);
+        setupSlider (*slider);
+        slider->getValueObject().referTo (
+            layer.getPropertyAsValue (Tags::velocity));
+        slider->onValueChange = [slider, this]() {
+            lastVelocity = jlimit (0, 127, roundToInt (slider->getValue()));
+        };
+        auto* const toggle = toggles.add (new TextButton());
+        addAndMakeVisible (toggle);        
+        toggle->setButtonText (String ("Remove"));
+        toggle->addListener (this);
     }
-    #endif
+    jassert (sliders.size() == toggles.size());
+    resized();
 }
 
-void LayersComponent::stabilizeSettings()
-{
-    for (int i = 0; i < 4; ++i)
-    {
-        sliders[i]->setEnabled (toggles[i]->getToggleState());
-    }
-}
+void LayersComponent::stabilizeSettings() { }
 
 void LayersComponent::resized()
 {
     auto r = getLocalBounds().reduced (8, 10);
-    for (int i = 0; i < 4; ++i)
-        layout (r, *toggles[i], *sliders[i], 10);
+    addLayerButton.setBounds (r.removeFromTop(22).removeFromLeft (74));
+    r.removeFromTop (3);
+    for (int i = 0; i < jmin (toggles.size(), sliders.size()); ++i)
+        layout (r, *toggles[i], *sliders[i], 10, 22, 6);
+}
+
+void LayersComponent::addLayer()
+{
+    auto project = versicap.getProject();
+    auto newLayer = project.addLayer();
+    if (isPositiveAndBelow (lastVelocity, 128))
+        newLayer.setProperty (Tags::velocity, lastVelocity);
+    updateSettings();
 }
 
 }

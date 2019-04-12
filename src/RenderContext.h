@@ -55,9 +55,11 @@ struct RenderContext
     String baseName             = "Sample";
     int noteLength              = 3000;
     int tailLength              = 1000;
-
+#if 0
     bool layerEnabled[4]        { true, false, false, false };
     int layerVelocities[4]      { 127, 96, 64, 32 };
+#endif
+    Array<uint8> layers;
 
     int loopMode                = 0;
     int loopStart               = 500;

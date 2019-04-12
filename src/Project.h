@@ -39,6 +39,8 @@ public:
     //=========================================================================
     int getNumLayers() const;
     Layer getLayer (int index) const;
+    Layer addLayer();
+    void removeLayer (int index);
 
     //=========================================================================
     void getRenderContext (RenderContext&) const;

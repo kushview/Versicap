@@ -24,10 +24,12 @@ ValueTree RenderContext::createValueTree() const
     auto layers = versicap.getOrCreateChildWithName ("layers", nullptr);
     for (int i = 0; i < 4; ++i)
     {
+        #if 0
         ValueTree layer ("layer");
         layer.setProperty ("enabled", layerEnabled [i], nullptr)
-                .setProperty ("velocity", layerVelocities [i], nullptr);
+             .setProperty ("velocity", layerVelocities [i], nullptr);
         layers.appendChild (layer, nullptr);
+        #endif
     }
 
     return versicap;
@@ -39,7 +41,7 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
                                                              TimeSliceThread& thread) const
 {
     jassert (sampleRate > 0.0);
-    jassert (isPositiveAndBelow (layer, 4));
+    jassert (isPositiveAndBelow (layer, layers.size()));
     jassert (keyStride > 0);
 
     const auto extension = FormatType::getFileExtension (FormatType::fromSlug (format));
@@ -111,7 +113,7 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
 
         }
 
-        const auto velocity = static_cast<uint8> (layerVelocities [layer]);
+        const auto velocity = layers [layer];
         auto noteOn  = MidiMessage::noteOn (1, key, velocity);
         noteOn.setTimeStamp (static_cast<double> (frame));
         renderLayer->start = frame;
@@ -164,9 +166,11 @@ void RenderContext::restoreFromFile (const File& file)
         
         for (int i = 0; i < 4; ++i)
         {
+            #if 0
             auto l = layers.getChild (i);
             ctx.layerEnabled[i]     = (bool) l.getProperty("enabled", ctx.layerEnabled [i]);
             ctx.layerVelocities[i]  = l.getProperty("velocity", ctx.layerVelocities [i]);
+            #endif
         }
 
         deleteAndZero (xml);

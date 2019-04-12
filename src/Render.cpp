@@ -87,15 +87,7 @@ void Render::getNextMidiBlock (MidiBuffer& buffer, int nframes)
 
     ScopedLock sl (getCallbackLock());
 
-    if (! context.layerEnabled [layer])
-    {
-        frame = 0;
-        event = 0;
-        ++layer;
-        return;
-    }
-
-    if (layer >= 4)
+    if (layer >= nlayers)
     {
         renderingRequest.compareAndSetBool (0, 1);
         return;
@@ -122,18 +114,16 @@ void Render::getNextMidiBlock (MidiBuffer& buffer, int nframes)
         
         buffer.addEvent (msg, roundToInt (timestamp - start));
         
-       #if 0
+       #if 1
         if (msg.isNoteOn())
         {
             DBG("note on: " << MidiMessage::getMidiNoteName (msg.getNoteNumber(), true, true, 4) << " - "
                 << static_cast<int64> (msg.getTimeStamp()));
-            DBG("local frame: " << localFrame);
         }
         else if (msg.isNoteOff())
         {
             DBG("note off: " << MidiMessage::getMidiNoteName (msg.getNoteNumber(), true, true, 4) << " - "
                 << static_cast<int64> (msg.getTimeStamp()));
-            DBG("local frame: " << localFrame);
         }
        #endif
 
@@ -146,7 +136,7 @@ void Render::writeAudioFrames (AudioSampleBuffer& audio)
     if (! isRendering())
         return;
 
-    if (layer >= 4)
+    if (layer >= nlayers)
     {
         renderingRequest.compareAndSetBool (0, 1);
         return;
@@ -244,30 +234,24 @@ void Render::start (const RenderContext& newContext, int latencySamples)
 
     OwnedArray<LayerRenderDetails> newDetails;
 
-    for (int i = 0; i < 4; ++i)
+    for (int i = 0; i < newContext.layers.size(); ++i)
     {
-        if (! newContext.layerEnabled [i])
-        {
-            newDetails.add (new LayerRenderDetails());
-        }
-        else
-        {
-            newDetails.add (newContext.createLayerRenderDetails (
-                            i, sampleRate, formats, thread));
-        }
+        newDetails.add (newContext.createLayerRenderDetails (
+                        i, sampleRate, formats, thread));
     }
 
     {
         ScopedLock sl (getCallbackLock());
-        writerDelay = jmax (0, newContext.latency + latencySamples);
+        nlayers         = jmax (0, newContext.layers.size());
+        writerDelay     = jmax (0, newContext.latency + latencySamples);
+        context         = newContext;
         details.swapWith (newDetails);
-        context = newContext;
     }
 
     if (renderingRequest.compareAndSetBool (1, 0))
     {
         DBG("[VCP] render start requested");
-        DBG("[VCP] writerDelay: " << writerDelay);
+        DBG("[VCP] compensate samples: " << writerDelay);
     }
 
     newDetails.clear();

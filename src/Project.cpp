@@ -73,11 +73,34 @@ void Project::getRenderContext (RenderContext& context) const
 
     // not currently used
     context.sampleRate      = 44100.0;
+
+    for (int i = 0; i < getNumLayers(); ++i)
+    {
+        const auto layer (getLayer (i));
+        context.layers.add (layer.getVelocity());
+    }
 }
 
 //=========================================================================
 int Project::getNumLayers() const { return objectData.getChildWithName (Tags::layers).getNumChildren(); }
 Layer Project::getLayer (int index) const { return Layer (objectData.getChildWithName (Tags::layers).getChild (index)); }
+
+Layer Project::addLayer()
+{
+    auto layers = objectData.getChildWithName (Tags::layers);
+    Layer layer;
+    layer.setProperty (Tags::velocity, 127);
+    layers.appendChild (layer.getValueTree(), nullptr);
+    return layer;
+}
+
+void Project::removeLayer (int index)
+{
+    if (! isPositiveAndBelow (index, getNumLayers()))
+        return;
+    auto layers = objectData.getChildWithName (Tags::layers);
+    layers.removeChild (index, nullptr);
+}
 
 //=========================================================================
 void Project::clearPlugin()

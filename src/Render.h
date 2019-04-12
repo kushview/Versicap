@@ -51,6 +51,7 @@ private:
     int64 frame = 0;
     int event = 0;
     int layer = 0;
+    int nlayers = 0;
     
     HeapBlock<float*> channels;
     OwnedArray<LayerRenderDetails> details;
