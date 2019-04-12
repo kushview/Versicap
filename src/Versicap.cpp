@@ -47,7 +47,8 @@ private:
 };
 
 struct Versicap::Impl : public AudioIODeviceCallback,
-                        public MidiInputCallback
+                        public MidiInputCallback,
+                        public ChangeListener
 {
     Impl()
     { 
@@ -81,6 +82,13 @@ struct Versicap::Impl : public AudioIODeviceCallback,
                                 float** output, int numOutputs,
                                 int nframes) override
     {
+        if (shouldProcess.get() != 1)
+        {
+            for (int c = 0; c < numOutputs; ++c)
+                FloatVectorOperations::clear (output[0], nframes);
+            return;
+        }
+
         jassert (sampleRate > 0 && bufferSize > 0);
     
         ScopedNoDenormals denormals;
@@ -279,6 +287,22 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         ignoreUnused (source, messageData, numBytesSoFar, timestamp);
     }
 
+    void updateLockedStatus()
+    {
+        const bool unlocked = (bool) unlock->isUnlocked();
+        shouldProcess.set (unlocked ? 1 : 0);
+    }
+
+    //=========================================================================
+    void changeListenerCallback (ChangeBroadcaster* broadcaster) override
+    {
+        if (broadcaster == unlock.get())
+        {
+            updateLockedStatus();
+        }
+    }
+
+    //=========================================================================
     Project project;
 
     Settings settings;
@@ -292,6 +316,8 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     std::unique_ptr<AudioProcessor> processor;
     std::unique_ptr<PluginWindow> window;
     
+    Atomic<int> shouldProcess { 0 };
+
     int pluginLatency = 0;
     int pluginChannels = 0;
     int pluginNumIns = 0;
@@ -423,6 +449,8 @@ void Versicap::initializePlugins()
 void Versicap::initializeUnlockStatus()
 {
     getUnlockStatus().load();
+    impl->updateLockedStatus();
+    getUnlockStatus().addChangeListener (impl.get());
 }
 
 void Versicap::initialize()
@@ -437,6 +465,10 @@ void Versicap::initialize()
 
 void Versicap::shutdown()
 {
+    auto& unlock = getUnlockStatus();
+    unlock.removeChangeListener (impl.get());
+    unlock.save();
+
     auto& devices = getDeviceManager();
     devices.removeAudioCallback (impl.get());
     devices.removeMidiInputCallback (String(), impl.get());
