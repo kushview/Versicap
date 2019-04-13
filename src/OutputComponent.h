@@ -6,7 +6,8 @@
 
 namespace vcp {
 
-class OutputComponent : public SettingGroup
+class OutputComponent : public SettingGroup,
+                        public FilenameComponentListener
 {
 public:
     OutputComponent (Versicap& vc)
@@ -25,6 +26,7 @@ public:
         addAndMakeVisible (directory);
         directory.setCurrentFile (Versicap::getSamplesPath(),
                                   false, dontSendNotification);
+        directory.addListener (this);
 
         addAndMakeVisible (formatLabel);
         formatLabel.setText ("Format", dontSendNotification);
@@ -75,6 +77,12 @@ public:
 
     }
     
+    void filenameComponentChanged (FilenameComponent*) override
+    {
+        auto project = versicap.getProject();
+        project.setProperty (Tags::dataPath, directory.getCurrentFile().getFullPathName());
+    }
+
     void updateSettings() override
     {
         auto project = versicap.getProject();
@@ -86,6 +94,10 @@ public:
             if (file.exists() && ! file.isDirectory())
                 file = file.getParentDirectory();
             directory.setCurrentFile (file, true, dontSendNotification);
+        }
+        else
+        {
+            directory.setCurrentFile (File(), false, dontSendNotification);
         }
 
         formatCombo.setSelectedId (1 + project.getFormatType(), dontSendNotification);
