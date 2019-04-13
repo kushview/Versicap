@@ -8,50 +8,73 @@
     <GROUP id="{0AF932B7-4585-6AE9-DC1E-4291EAAEC5EF}" name="data">
       <FILE id="EYE9Kw" name="versicap_v1.png" compile="0" resource="0" file="../data/versicap_v1.png"/>
     </GROUP>
-    <GROUP id="{CF3D9FD5-623B-929D-8445-AAA1B8D9FA7C}" name="src">
-      <GROUP id="{794287C6-1115-74B1-FEC8-164C1B5F7768}" name="exporters">
-        <FILE id="WZHXbV" name="EXS24Exporter.h" compile="0" resource="0" file="../src/exporters/EXS24Exporter.h"/>
-        <FILE id="DrJJKp" name="GenericExporter.h" compile="0" resource="0"
+    <GROUP id="{8705BA76-3319-E94D-E01D-9874E3FB2A67}" name="src">
+      <GROUP id="{2BCB9EB1-7372-7805-D8B6-2FD3CA5FE674}" name="controllers">
+        <FILE id="KBP200" name="ProjectsController.h" compile="0" resource="0"
+              file="../src/controllers/ProjectsController.h"/>
+      </GROUP>
+      <GROUP id="{EAB2C6A2-6A3A-180E-D862-30FB8F92D0FE}" name="exporters">
+        <FILE id="JUrxfE" name="EXS24Exporter.h" compile="0" resource="0" file="../src/exporters/EXS24Exporter.h"/>
+        <FILE id="Xf6LLV" name="GenericExporter.h" compile="0" resource="0"
               file="../src/exporters/GenericExporter.h"/>
       </GROUP>
-      <FILE id="Y7zoDC" name="EngineComponent.cpp" compile="1" resource="0"
+      <FILE id="aTgV9P" name="AudioDeviceSelect.h" compile="0" resource="0"
+            file="../src/AudioDeviceSelect.h"/>
+      <FILE id="ItbJ0J" name="AudioPlugin.h" compile="0" resource="0" file="../src/AudioPlugin.h"/>
+      <FILE id="Hoh9Vw" name="ChannelDelay.h" compile="0" resource="0" file="../src/ChannelDelay.h"/>
+      <FILE id="xFGzfX" name="EngineComponent.cpp" compile="1" resource="0"
             file="../src/EngineComponent.cpp"/>
-      <FILE id="FRrY1w" name="EngineComponent.h" compile="0" resource="0"
+      <FILE id="ud1K16" name="EngineComponent.h" compile="0" resource="0"
             file="../src/EngineComponent.h"/>
-      <FILE id="dY8vTl" name="Exporter.cpp" compile="1" resource="0" file="../src/Exporter.cpp"/>
-      <FILE id="MhQN7A" name="Exporter.h" compile="0" resource="0" file="../src/Exporter.h"/>
-      <FILE id="OECkAq" name="LayersComponent.cpp" compile="1" resource="0"
+      <FILE id="H9G6TB" name="Exporter.cpp" compile="1" resource="0" file="../src/Exporter.cpp"/>
+      <FILE id="SIcIRy" name="Exporter.h" compile="0" resource="0" file="../src/Exporter.h"/>
+      <FILE id="sVaRE3" name="LayersComponent.cpp" compile="1" resource="0"
             file="../src/LayersComponent.cpp"/>
-      <FILE id="O82dVL" name="LayersComponent.h" compile="0" resource="0"
+      <FILE id="WGxsay" name="LayersComponent.h" compile="0" resource="0"
             file="../src/LayersComponent.h"/>
-      <FILE id="ldDyuJ" name="LoopingComponent.h" compile="0" resource="0"
+      <FILE id="FQCLts" name="LoopingComponent.h" compile="0" resource="0"
             file="../src/LoopingComponent.h"/>
-      <FILE id="kHOade" name="Main.cpp" compile="1" resource="0" file="../src/Main.cpp"/>
-      <FILE id="yKqcEQ" name="MainComponent.cpp" compile="1" resource="0"
+      <FILE id="rDyoib" name="Main.cpp" compile="1" resource="0" file="../src/Main.cpp"/>
+      <FILE id="OeW3KG" name="MainComponent.cpp" compile="1" resource="0"
             file="../src/MainComponent.cpp"/>
-      <FILE id="gandlE" name="MainComponent.h" compile="0" resource="0" file="../src/MainComponent.h"/>
-      <FILE id="IYOsJj" name="MainTabs.h" compile="0" resource="0" file="../src/MainTabs.h"/>
-      <FILE id="Vsx3u0" name="NotesComponent.h" compile="0" resource="0"
+      <FILE id="D4IbVI" name="MainComponent.h" compile="0" resource="0" file="../src/MainComponent.h"/>
+      <FILE id="wHDanV" name="MainTabs.h" compile="0" resource="0" file="../src/MainTabs.h"/>
+      <FILE id="QEBpYZ" name="NotesComponent.cpp" compile="1" resource="0"
+            file="../src/NotesComponent.cpp"/>
+      <FILE id="in2IsT" name="NotesComponent.h" compile="0" resource="0"
             file="../src/NotesComponent.h"/>
-      <FILE id="tcoOks" name="OutputComponent.h" compile="0" resource="0"
+      <FILE id="ghvkEc" name="OutputComponent.cpp" compile="1" resource="0"
+            file="../src/OutputComponent.cpp"/>
+      <FILE id="d50jaq" name="OutputComponent.h" compile="0" resource="0"
             file="../src/OutputComponent.h"/>
-      <FILE id="Fqm97e" name="PublicKey.h" compile="0" resource="0" file="../src/PublicKey.h"/>
-      <FILE id="qJouXC" name="Render.cpp" compile="1" resource="0" file="../src/Render.cpp"/>
-      <FILE id="xMhZNA" name="Render.h" compile="0" resource="0" file="../src/Render.h"/>
-      <FILE id="pJDnHF" name="RenderContext.h" compile="0" resource="0" file="../src/RenderContext.h"/>
-      <FILE id="q78MPN" name="SamplingComponent.h" compile="0" resource="0"
+      <FILE id="eI3pDN" name="PluginManager.cpp" compile="1" resource="0"
+            file="../src/PluginManager.cpp"/>
+      <FILE id="ZNjVxz" name="PluginManager.h" compile="0" resource="0" file="../src/PluginManager.h"/>
+      <FILE id="dfrNW2" name="PluginPicker.h" compile="0" resource="0" file="../src/PluginPicker.h"/>
+      <FILE id="xLVA9c" name="Project.cpp" compile="1" resource="0" file="../src/Project.cpp"/>
+      <FILE id="ajMQ2W" name="Project.h" compile="0" resource="0" file="../src/Project.h"/>
+      <FILE id="h8ebf9" name="PublicKey.h" compile="0" resource="0" file="../src/PublicKey.h"/>
+      <FILE id="NbuCPl" name="Render.cpp" compile="1" resource="0" file="../src/Render.cpp"/>
+      <FILE id="lF30un" name="Render.h" compile="0" resource="0" file="../src/Render.h"/>
+      <FILE id="FgSvmK" name="RenderContext.cpp" compile="1" resource="0"
+            file="../src/RenderContext.cpp"/>
+      <FILE id="Fk8SVh" name="RenderContext.h" compile="0" resource="0" file="../src/RenderContext.h"/>
+      <FILE id="X5GRdz" name="SamplingComponent.h" compile="0" resource="0"
             file="../src/SamplingComponent.h"/>
-      <FILE id="U3CuNt" name="SettingGroup.cpp" compile="1" resource="0"
+      <FILE id="miMw4M" name="SettingGroup.cpp" compile="1" resource="0"
             file="../src/SettingGroup.cpp"/>
-      <FILE id="HbPPaU" name="SettingGroup.h" compile="0" resource="0" file="../src/SettingGroup.h"/>
-      <FILE id="Huo6pz" name="Settings.h" compile="0" resource="0" file="../src/Settings.h"/>
-      <FILE id="YEFhIr" name="UnlockForm.cpp" compile="1" resource="0" file="../src/UnlockForm.cpp"/>
-      <FILE id="vPeQxv" name="UnlockForm.h" compile="0" resource="0" file="../src/UnlockForm.h"/>
-      <FILE id="aJuoyi" name="UnlockStatus.cpp" compile="1" resource="0"
+      <FILE id="b6uri5" name="SettingGroup.h" compile="0" resource="0" file="../src/SettingGroup.h"/>
+      <FILE id="KUzvhx" name="Settings.cpp" compile="1" resource="0" file="../src/Settings.cpp"/>
+      <FILE id="Nq0v42" name="Settings.h" compile="0" resource="0" file="../src/Settings.h"/>
+      <FILE id="QSCWl5" name="Tags.h" compile="0" resource="0" file="../src/Tags.h"/>
+      <FILE id="F1CHEt" name="Types.h" compile="0" resource="0" file="../src/Types.h"/>
+      <FILE id="YztPhj" name="UnlockForm.cpp" compile="1" resource="0" file="../src/UnlockForm.cpp"/>
+      <FILE id="Nhf7xg" name="UnlockForm.h" compile="0" resource="0" file="../src/UnlockForm.h"/>
+      <FILE id="uJnzzE" name="UnlockStatus.cpp" compile="1" resource="0"
             file="../src/UnlockStatus.cpp"/>
-      <FILE id="Nd0FMz" name="UnlockStatus.h" compile="0" resource="0" file="../src/UnlockStatus.h"/>
-      <FILE id="sSNOWh" name="Versicap.cpp" compile="1" resource="0" file="../src/Versicap.cpp"/>
-      <FILE id="TW539C" name="Versicap.h" compile="0" resource="0" file="../src/Versicap.h"/>
+      <FILE id="fu5xTO" name="UnlockStatus.h" compile="0" resource="0" file="../src/UnlockStatus.h"/>
+      <FILE id="HovqT5" name="Versicap.cpp" compile="1" resource="0" file="../src/Versicap.cpp"/>
+      <FILE id="zjuZ6I" name="Versicap.h" compile="0" resource="0" file="../src/Versicap.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
