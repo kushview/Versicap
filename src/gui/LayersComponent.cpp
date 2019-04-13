@@ -1,6 +1,6 @@
 
+#include "gui/LayersComponent.h"
 #include "RenderContext.h"
-#include "LayersComponent.h"
 
 namespace vcp {
 

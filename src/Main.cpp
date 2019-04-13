@@ -1,8 +1,7 @@
 
 #ifndef VCP_TESTS
 
-#include "JuceHeader.h"
-#include "MainComponent.h"
+#include "gui/MainComponent.h"
 #include "PluginManager.h"
 #include "Project.h"
 #include "Versicap.h"

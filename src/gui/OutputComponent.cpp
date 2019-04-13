@@ -1,6 +1,6 @@
 
-#include "MainComponent.h"
-#include "OutputComponent.h"
+#include "gui/MainComponent.h"
+#include "gui/OutputComponent.h"
 
 namespace vcp {
 

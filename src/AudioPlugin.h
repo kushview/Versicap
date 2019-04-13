@@ -6,7 +6,9 @@ namespace vcp {
 
 class AudioPlugin : public ReferenceCountedObject
 {
-
+public:
+    AudioPlugin() { }
+    ~AudioPlugin() { }
 };
 
 }

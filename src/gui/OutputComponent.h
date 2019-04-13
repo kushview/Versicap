@@ -1,7 +1,6 @@
 #pragma once
 
-#include "RenderContext.h"
-#include "SettingGroup.h"
+#include "gui/SettingGroup.h"
 #include "Exporter.h"
 
 namespace vcp {

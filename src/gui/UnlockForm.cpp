@@ -24,7 +24,7 @@
   ==============================================================================
 */
 
-#include "UnlockForm.h"
+#include "gui/UnlockForm.h"
 
 namespace vcp
 {

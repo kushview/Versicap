@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SettingGroup.h"
+#include "gui/SettingGroup.h"
 
 namespace vcp {
 

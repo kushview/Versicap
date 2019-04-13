@@ -4,13 +4,13 @@
 #include "Versicap.h"
 #include "RenderContext.h"
 
-#include "EngineComponent.h"
-#include "LoopingComponent.h"
-#include "NotesComponent.h"
-#include "OutputComponent.h"
-#include "SamplingComponent.h"
-#include "LayersComponent.h"
-#include "SettingGroup.h"
+#include "gui/EngineComponent.h"
+#include "gui/LoopingComponent.h"
+#include "gui/NotesComponent.h"
+#include "gui/OutputComponent.h"
+#include "gui/SamplingComponent.h"
+#include "gui/LayersComponent.h"
+#include "gui/SettingGroup.h"
 
 namespace vcp {
 

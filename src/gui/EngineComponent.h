@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "AudioDeviceSelect.h"
-#include "PluginPicker.h"
-#include "SettingGroup.h"
+#include "gui/AudioDeviceSelect.h"
+#include "gui/PluginPicker.h"
+#include "gui/SettingGroup.h"
 #include "Types.h"
 
 namespace vcp {

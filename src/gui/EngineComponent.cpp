@@ -1,9 +1,10 @@
 
+#include "gui/EngineComponent.h"
+#include "gui/MainComponent.h"
+
 #include "Versicap.h"
 #include "Tags.h"
 #include "Types.h"
-#include "EngineComponent.h"
-#include "MainComponent.h"
 #include "PluginManager.h"
 
 namespace vcp {
