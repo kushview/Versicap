@@ -29,6 +29,7 @@ namespace Tags {
     static const Identifier state           = "state";
     static const Identifier tailLength      = "tailLength";
     static const Identifier velocity        = "velocity";
+    static const Identifier version         = "version";
 
 }
 }
