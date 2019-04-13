@@ -94,7 +94,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         ScopedNoDenormals denormals;
         messageCollector.removeNextBlockOfMessages (incomingMidi, nframes);
         ScopedLock slr (render->getCallbackLock());
-        
+
        #if 0
         int totalNumChans = 0;
         if (numInputs > numOutputs)
@@ -157,6 +157,8 @@ struct Versicap::Impl : public AudioIODeviceCallback,
             if (pluginChannels == 0 || pluginNumOuts == 0)
             {
                 // noop
+                renderBuffer.clear (0, nframes);
+                pluginBuffer.clear (0, nframes);
             }
             else if (pluginNumOuts == renderCtx.channels)
             {
@@ -206,6 +208,8 @@ struct Versicap::Impl : public AudioIODeviceCallback,
                 // fall back - copy the lesser of the channels
                 for (int c = jmin (numInputs, renderCtx.channels); --c >= 0;)
                     renderBuffer.copyFrom (c, 0, input[c], nframes);
+                for (int c = renderCtx.channels; c < numInputs; ++c)
+                    renderBuffer.clear (c, 0, nframes);
             }
         }
         else
@@ -582,6 +586,10 @@ void Versicap::closePlugin (bool clearProjectPlugin)
     {
         ScopedLock sl (impl->render->getCallbackLock());
         oldProc.swap (impl->processor);
+        impl->pluginChannels    = 0;
+        impl->pluginLatency     = 0;
+        impl->pluginNumIns      = 0;
+        impl->pluginNumOuts     = 0;
     }
 
     if (clearProjectPlugin)
