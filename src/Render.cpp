@@ -212,14 +212,39 @@ void Render::handleAsyncUpdate()
     }
 
     OwnedArray<LayerRenderDetails> old;
+    RenderContext ctx;
     {
         ScopedLock sl (getCallbackLock());
         details.swapWith (old);
+        ctx = context;
     }
 
+    const auto captureDir = ctx.getCaptureDir();
+    const auto projectDir = captureDir.getParentDirectory();
+    const auto samplesDir = projectDir.getChildFile ("samples");
+
+    ValueTree manifest ("manifest");
     for (auto* detail : old)
+    {
         for (auto* frame : detail->frames)
+        {
+            ValueTree sample ("sample");
             frame->writer.reset();
+            sample.setProperty ("file", String("samples/") + frame->file.getFileName(), nullptr)
+                  .setProperty ("layer", frame->index, nullptr);
+            manifest.appendChild (sample, nullptr);
+        }
+    }
+    
+    if (samplesDir.exists())
+        samplesDir.deleteRecursively();
+    captureDir.copyDirectoryTo (samplesDir);
+    captureDir.deleteRecursively();
+    if (auto* xml = manifest.createXml())
+    {
+        xml->writeToFile (projectDir.getChildFile ("manifest.xml"), {});
+        deleteAndZero (xml);
+    }
     
     stopped.triggerAsyncUpdate();
 }
@@ -232,12 +257,50 @@ void Render::start (const RenderContext& newContext, int latencySamples)
     jassert (sampleRate > 0.0);
     jassert (blockSize > 0);
 
-    OwnedArray<LayerRenderDetails> newDetails;
+    const auto extension = FormatType::getFileExtension (FormatType::fromSlug (newContext.format));
+    auto* const audioFormat = formats.findFormatForFileExtension (extension);
+    if (! audioFormat)
+    {
+        jassertfalse;
+        return;
+    }
 
+    OwnedArray<LayerRenderDetails> newDetails;
+    const File directory = newContext.getCaptureDir();
+    if (directory.exists())
+        directory.deleteRecursively();
+    directory.createDirectory();
     for (int i = 0; i < newContext.layers.size(); ++i)
     {
-        newDetails.add (newContext.createLayerRenderDetails (
-                        i, sampleRate, formats, thread));
+        auto* details = newDetails.add (newContext.createLayerRenderDetails (
+                                        i, sampleRate, formats, thread));
+        
+        for (auto* const detail : details->frames)
+        {
+            const auto file = detail->file;
+            std::unique_ptr<FileOutputStream> stream (file.createOutputStream());
+            if (stream)
+            {
+                if (auto* const writer = audioFormat->createWriterFor (
+                        stream.get(),
+                        sampleRate,
+                        newContext.channels,
+                        newContext.bitDepth,
+                        StringPairArray(),
+                        0
+                    ))
+                {
+                    detail->writer.reset (new AudioFormatWriter::ThreadedWriter (writer, thread, 8192));
+                    stream.release();
+                    DBG("[VCP] " << file.getFullPathName());
+                }
+            }
+            else
+            {
+                jassertfalse;
+                return;
+            }
+        }
     }
 
     {

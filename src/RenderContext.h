@@ -78,6 +78,7 @@ struct RenderContext
     void writeToFile (const File& file) const;
     void restoreFromFile (const File& file);
 
+    File getCaptureDir() const;
     LayerRenderDetails* createLayerRenderDetails (const int layer, 
                                                   const double sourceSampleRate,
                                                   AudioFormatManager& formats,

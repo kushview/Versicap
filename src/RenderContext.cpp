@@ -4,6 +4,22 @@
 
 namespace vcp {
 
+File RenderContext::getCaptureDir() const
+{
+    String path = outputPath;
+    if (! File::isAbsolutePath (path))
+        path = Versicap::getSamplesPath().getChildFile("DataPath").getFullPathName();
+    
+    if (! File::isAbsolutePath (path))
+    {
+        jassertfalse;
+        return File();
+    }
+
+    File directory (path);
+    return directory.getChildFile ("capture");
+}
+
 ValueTree RenderContext::createValueTree() const
 {
     ValueTree versicap ("versicap");
@@ -44,15 +60,6 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
     jassert (isPositiveAndBelow (layer, layers.size()));
     jassert (keyStride > 0);
 
-    const auto extension = FormatType::getFileExtension (FormatType::fromSlug (format));
-    auto* const audoFormat = formats.findFormatForFileExtension (extension);
-    
-    if (! audoFormat)
-    {
-        jassertfalse;
-        return nullptr;
-    }
-
     std::unique_ptr<LayerRenderDetails> details;
     details.reset (new LayerRenderDetails());
     auto& seq = details->sequence;
@@ -61,57 +68,43 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
     int64 frame = 0;
     const int64 noteFrames = static_cast<int64> (sourceSampleRate * ((double) noteLength / 1000.0));
     const int64 tailFrames = static_cast<int64> (sourceSampleRate * ((double) tailLength / 1000.0));
-    
+
+    const File directory (getCaptureDir());
+    const auto extension = FormatType::getFileExtension (FormatType::fromSlug (format));
+
     while (key <= keyEnd)
     {
         auto* const renderLayer = details->frames.add (new RenderLayer());
         renderLayer->index = details->frames.size() - 1;
-        
-        String path = outputPath;
-        
-        if (! File::isAbsolutePath (path))
-            path = Versicap::getSamplesPath().getFullPathName();
+    
+        String identifier;
+        identifier << String(layer).paddedLeft ('0', 3) << "_"
+                    << String(key).paddedLeft ('0', 3);
+        String fileName = identifier;
+        fileName << "." << extension;
+        renderLayer->file = directory.getChildFile (fileName);
 
-        if (File::isAbsolutePath (path))
+       #if 0
+        std::unique_ptr<FileOutputStream> stream (file.createOutputStream());
+        if (stream)
         {
-            File file (path);
-            if (instrumentName.isNotEmpty())
-                file = file.getChildFile (instrumentName);
-            file.createDirectory();
-
-            String fileName = "0";
-            fileName << layer << "_" << "0" << renderLayer->index << "_"
-                << MidiMessage::getMidiNoteName (key, true, true, 4)
-                << "_" << baseName << "." << extension;
-            file = file.getChildFile (fileName);
-            if (file.existsAsFile())
-                file.deleteFile();
-            std::unique_ptr<FileOutputStream> stream;
-            stream.reset (file.createOutputStream());
-            
-            if (stream)
+            if (auto* writer = audoFormat->createWriterFor (
+                    stream.get(),
+                    sourceSampleRate,
+                    this->channels,
+                    this->bitDepth,
+                    StringPairArray(),
+                    0
+                ))
             {
-                if (auto* writer = audoFormat->createWriterFor (
-                        stream.get(),
-                        sourceSampleRate,
-                        this->channels,
-                        this->bitDepth,
-                        StringPairArray(),
-                        0
-                    ))
-                {
-                    renderLayer->file = file;
-                    renderLayer->writer.reset (
-                        new AudioFormatWriter::ThreadedWriter (writer, thread, 8192));
-                    stream.release();
-                    DBG("[VCP] " << file.getFullPathName());
-                }
+                renderLayer->file = file;
+                renderLayer->writer.reset (
+                    new AudioFormatWriter::ThreadedWriter (writer, thread, 8192));
+                stream.release();
+                DBG("[VCP] " << file.getFullPathName());
             }
         }
-        else
-        {
-
-        }
+       #endif
 
         const auto velocity = layers [layer];
         auto noteOn  = MidiMessage::noteOn (1, key, velocity);
