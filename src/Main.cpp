@@ -1,7 +1,9 @@
 
-#ifndef VCP_TESTS
+#ifndef VCP_STLIB
 
 #include "gui/MainComponent.h"
+#include "gui/MainMenu.h"
+
 #include "PluginManager.h"
 #include "Project.h"
 #include "Versicap.h"
@@ -71,15 +73,18 @@ public:
                                          DocumentWindow::allButtons),
               versicap (vc)
         {
+            menu.reset (new MainMenu (*this));
+            menu->setupMenu();
+
             setUsingNativeTitleBar (true);
             setBackgroundColour (kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
             setContentOwned (new MainComponent (vc), true);
 
-            setResizable (false, false);
-            constrain.setMinimumSize (440, 340);
-            constrain.setMaximumSize (440, 340);
+            setResizable (true, false);
+            constrain.setMinimumSize (540, 340);
+            // constrain.setMaximumSize (1280, 340);
             setConstrainer (&constrain);
-            centreWithSize (440, 340);
+            centreWithSize (640, 360 + 240);
 
             if (auto* props = versicap.getSettings().getUserSettings())
             {
@@ -94,6 +99,10 @@ public:
         ~MainWindow()
         {
             setConstrainer (nullptr);
+           #if ! JUCE_MAC
+            setMenuBar (nullptr);
+           #endif
+            menu.reset();
         }
 
         void savePersistentData()
@@ -117,6 +126,7 @@ public:
     private:
         Versicap& versicap;
         ComponentBoundsConstrainer constrain;
+        std::unique_ptr<MainMenu> menu;
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainWindow)
     };
 
