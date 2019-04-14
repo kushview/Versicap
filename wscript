@@ -98,11 +98,39 @@ def configure (conf):
 def common_use_flags():
     return 'ACCELERATE AUDIO_TOOLBOX AUDIO_UNIT CORE_AUDIO CORE_AUDIO_KIT COCOA CORE_MIDI IO_KIT QUARTZ_CORE'.split()
 
+def build_sf2cute (bld):
+    return bld.stlib (
+        source = bld.path.ant_glob ("libs/sf2cute/src/**/*.cpp"),
+        includes = [ 'libs/sf2cute/src', \
+                     'libs/sf2cute/include' ],
+        name   = 'SF2CUTE',
+        target  = 'lib/sf2cute'
+    )
+
 def build_mac (bld):
-    appEnv = bld.env.derive()
-    bld.program (
+    build_sf2cute (bld)
+    
+    libEnv = bld.env.derive()
+
+    bld.stlib (
         source      = bld.path.ant_glob ("src/**/*.cpp") +
                       bld.path.ant_glob ("jucer/JuceLibraryCode/*.mm"),
+        includes    = [ 'jucer/JuceLibraryCode', \
+                        'libs/kv/modules', \
+                        'src', \
+                        os.path.expanduser('~') + '/SDKs/VST_SDK/VST3_SDK', \
+                        os.path.expanduser('~') + '/SDKs/VST_SDK/VST2_SDK', \
+                        os.path.expanduser('~') + '/SDKs/JUCE/modules' ],
+        target      = 'lib/versicap',
+        cxxflags    = [ '-DVCP_STLIB=1' ],
+        name        = 'VERSICAP',
+        env         = libEnv,
+        use         = common_use_flags()
+    )
+
+    appEnv = bld.env.derive()
+    app = bld.program (
+        source      = [ 'src/Main.cpp' ],
         includes    = [ 'jucer/JuceLibraryCode', \
                         'libs/kv/modules', \
                         'src', \
@@ -118,5 +146,25 @@ def build_mac (bld):
         mac_files   = [ 'tools/macdeploy/Icon.icns' ]
     )
     
+    app.use.append ('SF2CUTE')
+    app.use.append ('VERSICAP')
+
+    tests = bld.program (
+        source      = bld.path.ant_glob ("tests/**/*.cpp"),
+        includes    = [ 'jucer/JuceLibraryCode', \
+                        'libs/kv/modules', \
+                        'src', \
+                        os.path.expanduser('~') + '/SDKs/VST_SDK/VST3_SDK', \
+                        os.path.expanduser('~') + '/SDKs/VST_SDK/VST2_SDK', \
+                        os.path.expanduser('~') + '/SDKs/JUCE/modules' ],
+        target      = 'bin/test-versicap',
+        name        = 'TEST_VERSICAP',
+        env         = appEnv,
+        use         = common_use_flags(),
+    )
+
+    tests.use.append ('SF2CUTE')
+    tests.use.append ('VERSICAP')
+
 def build (bld):
     build_mac (bld)
