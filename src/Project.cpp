@@ -89,12 +89,6 @@ void Project::getRenderContext (RenderContext& context) const
     context.noteLength      = (int) getProperty (Tags::noteLength, 3000);
     context.tailLength      = (int) getProperty (Tags::tailLength, 1000);
     
-    // not currently used
-    context.loopMode        = LoopType::Forwards;
-    context.loopStart       = 500;
-    context.loopEnd         = 2500;
-    context.crossfadeLength = 0;
-    
     context.instrumentName  = getProperty (Tags::name, "Instrument").toString();
     context.outputPath      = getProperty (Tags::dataPath).toString();
     context.format          = getFormatTypeSlug();

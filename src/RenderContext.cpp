@@ -30,9 +30,6 @@ ValueTree RenderContext::createValueTree() const
             .setProperty ("baseName",   baseName, nullptr)
             .setProperty ("noteLength", noteLength, nullptr)
             .setProperty ("tailLength", tailLength, nullptr)
-            .setProperty ("loopMode",   loopMode, nullptr)
-            .setProperty ("loopStart",  loopStart, nullptr)
-            .setProperty ("crossfadeLength", crossfadeLength, nullptr)
             .setProperty ("instrumentName", instrumentName, nullptr)
             .setProperty ("outputPath", outputPath, nullptr)
             .setProperty ("channels",   channels, nullptr);
@@ -123,14 +120,10 @@ void RenderContext::restoreFromFile (const File& file)
         RenderContext& ctx = *this;
         ctx.source              = tree.getProperty ("source", ctx.source);
         ctx.baseName            = tree.getProperty ("baseName", ctx.baseName);
-        ctx.crossfadeLength     = tree.getProperty ("crossfadeLength", ctx.crossfadeLength);
         ctx.instrumentName      = tree.getProperty ("instrumentName", ctx.instrumentName);
         ctx.keyEnd              = tree.getProperty ("keyEnd", ctx.keyEnd);
         ctx.keyStart            = tree.getProperty ("keyStart", ctx.keyStart);
         ctx.keyStride           = tree.getProperty ("keyStride", ctx.keyStride);
-        ctx.loopEnd             = tree.getProperty ("loopEnd", ctx.loopEnd);
-        ctx.loopMode            = tree.getProperty ("loopMode", ctx.loopMode);
-        ctx.loopStart           = tree.getProperty ("loopStart", ctx.loopStart);
         ctx.noteLength          = tree.getProperty ("noteLength", ctx.noteLength);
         ctx.tailLength          = tree.getProperty ("tailLength", ctx.tailLength);
         ctx.outputPath          = tree.getProperty ("outputPath", ctx.outputPath);

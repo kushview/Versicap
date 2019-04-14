@@ -89,11 +89,6 @@ struct RenderContext
 
     Array<LayerInfo> layers;
 
-    int loopMode                = 0;
-    int loopStart               = 500;
-    int loopEnd                 = 2500;
-    int crossfadeLength         = 0;
-
     String instrumentName       = "Instrument";
     String outputPath           = String();
     String format               = "wave";
