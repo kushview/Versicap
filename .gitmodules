@@ -6,3 +6,6 @@
 	path = libs/pybind11
 	url = https://github.com/pybind/pybind11
 	branch = stable
+[submodule "libs/sf2cute"]
+	path = libs/sf2cute
+	url = https://github.com/gocha/sf2cute
