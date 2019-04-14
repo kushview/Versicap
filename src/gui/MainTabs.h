@@ -21,6 +21,7 @@ public:
         : TabbedComponent (TabbedButtonBar::TabsAtTop),
           versicap (vc)
     {
+        setTabBarDepth (26);
         auto colour = kv::LookAndFeel_KV1::widgetBackgroundColor.darker();
         setColour (TabbedComponent::backgroundColourId, colour);
         colour = kv::LookAndFeel_KV1::widgetBackgroundColor;

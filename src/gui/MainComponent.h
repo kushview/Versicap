@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "gui/ContentComponent.h"
 #include "Versicap.h"
 
 namespace vcp {
@@ -8,7 +9,7 @@ namespace vcp {
 class Versicap;
 class UnlockForm;
 
-class MainComponent   : public Component,
+class MainComponent   : public ContentComponent,
                         public Versicap::Listener,
                         public ChangeListener
 {

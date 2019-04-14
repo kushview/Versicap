@@ -5,15 +5,15 @@ namespace vcp {
 class ProjectTests : public UnitTestBase
 {
 public:
-    ProjectTests() : UnitTestBase ("Projects", "model", "project") {}
+    ProjectTests() : UnitTestBase ("Project", "model", "project") {}
     
     void runTest() override
     {
         beginTest ("properties");
         Project project;
-        
-        project.getFormatType() == FormatType::WAVE;
-        project.getFormatTypeSlug() == FormatType::getSlug (project.getFormatType());
+        expect (project.getNumLayers() == 0);
+        expect (project.getFormatType() == FormatType::WAVE);
+        expect (project.getFormatTypeSlug() == FormatType::getSlug (project.getFormatType()));
     }
 };
 

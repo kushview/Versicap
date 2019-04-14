@@ -1,5 +1,6 @@
 
 
+#include "gui/ContentView.h"
 #include "gui/MainComponent.h"
 #include "gui/MainTabs.h"
 #include "gui/UnlockForm.h"
@@ -118,6 +119,9 @@ public:
 
         addAndMakeVisible (tabs);
 
+        view.reset (new ContentView());
+        addAndMakeVisible (view.get());
+
         progress.onCancel = std::bind (&Versicap::stopRendering, &vc);
         setSize (440, 340);
     }
@@ -150,7 +154,10 @@ public:
         recordButton.setBounds (r2.removeFromRight (60));
 
         r.removeFromTop (1);
-        tabs.setBounds (r);
+        tabs.setBounds (r.removeFromLeft (240));
+        r.removeFromLeft (2);
+        view->setBounds (r);
+
         if (overlay.isVisible())
         {
             overlay.setBounds (getLocalBounds());
@@ -214,10 +221,13 @@ public:
     }
 
     RenderProgress& getRenderProgress() { return progress; }
+
 private:
     Versicap& versicap;
     MainComponent& owner;
     MainTabs tabs;
+    std::unique_ptr<ContentView> view;
+    
     TextButton importButton;
     TextButton exportButton;
     TextButton recordButton;
@@ -248,7 +258,8 @@ private:
 };
 
 MainComponent::MainComponent (Versicap& vc)
-    : versicap (vc)
+    : ContentComponent (vc),
+      versicap (vc)
 {
     setOpaque (true);
     content.reset (new Content (*this, vc));

@@ -9,9 +9,7 @@ class SamplingComponent : public SettingGroup
 public:
     SamplingComponent (Versicap& vc)
         : SettingGroup (vc)
-    {
-        settingWidth = 300;
-        
+    {   
         addAndMakeVisible (baseNameLabel);
         baseNameLabel.setText ("Base Name", dontSendNotification);
         addAndMakeVisible (baseName);

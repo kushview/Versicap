@@ -56,17 +56,17 @@ public:
 
     bool stabilizeKeyStart()
     {
-        bool shouldConstrain = keyEnd.getValue() <= keyStart.getValue();
+        bool shouldConstrain = keyEnd.getValue() < keyStart.getValue();
         if (shouldConstrain)
-            keyEnd.setValue (keyStart.getValue() + 1.0, dontSendNotification);
+            keyEnd.setValue (keyStart.getValue(), dontSendNotification);
         return shouldConstrain;
     }
 
     bool stabilizeKeyEnd()
     {
-        bool shouldConstrain = keyStart.getValue() >= keyEnd.getValue();
+        bool shouldConstrain = keyStart.getValue() > keyEnd.getValue();
         if (shouldConstrain)
-            keyStart.setValue (keyEnd.getValue() - 1.0, dontSendNotification);
+            keyStart.setValue (keyEnd.getValue(), dontSendNotification);
         return shouldConstrain;
     }
 
