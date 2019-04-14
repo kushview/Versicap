@@ -109,9 +109,9 @@ def build_sf2cute (bld):
 
 def build_mac (bld):
     build_sf2cute (bld)
-    
-    libEnv = bld.env.derive()
 
+    bld.add_group()
+    libEnv = bld.env.derive()
     bld.stlib (
         source      = bld.path.ant_glob ("src/**/*.cpp") +
                       bld.path.ant_glob ("jucer/JuceLibraryCode/*.mm"),
@@ -128,6 +128,7 @@ def build_mac (bld):
         use         = common_use_flags()
     )
 
+    bld.add_group()
     appEnv = bld.env.derive()
     app = bld.program (
         source      = [ 'src/Main.cpp' ],
@@ -149,6 +150,7 @@ def build_mac (bld):
     app.use.append ('SF2CUTE')
     app.use.append ('VERSICAP')
 
+    bld.add_group()
     tests = bld.program (
         source      = bld.path.ant_glob ("tests/**/*.cpp"),
         includes    = [ 'jucer/JuceLibraryCode', \
