@@ -128,6 +128,11 @@ void Project::removeLayer (int index)
     layers.removeChild (index, nullptr);
 }
 
+int Project::indexOf (const Layer& layer) const
+{
+    return objectData.getChildWithName(Tags::layers).indexOf (layer.getValueTree());
+}
+
 //=========================================================================
 void Project::setSamples (const ValueTree& newSamples)
 {

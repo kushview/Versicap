@@ -23,9 +23,8 @@ public:
     }
 
     SettingGroup (Versicap& vc) 
-        : ContentView(),
-          versicap (vc)
-    {}
+        : ContentView (vc)
+    { }
     
     virtual ~SettingGroup() = default;
 
@@ -37,7 +36,6 @@ public:
     void paint (Graphics&) override {}
 
 protected:
-    Versicap& versicap;
     int labelWidth = 80;
     int settingWidth = 100;
     void layout (Rectangle<int>& r, Component& label, Component& body,

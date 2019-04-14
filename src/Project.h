@@ -95,6 +95,7 @@ public:
     Layer getLayer (int index) const;
     Layer addLayer();
     void removeLayer (int index);
+    int indexOf (const Layer& layer) const;
 
     //=========================================================================
     void setSamples (const ValueTree& samples);

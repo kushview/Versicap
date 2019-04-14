@@ -75,7 +75,8 @@ public:
     ~Content() { }
 };
 
-SamplesTableContentView::SamplesTableContentView()
+SamplesTableContentView::SamplesTableContentView (Versicap& vc)
+    : ContentView (vc)
 {
     content.reset (new Content());
     addAndMakeVisible (content.get());

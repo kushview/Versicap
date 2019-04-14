@@ -6,7 +6,7 @@ namespace vcp {
 class SamplesTableContentView : public ContentView
 {
 public:
-    SamplesTableContentView();
+    SamplesTableContentView (Versicap&);
     ~SamplesTableContentView();
 
     void resized() override;

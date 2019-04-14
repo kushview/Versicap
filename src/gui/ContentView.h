@@ -7,12 +7,16 @@ namespace vcp {
 
 class Layer;
 class Project;
+class Versicap;
 
 class ContentView : public Component
 {
 public:
-    ContentView() { }
+    ContentView (Versicap& vc) : versicap (vc) { }
     virtual ~ContentView() { }
+
+protected:
+    Versicap& versicap;
 };
 
 }

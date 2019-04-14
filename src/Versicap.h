@@ -22,6 +22,9 @@ public:
     {
         Listener() = default;
         virtual ~Listener() = default;
+
+        virtual void projectChanged() { }
+
         virtual void renderWillStart() { }
         virtual void renderStarted() { }
         virtual void renderWillStop() { }

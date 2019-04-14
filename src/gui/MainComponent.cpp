@@ -1,6 +1,7 @@
 
-
 #include "gui/ContentView.h"
+#include "gui/LayersTableContentView.h"
+#include "gui/SamplesTableContentView.h"
 #include "gui/MainComponent.h"
 #include "gui/MainTabs.h"
 #include "gui/UnlockForm.h"
@@ -82,10 +83,12 @@ class MainComponent::Content : public Component
 {
 public:
     Content (MainComponent& o, Versicap& vc)
-        : versicap (vc),
-          owner (o),
+        : owner (o),
+          versicap (vc),
           tabs (vc)
     {
+        project = versicap.getProject();
+
         setOpaque (true);
 
         addAndMakeVisible (importButton);
@@ -119,7 +122,13 @@ public:
 
         addAndMakeVisible (tabs);
 
-        view.reset (new ContentView());
+        layers.reset (new LayersTableContentView (versicap));
+        addAndMakeVisible (layers.get());
+
+        samples.reset (new SamplesTableContentView (versicap));
+        addAndMakeVisible (samples.get());
+
+        view.reset (new ContentView (versicap));
         addAndMakeVisible (view.get());
 
         progress.onCancel = std::bind (&Versicap::stopRendering, &vc);
@@ -154,7 +163,11 @@ public:
         recordButton.setBounds (r2.removeFromRight (60));
 
         r.removeFromTop (1);
-        tabs.setBounds (r.removeFromLeft (240));
+        r2 = r.removeFromLeft (240);
+        tabs.setBounds (r2.removeFromTop (300));
+        layers->setBounds (r2.removeFromTop (100));
+        samples->setBounds (r2);
+
         r.removeFromLeft (2);
         view->setBounds (r);
 
@@ -223,11 +236,16 @@ public:
     RenderProgress& getRenderProgress() { return progress; }
 
 private:
-    Versicap& versicap;
     MainComponent& owner;
-    MainTabs tabs;
-    std::unique_ptr<ContentView> view;
+    Versicap& versicap;
+    Project project;
     
+    MainTabs tabs;
+    
+    std::unique_ptr<ContentView> view;
+    std::unique_ptr<LayersTableContentView> layers;
+    std::unique_ptr<SamplesTableContentView> samples;
+
     TextButton importButton;
     TextButton exportButton;
     TextButton recordButton;

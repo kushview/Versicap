@@ -1,8 +1,73 @@
 
 #include "gui/LayersTableContentView.h"
-#include "Project.h"
+#include "Versicap.h"
 
 namespace vcp {
+
+class ProjectWatcher : private ValueTree::Listener
+{
+public:
+    ProjectWatcher() = default;
+    virtual ~ProjectWatcher() {}
+
+    void setProject (const Project& newProject)
+    {
+        if (data == newProject.getValueTree())
+            return;
+        
+        data.removeListener (this);
+        project = newProject;
+        data = project.getValueTree();
+        data.addListener (this);
+        if (onChanged)
+            onChanged();
+    }
+
+    Project getProject() const { return project; }
+
+    std::function<void()> onChanged;
+    std::function<void()> onLayerAdded;
+    std::function<void()> onLayerRemoved;
+
+private:
+    Project project;
+    ValueTree data;
+
+    void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged,
+                                   const Identifier& property) override
+    {
+        ignoreUnused (treeWhosePropertyHasChanged, property);
+    }
+
+    void valueTreeChildAdded (ValueTree& parent, ValueTree& child) override
+    {
+        if (child.hasType (Tags::layer) && parent.getParent() == data)
+            if (onLayerAdded)
+                onLayerAdded();
+    }
+
+    void valueTreeChildRemoved (ValueTree& parent, ValueTree& child, int index) override
+    {
+        if (child.hasType (Tags::layer) && parent.getParent() == data)
+            if (onLayerRemoved)
+                onLayerRemoved();
+    }
+
+    void valueTreeChildOrderChanged (ValueTree& parent, int oldIndex, int newIndex) override
+    {
+        ignoreUnused (parent, oldIndex, newIndex);
+    }
+
+    void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged) override
+    {
+        ignoreUnused (treeWhoseParentHasChanged);
+    }
+
+    void valueTreeRedirected (ValueTree& tree) override
+    {
+        ignoreUnused (tree);
+    }
+};
 
 class LayerTable : public TableListBox,
                    public TableListBoxModel
@@ -11,7 +76,21 @@ public:
     LayerTable()
     {
         setModel (this);
-    }
+        getHeader().addColumn ("Name", 1, 100);
+        setHeaderHeight (0);
+        
+        watcher.onChanged = [this]() {
+            updateContent();
+        };
+
+        watcher.onLayerAdded = [this]() {
+            updateContent();
+        };
+
+        watcher.onLayerRemoved = [this]() {
+            updateContent();
+        };
+    }   
 
     ~LayerTable()
     {
@@ -19,25 +98,36 @@ public:
     }
 
     //=========================================================================
-    void setProject (const Project& newProject)
-    {
-        project = newProject;
-        updateContent();
-    }
+    void setProject (const Project& newProject) { watcher.setProject (newProject); }
+    Project getProject() const { return watcher.getProject(); }
 
     //=========================================================================
-    int getNumRows() override { return project.getNumLayers(); }
+    int getNumRows() override { return watcher.getProject().getNumLayers(); }
 
-    void paintRowBackground (Graphics&, int rowNumber,
-                             int width, int height, bool rowIsSelected) override
+    void paintRowBackground (Graphics& g, int rowNumber,
+                             int width, int height, 
+                             bool rowIsSelected) override
     {
-        
+        if (rowIsSelected)
+        {
+            g.setColour (Colours::orange);
+            g.fillAll();
+        }
     }
 
-    void paintCell (Graphics&, int rowNumber, int columnId,
+    void paintCell (Graphics& g, int rowNumber, int columnId,
                     int width, int height, bool rowIsSelected) override
     {
-        
+        const auto project = watcher.getProject();
+        const auto layer = project.getLayer (rowNumber);
+        g.setColour (Colours::white);
+        auto text = layer.getProperty (Tags::name).toString();
+        if (text.isEmpty())
+            text = "Layer " + String (1 + project.indexOf (layer));
+
+        g.drawText (text,
+                    0, 0, width, height, 
+                    Justification::centredLeft);
     }
 
    #if 0
@@ -56,25 +146,67 @@ public:
     virtual var getDragSourceDescription (const SparseSet<int>& currentlySelectedRows);
    #endif
 private:
-    Project project;
+    ProjectWatcher watcher;
 };
 
 class LayersTableContentView::Content : public Component
 {
 public:
-    Content() { }
+    Content()
+    { 
+        addAndMakeVisible (addButton);
+        addButton.setButtonText ("A");
+        addButton.onClick = [this]()
+        {
+            auto project = table.getProject();
+            auto layer = project.addLayer();
+            table.selectRow (project.indexOf (layer));
+        };
+
+        addAndMakeVisible (table);
+    }
+
     ~Content() { }
+
+    void paint (Graphics& g) override
+    {
+        g.fillAll (kv::LookAndFeel_KV1::widgetBackgroundColor);
+    }
+
+    void resized() override
+    {
+        auto r1 = getLocalBounds();
+        auto r2 = r1.removeFromTop (22);
+        addButton.setBounds (r2.removeFromLeft (24));
+        r1.removeFromTop (2);
+        table.setBounds (r1);
+    }
+
+private:
+    friend class LayersTableContentView;
+    LayerTable table;
+    TextButton addButton;
 };
 
-LayersTableContentView::LayersTableContentView()
+LayersTableContentView::LayersTableContentView (Versicap& vc)
+    : ContentView (vc)
 {
     content.reset (new Content());
     addAndMakeVisible (content.get());
+    auto& table = content->table;
+    table.setProject (vc.getProject());
 }
 
 LayersTableContentView::~LayersTableContentView()
 {
 
+}
+
+void LayersTableContentView::projectChanged()
+{
+    auto project = versicap.getProject();
+    auto& table = content->table;
+    table.setProject (project);
 }
 
 void LayersTableContentView::resized()
