@@ -90,7 +90,7 @@ void Project::getRenderContext (RenderContext& context) const
     context.tailLength      = (int) getProperty (Tags::tailLength, 1000);
     
     context.instrumentName  = getProperty (Tags::name, "Instrument").toString();
-    context.outputPath      = getProperty (Tags::dataPath).toString();
+    context.outputPath      = getProperty(Tags::dataPath).toString();
     context.format          = getFormatTypeSlug();
     context.channels        = (int) getProperty (Tags::channels, 2);
     context.bitDepth        = (int) getProperty (Tags::bitDepth, 16);
