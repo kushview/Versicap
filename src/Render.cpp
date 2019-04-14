@@ -1,5 +1,6 @@
 
 #include "Render.h"
+#include "Tags.h"
 
 /*
 source  = 22050
@@ -146,14 +147,14 @@ void Render::writeAudioFrames (AudioSampleBuffer& audio)
 
     const int nframes           = audio.getNumSamples();
     auto* const detail          = details.getUnchecked (layer);
-    const int numDetails        = detail->getNumRenderLayers();
+    const int numDetails        = detail->getNumSamples();
     const auto lastStopFrame    = detail->getHighestEndFrame();
     const int64 startFrame      = frame - writerDelay;
     const int64 endFrame        = startFrame + nframes;
     
-    for (int i = detail->getNextRenderLayerIndex (startFrame); i < numDetails;)
+    for (int i = detail->getNextSampleIndex (startFrame); i < numDetails;)
     {
-        auto* const render = detail->getRenderLayer (i);
+        auto* const render = detail->getSample (i);
         if (render->start >= endFrame)
             break;
    
@@ -223,15 +224,18 @@ void Render::handleAsyncUpdate()
     const auto projectDir = captureDir.getParentDirectory();
     const auto samplesDir = projectDir.getChildFile ("samples");
 
-    ValueTree manifest ("manifest");
+    ValueTree manifest (Tags::samples);
+    
     for (auto* detail : old)
     {
-        for (auto* frame : detail->frames)
+        for (auto* const info : detail->samples)
         {
-            ValueTree sample ("sample");
-            frame->writer.reset();
-            sample.setProperty ("file", String("samples/") + frame->file.getFileName(), nullptr)
-                  .setProperty ("layer", frame->index, nullptr);
+            ValueTree sample (Tags::sample);
+            info->writer.reset();
+            sample.setProperty (Tags::uuid, Uuid().toString(), nullptr)
+                  .setProperty (Tags::layer, info->layerId.toString(), nullptr)
+                  .setProperty (Tags::file, info->file.getFileName(), nullptr)
+                  .setProperty (Tags::note, info->note, nullptr);
             manifest.appendChild (sample, nullptr);
         }
     }
@@ -240,11 +244,8 @@ void Render::handleAsyncUpdate()
         samplesDir.deleteRecursively();
     captureDir.copyDirectoryTo (samplesDir);
     captureDir.deleteRecursively();
-    if (auto* xml = manifest.createXml())
-    {
-        xml->writeToFile (projectDir.getChildFile ("manifest.xml"), {});
-        deleteAndZero (xml);
-    }
+    
+    samples = manifest;
     
     stopped.triggerAsyncUpdate();
 }
@@ -275,9 +276,9 @@ void Render::start (const RenderContext& newContext, int latencySamples)
         auto* details = newDetails.add (newContext.createLayerRenderDetails (
                                         i, sampleRate, formats, thread));
         
-        for (auto* const detail : details->frames)
+        for (auto* const sample : details->samples)
         {
-            const auto file = detail->file;
+            const auto file = sample->file;
             std::unique_ptr<FileOutputStream> stream (file.createOutputStream());
             if (stream)
             {
@@ -290,7 +291,7 @@ void Render::start (const RenderContext& newContext, int latencySamples)
                         0
                     ))
                 {
-                    detail->writer.reset (new AudioFormatWriter::ThreadedWriter (writer, thread, 8192));
+                    sample->writer.reset (new AudioFormatWriter::ThreadedWriter (writer, thread, 8192));
                     stream.release();
                     DBG("[VCP] " << file.getFullPathName());
                 }
@@ -302,6 +303,8 @@ void Render::start (const RenderContext& newContext, int latencySamples)
             }
         }
     }
+
+    samples = ValueTree (samplesType);
 
     {
         ScopedLock sl (getCallbackLock());

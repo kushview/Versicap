@@ -54,6 +54,7 @@ public:
     const OwnedArray<Exporter>& getExporters() const;
 
     //=========================================================================
+    ApplicationCommandManager& getCommandManager();
     AudioDeviceManager& getDeviceManager();
     PluginManager& getPluginManager();
     AudioFormatManager& getAudioFormats();

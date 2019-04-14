@@ -31,10 +31,14 @@ public:
     const RenderContext& getContext() const { return context; }
     int getSourceType() const { return context.source; }
 
+    ValueTree getSamples() const { return samples; }
+
     std::function<void()> onStopped;
     std::function<void()> onStarted;
 
 private:
+    Identifier samplesType { "samples" };
+    ValueTree samples;
     TimeSliceThread thread;
     AudioFormatManager& formats;
     

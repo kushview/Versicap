@@ -5,9 +5,12 @@
 
 namespace vcp {
 
-struct RenderLayer
+struct SampleInfo
 {
+    Uuid layerId;
     int index   = 0;
+    int note    = 0;
+    
     int64 start = 0;
     int64 stop  = 0;
 
@@ -18,17 +21,17 @@ struct RenderLayer
 struct LayerRenderDetails
 {
     MidiMessageSequence sequence;
-    OwnedArray<RenderLayer> frames;
+    OwnedArray<SampleInfo> samples;
     
-    int getNumRenderLayers() const { return frames.size(); }
-    RenderLayer* getRenderLayer (const int i) { return frames.getUnchecked (i); }
-    int getNextRenderLayerIndex (const int64 frame)
+    int getNumSamples() const { return samples.size(); }
+    SampleInfo* getSample (const int i) { return samples.getUnchecked (i); }
+    int getNextSampleIndex (const int64 frame)
     {
-        const auto total = frames.size();
+        const auto total = samples.size();
         int i;
 
         for (i = 0; i < total; ++i)
-            if (frames.getUnchecked(i)->start >= frame || frames.getUnchecked(i)->stop >= frame)
+            if (samples.getUnchecked(i)->start >= frame || samples.getUnchecked(i)->stop >= frame)
                 return i;
 
         return i;
@@ -37,10 +40,38 @@ struct LayerRenderDetails
     int64 getHighestEndFrame() const
     {
         int64 frame = 0;
-        for (auto* const lf : frames)
-            if (lf->stop > frame)
-                frame = lf->stop;
+        for (auto* const sample : samples)
+            if (sample->stop > frame)
+                frame = sample->stop;
         return frame;
+    }
+};
+
+class RenderDetails
+{
+public:
+    RenderDetails() = default;
+    ~RenderDetails() = default;
+
+private:
+};
+
+struct LayerInfo
+{
+    LayerInfo (const String& layerId, int layerVelocity)
+        : uuid (layerId), velocity (static_cast<uint8> (layerVelocity)) {}
+    LayerInfo (const String& layerId, uint8 layerVelocity)
+        : uuid (layerId), velocity (layerVelocity) {}
+    LayerInfo (const LayerInfo& o) { operator= (o); }
+
+    Uuid uuid;
+    uint8 velocity;
+
+    LayerInfo& operator= (const LayerInfo& o)
+    {
+        uuid = o.uuid;
+        velocity = o.velocity;
+        return *this;
     }
 };
 
@@ -55,11 +86,8 @@ struct RenderContext
     String baseName             = "Sample";
     int noteLength              = 3000;
     int tailLength              = 1000;
-#if 0
-    bool layerEnabled[4]        { true, false, false, false };
-    int layerVelocities[4]      { 127, 96, 64, 32 };
-#endif
-    Array<uint8> layers;
+
+    Array<LayerInfo> layers;
 
     int loopMode                = 0;
     int loopStart               = 500;

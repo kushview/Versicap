@@ -51,14 +51,15 @@ ValueTree RenderContext::createValueTree() const
     return versicap;
 }
 
-LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
+LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layerIdx,
                                                              const double sourceSampleRate,
                                                              AudioFormatManager& formats,
                                                              TimeSliceThread& thread) const
 {
     jassert (sampleRate > 0.0);
-    jassert (isPositiveAndBelow (layer, layers.size()));
+    jassert (isPositiveAndBelow (layerIdx, layers.size()));
     jassert (keyStride > 0);
+    const auto& layer = layers.getReference (layerIdx);
 
     std::unique_ptr<LayerRenderDetails> details;
     details.reset (new LayerRenderDetails());
@@ -74,48 +75,27 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layer,
 
     while (key <= keyEnd)
     {
-        auto* const renderLayer = details->frames.add (new RenderLayer());
-        renderLayer->index = details->frames.size() - 1;
+        auto* const sample  = details->samples.add (new SampleInfo());
+        sample->layerId     = layer.uuid;
+        sample->index       = details->samples.size() - 1;
+        sample->note        = key;
     
         String identifier;
-        identifier << String(layer).paddedLeft ('0', 3) << "_"
-                    << String(key).paddedLeft ('0', 3);
+        identifier << String(layerIdx).paddedLeft ('0', 3) << "_"
+                   << String(key).paddedLeft ('0', 3);
         String fileName = identifier;
         fileName << "." << extension;
-        renderLayer->file = directory.getChildFile (fileName);
+        sample->file = directory.getChildFile (fileName);
 
-       #if 0
-        std::unique_ptr<FileOutputStream> stream (file.createOutputStream());
-        if (stream)
-        {
-            if (auto* writer = audoFormat->createWriterFor (
-                    stream.get(),
-                    sourceSampleRate,
-                    this->channels,
-                    this->bitDepth,
-                    StringPairArray(),
-                    0
-                ))
-            {
-                renderLayer->file = file;
-                renderLayer->writer.reset (
-                    new AudioFormatWriter::ThreadedWriter (writer, thread, 8192));
-                stream.release();
-                DBG("[VCP] " << file.getFullPathName());
-            }
-        }
-       #endif
-
-        const auto velocity = layers [layer];
-        auto noteOn  = MidiMessage::noteOn (1, key, velocity);
+        auto noteOn  = MidiMessage::noteOn (1, key, layer.velocity);
         noteOn.setTimeStamp (static_cast<double> (frame));
-        renderLayer->start = frame;
+        sample->start = frame;
         frame += noteFrames;
         
         auto noteOff = MidiMessage::noteOff (1, key);
         noteOff.setTimeStamp (static_cast<double> (frame));
         frame += tailFrames;
-        renderLayer->stop = frame;
+        sample->stop = frame;
 
         seq.addEvent (noteOn);
         seq.addEvent (noteOff);

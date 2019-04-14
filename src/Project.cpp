@@ -10,11 +10,40 @@
 namespace vcp {
 
 //=========================================================================
-Layer::Layer() : kv::ObjectModel (Tags::layer) { }
-Layer::Layer (const ValueTree& data) : kv::ObjectModel (data) { }
+Layer::Layer()
+    : kv::ObjectModel (Tags::layer)
+{ 
+    setMissingProperties();
+}
 
-bool  Layer::isValid() const        { return objectData.hasType (Tags::layer); }
+Layer::Layer (const ValueTree& data)
+    : kv::ObjectModel (data)
+{
+    if (objectData.hasType (Tags::layer))
+        setMissingProperties();
+}
+
+String Layer::getUuidString() const {   return getProperty (Tags::uuid).toString(); }
+
+Uuid Layer::getUuid() const
+{
+    const Uuid uuid (getUuidString());
+    return uuid;
+}
+
+bool Layer::isValid() const 
+{ 
+    return objectData.hasType (Tags::layer) &&
+           objectData.hasProperty (Tags::uuid) &&
+           ! Uuid (getProperty (Tags::uuid).toString()).isNull();
+}
+
 uint8 Layer::getVelocity() const    { return static_cast<uint8> ((int) getProperty (Tags::velocity)); }
+void Layer::setMissingProperties()
+{
+    stabilizePropertyString (Tags::uuid, Uuid().toString());
+    stabilizePropertyPOD (Tags::velocity, 127);
+}
 
 //=========================================================================
 Project::Project()
@@ -79,7 +108,8 @@ void Project::getRenderContext (RenderContext& context) const
     for (int i = 0; i < getNumLayers(); ++i)
     {
         const auto layer (getLayer (i));
-        context.layers.add (layer.getVelocity());
+        LayerInfo info (layer.getUuidString(), layer.getVelocity());
+        context.layers.add (info);
     }
 }
 
@@ -103,6 +133,61 @@ void Project::removeLayer (int index)
     auto layers = objectData.getChildWithName (Tags::layers);
     layers.removeChild (index, nullptr);
 }
+
+//=========================================================================
+void Project::setSamples (const ValueTree& newSamples)
+{
+    int lastIndex = -1;
+    for (int i = objectData.getNumChildren(); --i >= 0;)
+    {
+        const auto samples = objectData.getChild (i);
+        if (samples.hasType (Tags::samples))
+        {
+            lastIndex = i;
+            objectData.removeChild (samples, nullptr);        
+        }
+    }
+
+    objectData.addChild (newSamples, lastIndex, nullptr);
+}
+
+SampleArray Project::getSamples() const
+{
+    SampleArray samples (objectData.getChildWithName (Tags::samples));
+    return samples;
+}
+
+void Project::getSamples (int layer, OwnedArray<Sample>& out) const
+{
+    const auto samples = getSamples();
+    // for (int i = 0; i < samples.size(); ++i)
+    //     if (samples[i].isForLayer (layer))
+    //         out.add (new Sample (samples [i]));
+}
+
+#if 0
+void Project::rebuildNotes()
+{
+    ValueTree oldNotes (objectData.getChildWithName (Tags::notes));
+    ValueTree newNotes (Tags::notes);
+    ValueTree note (Tags::note);
+    
+    const int noteStart = getProperty (Tags::noteStart, 34);
+    const int noteEnd   = getProperty (Tags::noteEnd, 60);
+    const int noteStep  = getProperty (Tags::noteStep, 4);
+
+    for (int layerIdx = 0; layerIdx < getNumLayers(); ++layerIdx)
+    {
+        const Layer layer (getLayer (layerIdx));
+        for (int note = noteStart; note <= noteEnd; note += noteStep)
+        {
+            ValueTree noteData (Tags::note);
+            noteData.setProperty (Tags::value, note, nullptr)
+                    .setProperty (Tags::layer, layerIdx, nullptr);
+        }
+    }
+}
+#endif
 
 //=========================================================================
 void Project::clearPlugin()
@@ -193,7 +278,10 @@ bool Project::loadFile (const File& file)
     GZIPDecompressorInputStream gi (fi);
     auto newData = ValueTree::readFromStream (gi);
     if (newData.isValid() && newData.hasType (Tags::project))
+    {
         objectData = newData;
+        setMissingProperties();
+    }
 
     return objectData == newData;
 }
@@ -206,27 +294,22 @@ void Project::setMissingProperties()
     
     RenderContext context;
     stabilizePropertyString (Tags::source,      SourceType::getSlug (SourceType::MidiDevice));
-    stabilizePropertyPOD (Tags::latencyComp,    context.latency);
-    stabilizePropertyPOD (Tags::noteStart,      context.keyStart);
-    stabilizePropertyPOD (Tags::noteEnd,        context.keyEnd);
-    stabilizePropertyPOD (Tags::noteStep,       context.keyStride);
+    stabilizePropertyPOD (Tags::latencyComp,    0);
+    stabilizePropertyPOD (Tags::noteStart,      36);
+    stabilizePropertyPOD (Tags::noteEnd,        60);
+    stabilizePropertyPOD (Tags::noteStep,       4);
     
     stabilizePropertyString (Tags::baseName,    "Sample");
-    stabilizePropertyPOD (Tags::noteLength,     context.noteLength);
-    stabilizePropertyPOD (Tags::tailLength,     context.tailLength);
+    stabilizePropertyPOD (Tags::noteLength,     3000);
+    stabilizePropertyPOD (Tags::tailLength,     1000);
 
     stabilizePropertyString (Tags::format,      FormatType::getSlug (FormatType::WAVE));
     stabilizePropertyPOD (Tags::channels,       context.channels);
     stabilizePropertyPOD (Tags::bitDepth,       context.bitDepth);
 
-    auto layers = objectData.getOrCreateChildWithName (Tags::layers, nullptr);
-    if (layers.getNumChildren() <= 0)
-    {
-        auto layer = layers.getOrCreateChildWithName (Tags::layer, nullptr);
-        layer.setProperty (Tags::velocity, 127, nullptr);
-    }
-
-    objectData.getOrCreateChildWithName (Tags::plugin, nullptr);
+    objectData.getOrCreateChildWithName (Tags::layers,  nullptr);
+    objectData.getOrCreateChildWithName (Tags::samples, nullptr);
+    objectData.getOrCreateChildWithName (Tags::plugin,  nullptr);
 }
 
 }

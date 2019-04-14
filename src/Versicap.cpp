@@ -319,7 +319,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     Project project;
 
     Settings settings;
-    KnownPluginList knownPlugins;
+    ApplicationCommandManager commands;
     OwnedArray<Exporter> exporters;
     OptionalScopedPointer<AudioDeviceManager> devices;
     OptionalScopedPointer<AudioFormatManager> formats;
@@ -373,11 +373,10 @@ Versicap::Versicap()
     
     impl->render->onStopped = [this]()
     {
-        listeners.call ([](Listener& l) 
-        { 
-            l.renderWillStop();
-            l.renderStopped();
-        });
+        listeners.call ([](Listener& l) { l.renderWillStop(); });
+        auto project = getProject();
+        project.setSamples (impl->render->getSamples());
+        listeners.call ([](Listener& l) { l.renderStopped(); });
     };
 }
 
@@ -487,6 +486,15 @@ void Versicap::shutdown()
     devices.removeAudioCallback (impl.get());
     devices.removeMidiInputCallback (String(), impl.get());
     devices.closeAudioDevice();
+
+    closePluginWindow();
+    if (impl->processor != nullptr)
+    {
+        impl->processor->releaseResources();
+        impl->processor.reset();
+    }
+
+    impl->render.reset();
 }
 
 void Versicap::saveSettings()
@@ -529,6 +537,7 @@ void Versicap::setRenderContext (const RenderContext& context)
     impl->sourceType.set (impl->context.source);
 }
 
+ApplicationCommandManager& Versicap::getCommandManager()    { return impl->commands; }
 const RenderContext& Versicap::getRenderContext() const     { return impl->context; }
 const OwnedArray<Exporter>& Versicap::getExporters() const  { return impl->exporters; }
 Settings& Versicap::getSettings()                           { return impl->settings; }
