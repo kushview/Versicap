@@ -1,16 +1,27 @@
 
 #include "gui/SamplesTableContentView.h"
 #include "Project.h"
+#include "ProjectWatcher.h"
 
 namespace vcp {
 
 class SampleTable : public TableListBox,
-                   public TableListBoxModel
+                    public TableListBoxModel
 {
 public:
     SampleTable()
     {
         setModel (this);
+        getHeader().addColumn ("Note", 1, 100);
+        getHeader().addColumn ("Name", 2, 100);
+
+        watcher.onChanged = [this]() { refreshSamples(); };
+        watcher.onSamplesAdded = [this]() { refreshSamples(); };
+        watcher.onActiveLayerChanged = [this]()
+        {
+            layer = watcher.getProject().getActiveLayer();
+            refreshSamples();
+        };
     }
 
     ~SampleTable()
@@ -18,32 +29,52 @@ public:
         setModel (nullptr);
     }
 
-    void refreshSamples()
-    {
-        filtered.clearQuick (true);
-        // project.getSamples (filtered);
-    }
-
     void setProject (const Project& newProject)
     {
-        project = newProject;
+        watcher.setProject (newProject);
+    }
+
+    Project getProject() const { return watcher.getProject(); }
+
+    void refreshSamples()
+    {
+        const auto project = watcher.getProject();
+        filtered.clearQuick (true);
+        auto layerIdx = project.indexOf (layer);
+        if (isPositiveAndBelow (layerIdx, project.getNumLayers()))
+            project.getSamples (layerIdx, filtered);
+
+        for (auto* sample : filtered)
+        {
+            DBG("sample: " << sample->getNote());   
+        }
+        
+        updateContent();
     }
 
     //=========================================================================
-    int getNumRows() override { 
-        return 0;
-    }
+    int getNumRows() override { return filtered.size(); }
 
-    void paintRowBackground (Graphics&, int rowNumber,
+    void paintRowBackground (Graphics& g, int rowNumber,
                              int width, int height, bool rowIsSelected) override
     {
-        ignoreUnused (rowNumber, width, height, rowIsSelected);
+        if (rowIsSelected)
+        {
+            g.setColour (Colours::orange);
+            g.fillAll();
+        }
     }
 
-    void paintCell (Graphics&, int rowNumber, int columnId,
+    void paintCell (Graphics& g, int rowNumber, int columnId,
                     int width, int height, bool rowIsSelected) override
     {
-        ignoreUnused (rowNumber, columnId, width, height, rowIsSelected);
+        g.setColour (Colours::white);
+        if (auto* const sample = filtered [rowNumber])
+        {
+            String text = (columnId == 1) ? String (sample->getNote())
+                : MidiMessage::getMidiNoteName (sample->getNote(), true, true, 4);
+            g.drawText (text, 0, 0, width, height, Justification::centredLeft);
+        }
     }
 
    #if 0
@@ -63,7 +94,7 @@ public:
    #endif
 
 private:
-    Project project;
+    ProjectWatcher watcher;
     Layer layer;
     OwnedArray<Sample> filtered;
 };
@@ -71,8 +102,21 @@ private:
 class SamplesTableContentView::Content : public Component
 {
 public:
-    Content() { }
+    Content()
+    { 
+        addAndMakeVisible (table);
+    }
+
     ~Content() { }
+
+    void resized() override
+    {
+        table.setBounds (getLocalBounds());
+    }
+
+private:
+    friend class SamplesTableContentView;
+    SampleTable table;
 };
 
 SamplesTableContentView::SamplesTableContentView (Versicap& vc)
@@ -80,6 +124,9 @@ SamplesTableContentView::SamplesTableContentView (Versicap& vc)
 {
     content.reset (new Content());
     addAndMakeVisible (content.get());
+    versicap.addListener (this);
+    auto& table = content->table;
+    table.setProject (versicap.getProject());
 }
 
 SamplesTableContentView::~SamplesTableContentView()
@@ -90,6 +137,13 @@ SamplesTableContentView::~SamplesTableContentView()
 void SamplesTableContentView::resized()
 {
     content->setBounds (getLocalBounds());
+}
+
+void SamplesTableContentView::projectChanged()
+{
+    auto project = versicap.getProject();
+    auto& table = content->table;
+    table.setProject (project);
 }
 
 }

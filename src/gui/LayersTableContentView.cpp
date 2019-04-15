@@ -1,73 +1,9 @@
 
 #include "gui/LayersTableContentView.h"
+#include "ProjectWatcher.h"
 #include "Versicap.h"
 
 namespace vcp {
-
-class ProjectWatcher : private ValueTree::Listener
-{
-public:
-    ProjectWatcher() = default;
-    virtual ~ProjectWatcher() {}
-
-    void setProject (const Project& newProject)
-    {
-        if (data == newProject.getValueTree())
-            return;
-        
-        data.removeListener (this);
-        project = newProject;
-        data = project.getValueTree();
-        data.addListener (this);
-        if (onChanged)
-            onChanged();
-    }
-
-    Project getProject() const { return project; }
-
-    std::function<void()> onChanged;
-    std::function<void()> onLayerAdded;
-    std::function<void()> onLayerRemoved;
-
-private:
-    Project project;
-    ValueTree data;
-
-    void valueTreePropertyChanged (ValueTree& treeWhosePropertyHasChanged,
-                                   const Identifier& property) override
-    {
-        ignoreUnused (treeWhosePropertyHasChanged, property);
-    }
-
-    void valueTreeChildAdded (ValueTree& parent, ValueTree& child) override
-    {
-        if (child.hasType (Tags::layer) && parent.getParent() == data)
-            if (onLayerAdded)
-                onLayerAdded();
-    }
-
-    void valueTreeChildRemoved (ValueTree& parent, ValueTree& child, int index) override
-    {
-        if (child.hasType (Tags::layer) && parent.getParent() == data)
-            if (onLayerRemoved)
-                onLayerRemoved();
-    }
-
-    void valueTreeChildOrderChanged (ValueTree& parent, int oldIndex, int newIndex) override
-    {
-        ignoreUnused (parent, oldIndex, newIndex);
-    }
-
-    void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged) override
-    {
-        ignoreUnused (treeWhoseParentHasChanged);
-    }
-
-    void valueTreeRedirected (ValueTree& tree) override
-    {
-        ignoreUnused (tree);
-    }
-};
 
 class LayerTable : public TableListBox,
                    public TableListBoxModel
@@ -78,7 +14,7 @@ public:
         setModel (this);
         getHeader().addColumn ("Name", 1, 100);
         setHeaderHeight (0);
-        
+
         watcher.onChanged = [this]() {
             updateContent();
         };
@@ -130,6 +66,13 @@ public:
                     Justification::centredLeft);
     }
 
+    void selectedRowsChanged (int lastRowSelected) override
+    {
+        auto project = watcher.getProject();
+        const auto layer = project.getLayer (lastRowSelected);
+        project.setActiveLayer (layer);
+    }
+
    #if 0
     virtual Component* refreshComponentForCell (int rowNumber, int columnId, bool isRowSelected,
                                                 Component* existingComponentToUpdate);
@@ -139,7 +82,7 @@ public:
     virtual void sortOrderChanged (int newSortColumnId, bool isForwards);
     virtual int getColumnAutoSizeWidth (int columnId);
     virtual String getCellTooltip (int rowNumber, int columnId);
-    virtual void selectedRowsChanged (int lastRowSelected);
+    
     virtual void deleteKeyPressed (int lastRowSelected);
     virtual void returnKeyPressed (int lastRowSelected);
     virtual void listWasScrolled();

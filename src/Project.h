@@ -39,6 +39,11 @@ public:
     Sample (const Sample& o) { operator= (o); }
     ~Sample() { }
 
+    Uuid getUuid() const;
+    String getUuidString() const;
+    bool isForLayer (const Layer& layer) const;
+
+    int getNote() const { return getProperty (Tags::note); }
     double getStartTime() const;
     double getLength() const;
 
@@ -53,10 +58,12 @@ class SampleArray : public kv::ObjectModel
 {
 public:
     SampleArray() : kv::ObjectModel (Tags::samples) { }
-    SampleArray (const ValueTree& data) : kv::ObjectModel (Tags::samples)
+    SampleArray (const ValueTree& data) 
+        : kv::ObjectModel (data)
     {
         jassert (data.hasType (Tags::samples));
     }
+    SampleArray (const SampleArray& o) { operator= (o); }
 
     ~SampleArray() { }
 
@@ -91,16 +98,24 @@ public:
     int getSourceType() const;
 
     //=========================================================================
+    int indexOf (const Layer& layer) const;
+
+    //=========================================================================
     int getNumLayers() const;
     Layer getLayer (int index) const;
     Layer addLayer();
     void removeLayer (int index);
-    int indexOf (const Layer& layer) const;
+    Layer findLayer (const String& uuid) const { return Layer (find (Tags::layers, Tags::uuid, uuid)); }
+    void setActiveLayer (const Layer& layer);
+    Layer getActiveLayer() const;
 
     //=========================================================================
     void setSamples (const ValueTree& samples);
+    void setActiveSample (const Sample& sample);
     SampleArray getSamples() const;
-    void getSamples (int layer, OwnedArray<Sample>& samples) const;
+    void getSamples (int layer, OwnedArray<Sample>& samples) const;        
+    Sample getActiveSample() const;
+    Sample findSample (const String& uuid) const { return Sample (find (Tags::samples, Tags::uuid, uuid)); }
 
     //=========================================================================
     void getRenderContext (RenderContext&) const;
@@ -125,6 +140,7 @@ public:
 
 private:
     void setMissingProperties();
+    ValueTree find (const Identifier& listType, const Identifier& property, const var& value) const;
 };
 
 }

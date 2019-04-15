@@ -46,6 +46,22 @@ void Layer::setMissingProperties()
 }
 
 //=========================================================================
+String Sample::getUuidString() const {   return getProperty (Tags::uuid).toString(); }
+
+Uuid Sample::getUuid() const
+{
+    const Uuid uuid (getUuidString());
+    return uuid;
+}
+
+bool Sample::isForLayer (const Layer& layer) const
+{
+    const Uuid sid (getProperty (Tags::layer).toString());
+    const Uuid lid (layer.getUuid());
+    return !sid.isNull() && !lid.isNull() && sid == lid;
+}
+
+//=========================================================================
 Project::Project()
     : ObjectModel (Tags::project)
 {
@@ -53,6 +69,37 @@ Project::Project()
 }
 
 Project::~Project() {}
+
+//=========================================================================
+void Project::setActiveLayer (const Layer& layer)
+{
+    auto layers = objectData.getChildWithName (Tags::layers);
+    if (layers.getProperty (Tags::active).toString() == layer.getUuidString())
+        return;
+    layers.setProperty (Tags::active, layer.getUuidString(), nullptr);
+}
+
+Layer Project::getActiveLayer() const
+{
+    const auto layers = objectData.getChildWithName (Tags::layers);
+    const Layer layer (find (Tags::layers, Tags::uuid, layers.getProperty (Tags::active)));
+    return layer;
+}
+
+void Project::setActiveSample (const Sample& sample)
+{
+    auto samples = objectData.getChildWithName (Tags::samples);
+    if (samples.getProperty (Tags::active).toString() == sample.getUuidString())
+        return;
+    samples.setProperty (Tags::active, sample.getUuidString(), nullptr);
+}
+
+Sample Project::getActiveSample() const
+{
+    const auto samples = objectData.getChildWithName (Tags::samples);
+    const Sample sample (find (Tags::samples, Tags::uuid, samples.getProperty (Tags::active)));
+    return sample;
+}
 
 //=========================================================================
 int Project::getFormatType() const
@@ -148,6 +195,11 @@ void Project::setSamples (const ValueTree& newSamples)
     }
 
     objectData.addChild (newSamples, lastIndex, nullptr);
+    DBG(getSamples().getValueTree().toXmlString());
+    DBG("===================================================");
+    DBG(newSamples.toXmlString());
+    DBG("===================================================");
+    DBG(objectData.toXmlString());
 }
 
 SampleArray Project::getSamples() const
@@ -156,37 +208,19 @@ SampleArray Project::getSamples() const
     return samples;
 }
 
-void Project::getSamples (int layer, OwnedArray<Sample>& out) const
+void Project::getSamples (int layerIdx, OwnedArray<Sample>& out) const
 {
+    if (! isPositiveAndBelow (layerIdx, getNumLayers()))
+        return;
+
     const auto samples = getSamples();
-    // for (int i = 0; i < samples.size(); ++i)
-    //     if (samples[i].isForLayer (layer))
-    //         out.add (new Sample (samples [i]));
-}
+    DBG(samples.getValueTree().toXmlString());
 
-#if 0
-void Project::rebuildNotes()
-{
-    ValueTree oldNotes (objectData.getChildWithName (Tags::notes));
-    ValueTree newNotes (Tags::notes);
-    ValueTree note (Tags::note);
-    
-    const int noteStart = getProperty (Tags::noteStart, 34);
-    const int noteEnd   = getProperty (Tags::noteEnd, 60);
-    const int noteStep  = getProperty (Tags::noteStep, 4);
-
-    for (int layerIdx = 0; layerIdx < getNumLayers(); ++layerIdx)
-    {
-        const Layer layer (getLayer (layerIdx));
-        for (int note = noteStart; note <= noteEnd; note += noteStep)
-        {
-            ValueTree noteData (Tags::note);
-            noteData.setProperty (Tags::value, note, nullptr)
-                    .setProperty (Tags::layer, layerIdx, nullptr);
-        }
-    }
+    const auto layer = getLayer (layerIdx);
+    for (int i = 0; i < samples.size(); ++i)
+        if (samples[i].isForLayer (layer))
+            out.add (new Sample (samples [i]));
 }
-#endif
 
 //=========================================================================
 void Project::clearPlugin()
@@ -309,6 +343,14 @@ void Project::setMissingProperties()
     objectData.getOrCreateChildWithName (Tags::layers,  nullptr);
     objectData.getOrCreateChildWithName (Tags::samples, nullptr);
     objectData.getOrCreateChildWithName (Tags::plugin,  nullptr);
+}
+
+ValueTree Project::find (const Identifier& listType, 
+                         const Identifier& property,
+                         const var& value) const
+{
+    const auto parent = objectData.getChildWithName (listType);
+    return parent.getChildWithProperty (property, value);
 }
 
 }

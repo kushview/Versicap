@@ -6,6 +6,7 @@
 namespace vcp {
 namespace Tags {
 
+    static const Identifier active          = "active";
     static const Identifier baseName        = "baseName";
     static const Identifier bitDepth        = "bitDepth";
     static const Identifier channels        = "channels";
