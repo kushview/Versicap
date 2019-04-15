@@ -43,6 +43,7 @@ public:
     String getUuidString() const;
     bool isForLayer (const Layer& layer) const;
 
+    File getFile() const;
     int getNote() const { return getProperty (Tags::note); }
     double getStartTime() const;
     double getLength() const;
@@ -89,6 +90,7 @@ public:
 class Project : public kv::ObjectModel
 {
 public:
+    Project (const ValueTree& data) : kv::ObjectModel (data) {}
     Project();
     ~Project();
     

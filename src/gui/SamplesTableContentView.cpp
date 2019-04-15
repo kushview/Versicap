@@ -77,6 +77,12 @@ public:
         }
     }
 
+    void selectedRowsChanged (int lastRowSelected) override
+    {
+        auto project = getProject();
+        if (auto* sample = filtered [lastRowSelected])
+            project.setActiveSample (*sample);
+    }
    #if 0
     virtual Component* refreshComponentForCell (int rowNumber, int columnId, bool isRowSelected,
                                                 Component* existingComponentToUpdate);
@@ -86,7 +92,7 @@ public:
     virtual void sortOrderChanged (int newSortColumnId, bool isForwards);
     virtual int getColumnAutoSizeWidth (int columnId);
     virtual String getCellTooltip (int rowNumber, int columnId);
-    virtual void selectedRowsChanged (int lastRowSelected);
+    
     virtual void deleteKeyPressed (int lastRowSelected);
     virtual void returnKeyPressed (int lastRowSelected);
     virtual void listWasScrolled();

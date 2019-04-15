@@ -77,12 +77,12 @@ void MainMenu::buildFileMenu (PopupMenu& menu)
 
 void MainMenu::buildDebugMenu (PopupMenu& menu)
 {
-    menu.addItem (9000, "Online documentation...");
+    menu.addItem (9000, "Debug something...");
 }
 
 void MainMenu::buildHelpMenu (PopupMenu& menu)
 {
-    menu.addItem (3000, "Open Project");
+    menu.addItem (3000, "Online documentation...");
 }
 
 }

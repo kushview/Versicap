@@ -61,6 +61,24 @@ bool Sample::isForLayer (const Layer& layer) const
     return !sid.isNull() && !lid.isNull() && sid == lid;
 }
 
+File Sample::getFile() const
+{
+    auto filename = getProperty(Tags::file).toString();
+    if (filename.isEmpty())
+        return File();
+    Project project (objectData.getParent().getParent());
+    auto path = project.getProperty (Tags::dataPath).toString();
+    
+    if (File::isAbsolutePath (path))
+    {
+        File file (path);
+        return file.getChildFile ("samples")
+                   .getChildFile (filename);
+    }
+
+    return File();
+}
+
 //=========================================================================
 Project::Project()
     : ObjectModel (Tags::project)
@@ -195,11 +213,11 @@ void Project::setSamples (const ValueTree& newSamples)
     }
 
     objectData.addChild (newSamples, lastIndex, nullptr);
-    DBG(getSamples().getValueTree().toXmlString());
-    DBG("===================================================");
-    DBG(newSamples.toXmlString());
-    DBG("===================================================");
-    DBG(objectData.toXmlString());
+    // DBG(getSamples().getValueTree().toXmlString());
+    // DBG("===================================================");
+    // DBG(newSamples.toXmlString());
+    // DBG("===================================================");
+    // DBG(objectData.toXmlString());
 }
 
 SampleArray Project::getSamples() const
@@ -214,7 +232,6 @@ void Project::getSamples (int layerIdx, OwnedArray<Sample>& out) const
         return;
 
     const auto samples = getSamples();
-    DBG(samples.getValueTree().toXmlString());
 
     const auto layer = getLayer (layerIdx);
     for (int i = 0; i < samples.size(); ++i)

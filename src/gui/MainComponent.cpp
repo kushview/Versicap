@@ -2,6 +2,7 @@
 #include "gui/ContentView.h"
 #include "gui/LayersTableContentView.h"
 #include "gui/SamplesTableContentView.h"
+#include "gui/SampleEditContentView.h"
 #include "gui/MainComponent.h"
 #include "gui/MainTabs.h"
 #include "gui/UnlockForm.h"
@@ -112,7 +113,6 @@ public:
             if (chooser.browseForFileToSave (true))
             {
                 versicap.saveProject (chooser.getResult());
-                DBG(versicap.getProject().getValueTree().toXmlString());
             }
         };
 
@@ -128,7 +128,7 @@ public:
         samples.reset (new SamplesTableContentView (versicap));
         addAndMakeVisible (samples.get());
 
-        view.reset (new ContentView (versicap));
+        view.reset (new SampleEditContentView (versicap));
         addAndMakeVisible (view.get());
 
         progress.onCancel = std::bind (&Versicap::stopRendering, &vc);
