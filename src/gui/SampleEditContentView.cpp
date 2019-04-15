@@ -13,10 +13,15 @@ public:
     Content (SampleEditContentView& view)
         : owner (view)
     {
+        addAndMakeVisible (wave);
         watcher.onActiveSampleChanged = [this]()
         {
             const auto sample = watcher.getProject().getActiveSample();
-            DBG(sample.getFile().getFullPathName());
+            if (sample.getFile().existsAsFile())
+            {
+                wave.setAudioThumbnail (owner.versicap.createAudioThumbnail (sample.getFile()));
+                resized();
+            }
         };
     }
 
@@ -26,9 +31,13 @@ public:
         watcher.setProject (project);
     }
 
+    void resized() override {
+        wave.setBounds (getLocalBounds());
+    }
 private:
     SampleEditContentView& owner;
     ProjectWatcher watcher;
+    WaveDisplayComponent wave;
 };
 
 SampleEditContentView::SampleEditContentView (Versicap& vc)

@@ -51,6 +51,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
                         public ChangeListener
 {
     Impl()
+        : peaks (32)
     { 
     }
 
@@ -319,6 +320,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     Project project;
 
     Settings settings;
+    AudioThumbnailCache peaks;
     ApplicationCommandManager commands;
     OwnedArray<Exporter> exporters;
     OptionalScopedPointer<AudioDeviceManager> devices;
@@ -537,6 +539,14 @@ void Versicap::setRenderContext (const RenderContext& context)
     impl->sourceType.set (impl->context.source);
 }
 
+AudioThumbnail* Versicap::createAudioThumbnail (const File& file)
+{
+    auto* thumb = new AudioThumbnail (1, *impl->formats, impl->peaks);
+    thumb->setSource (new FileInputSource (file));
+    return thumb;
+}
+
+AudioThumbnailCache& Versicap::getAudioThumbnailCache()     { return impl->peaks; }
 ApplicationCommandManager& Versicap::getCommandManager()    { return impl->commands; }
 const RenderContext& Versicap::getRenderContext() const     { return impl->context; }
 const OwnedArray<Exporter>& Versicap::getExporters() const  { return impl->exporters; }

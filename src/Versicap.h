@@ -57,10 +57,14 @@ public:
     const OwnedArray<Exporter>& getExporters() const;
 
     //=========================================================================
+    AudioThumbnailCache& getAudioThumbnailCache();
     ApplicationCommandManager& getCommandManager();
     AudioDeviceManager& getDeviceManager();
     PluginManager& getPluginManager();
     AudioFormatManager& getAudioFormats();
+
+    //=========================================================================
+    AudioThumbnail* createAudioThumbnail (const File& file);
 
     //=========================================================================
     void loadPlugin (const PluginDescription&, bool clearProjectPlugin = true);

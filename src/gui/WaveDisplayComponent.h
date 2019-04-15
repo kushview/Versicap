@@ -8,9 +8,7 @@ namespace vcp {
 class WaveDisplayComponent : public Component
 {
 public:
-    WaveDisplayComponent (AudioFormatManager& f, AudioThumbnailCache& c)
-        : formats (f), cache (c)
-    { }
+    WaveDisplayComponent() { }
     
     virtual ~WaveDisplayComponent() = default;
 
@@ -21,11 +19,17 @@ public:
         repaint();
     }
 
-    AudioThumbnail& getAudioThumbnail() { jassert(thumb); return *thumb; }
+    AudioThumbnail* getAudioThumbnail() { return thumb.get(); }
+
+    void paint (Graphics& g) override
+    {
+        if (thumb)
+        {
+            thumb->drawChannel (g, getLocalBounds(), 0.0, 4.0, 0, 1.f);
+        }
+    }
 
 private:
-    AudioFormatManager& formats;
-    AudioThumbnailCache& cache;
     std::unique_ptr<AudioThumbnail> thumb;
 };
 
