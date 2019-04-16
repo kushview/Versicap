@@ -17,6 +17,7 @@ public:
         addAndMakeVisible (nameLabel);
         nameLabel.setText ("Name", dontSendNotification);
         addAndMakeVisible (name);
+        name.setFont (Font (13.f));
         name.setTextToShowWhenEmpty ("Instrument/Patch name",
             findColour (TextEditor::textColourId).darker());
 
@@ -26,6 +27,14 @@ public:
         directory.setCurrentFile (Versicap::getSamplesPath(),
                                   false, dontSendNotification);
         directory.addListener (this);
+
+        addAndMakeVisible (sourceLabel);
+        sourceLabel.setText ("Source", dontSendNotification);
+        addAndMakeVisible (sourceCombo);
+        sourceCombo.addItem ("MIDI Device", 1 + SourceType::MidiDevice);
+        sourceCombo.addItem ("Plugin", 1 + SourceType::AudioPlugin);
+        sourceCombo.onChange = [this]() { sourceChanged(); };
+        sourceCombo.setSelectedId (1, dontSendNotification);
 
         addAndMakeVisible (formatLabel);
         formatLabel.setText ("Format", dontSendNotification);
@@ -54,6 +63,21 @@ public:
         addAndMakeVisible (sampleRateLabel);
         sampleRateLabel.setText ("Sample Rate", dontSendNotification);
         addAndMakeVisible (sampleRateCombo);
+
+        addAndMakeVisible (latencyLabel);
+        latencyLabel.setText ("Latency Comp.", dontSendNotification);
+        latencyLabel.setTooltip ("Latency compensation of sample recordings");
+        addAndMakeVisible (latency);
+        latency.setRange (0.0, 9999.0, 1.0);
+        setupSlider (latency);
+        latency.setTextBoxIsEditable (true);
+        latency.textFromValueFunction = [](double value) -> String
+        {
+            String text = String (roundToInt (value));
+            text << " (samples)";
+            return text;
+        };
+        latency.updateText();
 
         for (auto* const exporter : versicap.getExporters())
         {
@@ -86,6 +110,7 @@ public:
     {
         auto project = versicap.getProject();
         name.getTextValue().referTo (project.getPropertyAsValue (Tags::name));
+
         const auto dataPath = project.getProperty (Tags::dataPath).toString();
         if (File::isAbsolutePath (dataPath))
         {
@@ -99,13 +124,20 @@ public:
             directory.setCurrentFile (File(), false, dontSendNotification);
         }
 
+        sourceCombo.setSelectedId (1 + project.getSourceType(), dontSendNotification);
+
         formatCombo.setSelectedId (1 + project.getFormatType(), dontSendNotification);
         channelsCombo.getSelectedIdAsValue().referTo (
             project.getPropertyAsValue (Tags::channels));
         bitDepthCombo.getSelectedIdAsValue().referTo (
             project.getPropertyAsValue (Tags::bitDepth));
+
+        latency.getValueObject().referTo (
+            project.getPropertyAsValue (Tags::latencyComp));
     }
     
+    int getSourceType() const { return sourceCombo.getSelectedId() - 1; }
+
     void updateFormatParams();
 
     void stabilizeSettings() override
@@ -117,37 +149,39 @@ public:
     {
         auto r = getLocalBounds().reduced (8, 10);
         layout (r, nameLabel, name, 0, 22, 4);
-        layout (r, directoryLabel, directory, 0, 22, 16);
+        layout (r, directoryLabel, directory, 0, 22);
         
+        layout (r, sourceLabel, sourceCombo);
+
         layout (r, formatLabel, formatCombo, 0, 22, 4);
         layout (r, channelsLabel, channelsCombo, 0, 22, 4);
-        layout (r, bitDepthLabel, bitDepthCombo, 0, 22, 4);
-        // layout (r, sampleRateLabel, sampleRateCombo);
-
-        // for (int i = 0; i < exporterLabels.size(); ++i)
-        // {
-        //     layout (r,  *exporterToggles [i], *exporterLabels [i],
-        //             10, 22, 4);
-        // }
+        layout (r, bitDepthLabel, bitDepthCombo, 0, 22);
+        layout (r, latencyLabel, latency);
     }
 
 private:
     Label nameLabel;
     Label directoryLabel;
+    Label sourceLabel;
     Label formatLabel;
     Label bitDepthLabel;
     Label sampleRateLabel;
     Label channelsLabel;
+    Label latencyLabel;
 
     TextEditor name;
     FilenameComponent directory;
+    ComboBox sourceCombo;
     ComboBox formatCombo;
     ComboBox bitDepthCombo;
     ComboBox sampleRateCombo;
     ComboBox channelsCombo;
+    Slider latency;
 
     OwnedArray<Label> exporterLabels;
     OwnedArray<TextButton> exporterToggles;
+
+    void sourceChanged();
 };
 
 }

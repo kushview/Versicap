@@ -25,7 +25,7 @@ public:
         auto colour = kv::LookAndFeel_KV1::widgetBackgroundColor.darker();
         setColour (TabbedComponent::backgroundColourId, colour);
         colour = kv::LookAndFeel_KV1::widgetBackgroundColor;
-        addTab ("Engine",   colour, new EngineContentView (vc),   true);
+        addTab ("Engine",   colour, new EngineContentView (vc),    true);
         // addTab ("Notes",    colour, new NotesComponent (vc),    true);
         // addTab ("Sampling", colour, new SamplingComponent (vc), true);
         // addTab ("Layers",   colour, new LayersComponent (vc),   true);
@@ -74,15 +74,13 @@ public:
         : TabbedComponent (TabbedButtonBar::TabsAtTop),
           versicap (vc)
     {
-        setTabBarDepth (26);
+        setTabBarDepth (25);
         auto colour = kv::LookAndFeel_KV1::widgetBackgroundColor.darker();
         setColour (TabbedComponent::backgroundColourId, colour);
         colour = kv::LookAndFeel_KV1::widgetBackgroundColor;
-        addTab ("Engine",   colour, new EngineContentView (vc),   true);
-        // addTab ("Notes",    colour, new NotesComponent (vc),    true);
-        // addTab ("Sampling", colour, new SamplingComponent (vc), true);
-        // addTab ("Layers",   colour, new LayersComponent (vc),   true);
-        // addTab ("Looping",  colour, new LoopingComponent (vc),  true);
+        addTab ("Devices",  colour, new EngineContentView (vc), true);
+        addTab ("Notes",    colour, new NotesComponent (vc),    true);
+        addTab ("Looping",  colour, new LoopingComponent (vc),  true);
         addTab ("Output",   colour, new OutputComponent (vc),   true);
 
         updateSettings();

@@ -14,14 +14,6 @@ public:
     EngineContentView (Versicap& vc)
         : SettingGroup (vc)
     {
-        addAndMakeVisible (sourceLabel);
-        sourceLabel.setText ("Source", dontSendNotification);
-        addAndMakeVisible (sourceCombo);
-        sourceCombo.addItem ("MIDI Device", 1 + SourceType::MidiDevice);
-        sourceCombo.addItem ("Plugin", 1 + SourceType::AudioPlugin);
-        sourceCombo.onChange = [this]() { sourceChanged(); };
-        sourceCombo.setSelectedId (1, dontSendNotification);
-
         addAndMakeVisible (midiInputLabel);
         midiInputLabel.setText ("MIDI In", dontSendNotification);
         addAndMakeVisible (midiInputCombo);
@@ -91,7 +83,7 @@ public:
             for (int i = 0; i < chans.size(); i += 2)
             {
                 String name = String (i + 1);
-                name << " - " << int (i + 2);
+                name << "-" << int (i + 2);
                 stereo.addItem (i + 200, name);
             }
 
@@ -121,7 +113,7 @@ public:
             for (int i = 0; i < chans.size(); i += 2)
             {
                 String name = String (i + 1);
-                name << " - " << int (i + 2);
+                name << "-" << int (i + 2);
                 stereo.addItem (i + 200, name);
             }
 
@@ -131,25 +123,8 @@ public:
                                 ModalCallbackFunction::forComponent (EngineContentView::outputChannelChosen, this));
         };
 
-        addAndMakeVisible (latencyLabel);
-        latencyLabel.setText ("Latency Comp.", dontSendNotification);
-        latencyLabel.setTooltip ("Latency compensation of sample recordings");
-        addAndMakeVisible (latency);
-        latency.setRange (0.0, 9999.0, 1.0);
-        setupSlider (latency);
-        latency.setTextBoxIsEditable (true);
-        latency.textFromValueFunction = [](double value) -> String
-        {
-            String text = String (roundToInt (value));
-            text << " (samples)";
-            return text;
-        };
-        latency.updateText();
-
         setSize (300, 300);
     }
-
-    int getSourceType() const { return sourceCombo.getSelectedId() - 1; }
     
     void updateSettings() override;
 
@@ -166,29 +141,7 @@ public:
     void stabilizeSettings() override
     {
         updatePluginButton();
-        switch (getSourceType())
-        {
-            case SourceType::MidiDevice:
-            {
-                // midiInputLabel.setVisible (true);
-                // midiInputCombo.setVisible (true);
-                midiOutputLabel.setVisible (true);
-                midiOutputCombo.setVisible (true);
-                pluginLabel.setVisible (false);
-                pluginButton.setVisible (false);
-            } break;
-
-            case SourceType::AudioPlugin:
-            {
-                // midiInputLabel.setVisible (false);
-                // midiInputCombo.setVisible (false);
-                midiOutputLabel.setVisible (false);
-                midiOutputCombo.setVisible (false);
-                pluginLabel.setVisible (true);
-                pluginButton.setVisible (true);
-            } break;
-        }
-
+        
         ensureCorrectAudioInput();
         ensureCorrectAudioOutput();
         ensureCorrectMidiInput();
@@ -208,23 +161,16 @@ public:
     void resized() override
     {
         auto r = getLocalBounds().reduced (8, 10);
-        layout (r, sourceLabel, sourceCombo);
         
         layout (r, midiInputLabel, midiInputCombo, 0, 22, 4);
-        if (SourceType::MidiDevice == sourceCombo.getSelectedId() - 1)
-        {    
-            layout (r, midiOutputLabel, midiOutputCombo);
-        }
-        else
-        {
-            layout (r, pluginLabel, pluginButton);
-        }
+        layout (r, midiOutputLabel, midiOutputCombo);
+        
+        layout (r, pluginLabel, pluginButton);
         
         layout (r, inputDeviceLabel, inputDevice, 0, 22, 4);
         layout (r, outputDeviceLabel, outputDevice);
         layout (r, sampleRateLabel, sampleRateCombo, 0, 22, 4);
         layout (r, bufferSizeLabel, bufferSizeCombo);
-        layout (r, latencyLabel, latency);
     }
 
     static void pluginChosen (int, EngineContentView*);
@@ -235,7 +181,6 @@ private:
     PluginDescription plugin;
     StringArray midiInputs, midiOutputs;
 
-    Label sourceLabel;
     Label midiInputLabel;
     Label midiOutputLabel;
     Label pluginLabel;
@@ -243,9 +188,7 @@ private:
     Label bufferSizeLabel;
     Label inputDeviceLabel;
     Label outputDeviceLabel;
-    Label latencyLabel;
 
-    ComboBox sourceCombo;
     ComboBox midiInputCombo;
     ComboBox midiOutputCombo;
     PluginPicker pluginButton;
@@ -255,7 +198,6 @@ private:
     AudioDeviceSelect outputDevice;
     TextButton inputChannelButton;
     TextButton outputChannelButton;
-    Slider latency;
 
     void refreshAudioDevices();
     void refreshMidiDevices();

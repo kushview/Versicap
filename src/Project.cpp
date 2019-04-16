@@ -47,6 +47,8 @@ void Layer::setMissingProperties()
 
 void Layer::getProperties (Array<PropertyComponent*>& props)
 {
+    props.add (new TextPropertyComponent (getPropertyAsValue (Tags::name), 
+        "Name", 100, false, true));
     props.add (new SliderPropertyComponent (getPropertyAsValue (Tags::velocity, true),
         "Velocity", 0, 127, 1, 1, false));
 }
@@ -85,9 +87,10 @@ File Sample::getFile() const
     return File();
 }
 
-void Sample::getProperties (Array<PropertyComponent*>&)
+void Sample::getProperties (Array<PropertyComponent*>& props)
 {
-
+    props.add (new TextPropertyComponent (getPropertyAsValue (Tags::name), 
+        "Name", 100, false, true));
 }
 
 //=========================================================================
@@ -191,7 +194,10 @@ Layer Project::addLayer()
 {
     auto layers = objectData.getChildWithName (Tags::layers);
     Layer layer;
-    layer.setProperty (Tags::velocity, 127);
+    String layerName = "Layer ";
+    layerName << int (getNumLayers() + 1);
+    layer.setProperty (Tags::velocity, 127)
+         .setProperty (Tags::name, layerName);
     layers.appendChild (layer.getValueTree(), nullptr);
     return layer;
 }

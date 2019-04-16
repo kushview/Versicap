@@ -62,6 +62,7 @@ public:
     AudioDeviceManager& getDeviceManager();
     PluginManager& getPluginManager();
     AudioFormatManager& getAudioFormats();
+    MidiKeyboardState& getMidiKeyboardState();
 
     //=========================================================================
     AudioThumbnail* createAudioThumbnail (const File& file);

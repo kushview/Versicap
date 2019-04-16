@@ -61,8 +61,7 @@ public:
         if (text.isEmpty())
             text = "Layer " + String (1 + project.indexOf (layer));
 
-        g.drawText (text,
-                    0, 0, width, height, 
+        g.drawText (text, 0, 0, width, height, 
                     Justification::centredLeft);
     }
 
@@ -71,6 +70,13 @@ public:
         auto project = watcher.getProject();
         const auto layer = project.getLayer (lastRowSelected);
         project.setActiveLayer (layer);
+    }
+
+    void deleteKeyPressed (int lastRowSelected) override
+    {
+        auto project = watcher.getProject();
+        const auto layer = project.getLayer (lastRowSelected);
+        project.removeLayer (project.indexOf (layer));
     }
 
    #if 0

@@ -31,6 +31,20 @@ public:
         addAndMakeVisible (keyStride);
         keyStride.setRange (1, 12, 1);
         setupSlider (keyStride);
+
+        addAndMakeVisible (noteLengthLabel);
+        noteLengthLabel.setText ("Note On Len.", dontSendNotification);
+        addAndMakeVisible (noteLength);
+        noteLength.setRange (1, 10000, 1);
+        noteLength.textFromValueFunction = SettingGroup::milliSecondValueInt;
+        setupSlider (noteLength);
+
+        addAndMakeVisible (tailLengthLabel);
+        tailLengthLabel.setText ("Note Off Len.", dontSendNotification);
+        addAndMakeVisible (tailLength);
+        tailLength.setRange (1, 10000, 1);
+        tailLength.textFromValueFunction = SettingGroup::milliSecondValueInt;
+        setupSlider (tailLength);
     }
 
     ~NotesComponent()
@@ -44,6 +58,8 @@ public:
         keyStart.getValueObject().referTo (project.getPropertyAsValue (Tags::noteStart));
         keyEnd.getValueObject().referTo (project.getPropertyAsValue (Tags::noteEnd));
         keyStride.getValueObject().referTo (project.getPropertyAsValue (Tags::noteStep));
+        noteLength.getValueObject().referTo (project.getPropertyAsValue (Tags::noteLength));
+        tailLength.getValueObject().referTo (project.getPropertyAsValue (Tags::tailLength));
     }
 
     void stabilizeSettings() override
@@ -73,18 +89,26 @@ public:
     void resized() override
     {
         auto r = getLocalBounds().reduced (8, 10);
-        layout (r, keyStartLabel, keyStart);
-        layout (r, keyEndLabel, keyEnd);
+        layout (r, keyStartLabel, keyStart, 0, 22, 4);
+        layout (r, keyEndLabel, keyEnd, 0, 22, 4);
         layout (r, keyStrideLabel, keyStride);
+
+        layout (r, noteLengthLabel, noteLength, 0, 22, 4);
+        layout (r, tailLengthLabel, tailLength);
     }
 
 private:
     Label keyStartLabel;
     Label keyEndLabel;
     Label keyStrideLabel;
+    Label noteLengthLabel;
+    Label tailLengthLabel;
+
     Slider keyStart;
     Slider keyEnd;
     Slider keyStride;
+    Slider noteLength;
+    Slider tailLength;
 };
 
 }

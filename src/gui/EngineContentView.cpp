@@ -12,15 +12,7 @@ namespace vcp {
 void EngineContentView::updateSettings()
 {
     auto project = versicap.getProject();
-    sourceCombo.setSelectedId (1 + project.getSourceType(), dontSendNotification);
-    latency.getValueObject().referTo (project.getPropertyAsValue (Tags::latencyComp));
-}
-
-void EngineContentView::sourceChanged()
-{
-    versicap.getProject().setProperty (Tags::source,
-        SourceType::getSlug (getSourceType()));
-    stabilizeSettings();
+    
 }
 
 void EngineContentView::refreshMidiDevices()

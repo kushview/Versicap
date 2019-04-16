@@ -327,7 +327,9 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     OptionalScopedPointer<AudioFormatManager> formats;
     OptionalScopedPointer<PluginManager> plugins;
     std::unique_ptr<UnlockStatus> unlock;
-    
+    MidiKeyboardState keyboardState;
+
+    //=========================================================================
     std::unique_ptr<AudioProcessor> processor;
     std::unique_ptr<PluginWindow> window;
     
@@ -339,10 +341,12 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     int pluginNumIns = 0;
     int pluginNumOuts = 0;
 
+    //=========================================================================
     std::unique_ptr<Render> render;
     RenderContext context;
     AudioSampleBuffer renderBuffer;
 
+    //=========================================================================
     int inputLatency  = 0;
     int outputLatency = 0;
     int extraLatency  = 0;
@@ -350,10 +354,12 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     int bufferSize = 0;
     int numInputChans = 0, numOutputChans = 0;
 
+    //=========================================================================
     HeapBlock<float*> channels;
     AudioSampleBuffer tempBuffer;
     AudioSampleBuffer pluginBuffer;
     
+    //=========================================================================
     MidiBuffer incomingMidi;
     MidiBuffer renderMidi;
     MidiMessageCollector messageCollector;
@@ -476,10 +482,14 @@ void Versicap::initialize()
     initializeAudioDevice();
     initializeUnlockStatus();
     initializeRenderContext();
+
+    impl->keyboardState.addListener (&impl->messageCollector);
 }
 
 void Versicap::shutdown()
 {
+    impl->keyboardState.removeListener (&impl->messageCollector);
+
     auto& unlock = getUnlockStatus();
     unlock.removeChangeListener (impl.get());
     unlock.save();
@@ -553,6 +563,7 @@ const OwnedArray<Exporter>& Versicap::getExporters() const  { return impl->expor
 Settings& Versicap::getSettings()                           { return impl->settings; }
 AudioDeviceManager& Versicap::getDeviceManager()            { return *impl->devices; }
 AudioFormatManager& Versicap::getAudioFormats()             { return *impl->formats; }
+MidiKeyboardState& Versicap::getMidiKeyboardState()         { return impl->keyboardState; }
 PluginManager& Versicap::getPluginManager()                 { return *impl->plugins; }
 UnlockStatus& Versicap::getUnlockStatus()                   { return *impl->unlock; }
 
@@ -609,6 +620,7 @@ void Versicap::closePlugin (bool clearProjectPlugin)
         impl->pluginLatency     = 0;
         impl->pluginNumIns      = 0;
         impl->pluginNumOuts     = 0;
+
     }
 
     if (clearProjectPlugin)

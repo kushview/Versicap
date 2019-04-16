@@ -78,10 +78,10 @@ public:
             setContentOwned (new MainComponent (vc), true);
 
             setResizable (true, false);
-            constrain.setMinimumSize (540, 340);
+            constrain.setMinimumSize (870, 460);
             // constrain.setMaximumSize (1280, 340);
             setConstrainer (&constrain);
-            centreWithSize (640, 360 + 240);
+            centreWithSize (1200, 600);
 
             if (auto* props = versicap.getSettings().getUserSettings())
             {

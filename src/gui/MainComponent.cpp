@@ -139,6 +139,11 @@ public:
         engine.reset (new EngineTabs (versicap));
         addAndMakeVisible (engine.get());
 
+        keyboard.reset (new MidiKeyboardComponent (versicap.getMidiKeyboardState(), 
+            MidiKeyboardComponent::horizontalKeyboard));
+        keyboard->setKeyWidth (24);
+        addAndMakeVisible (keyboard.get());
+
         progress.onCancel = std::bind (&Versicap::stopRendering, &vc);
         setSize (440, 340);
     }
@@ -170,6 +175,8 @@ public:
 
         recordButton.setBounds (r2.removeFromRight (60));
 
+        keyboard->setBounds (r.removeFromBottom (60));
+
         r.removeFromTop (1);
         r2 = r.removeFromLeft (240);
         
@@ -177,7 +184,7 @@ public:
         samples->setBounds (r2);
 
         auto r3 = r.removeFromRight (240);
-        engine->setBounds (r3.removeFromTop (300));
+        engine->setBounds (r3.removeFromBottom (260));
         properties->setBounds (r3);
         
         r.removeFromLeft (2);
@@ -249,6 +256,7 @@ public:
     RenderProgress& getRenderProgress() { return progress; }
 
 private:
+    friend class MainComponent;
     MainComponent& owner;
     Versicap& versicap;
     Project project;
@@ -265,6 +273,8 @@ private:
     TextButton exportButton;
     TextButton recordButton;
     RenderProgress progress;
+
+    std::unique_ptr<MidiKeyboardComponent> keyboard;
 
     Component::SafePointer<UnlockForm> unlock;
 
@@ -299,7 +309,7 @@ MainComponent::MainComponent (Versicap& vc)
     addAndMakeVisible (content.get());
     setSize (600, 400);
 
-    auto& tabs = content->getTabs();
+    auto& tabs = *content->engine;
     tabs.refresh();
 
     if (auto* props = versicap.getSettings().getUserSettings())
@@ -315,8 +325,6 @@ MainComponent::MainComponent (Versicap& vc)
 
 MainComponent::~MainComponent()
 {
-    const auto ctx = content->getTabs().getRenderContext();
-    versicap.setRenderContext (ctx);
     versicap.removeListener (this);
     versicap.getUnlockStatus().removeChangeListener (this);
     content.reset();
@@ -358,7 +366,7 @@ void MainComponent::renderWillStop()
 void MainComponent::saveSettings()
 {
     if (auto* props = versicap.getSettings().getUserSettings())
-        props->setValue ("currentTab", content->getTabs().getCurrentTabIndex());
+        props->setValue ("currentTab", content->engine->getCurrentTabIndex());
 }
 
 void MainComponent::startRendering()

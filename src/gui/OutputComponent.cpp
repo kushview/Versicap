@@ -40,4 +40,11 @@ void OutputComponent::updateFormatParams()
     }
 }
 
+void OutputComponent::sourceChanged()
+{
+    versicap.getProject().setProperty (Tags::source,
+        SourceType::getSlug (getSourceType()));
+    stabilizeSettings();
+}
+
 }
