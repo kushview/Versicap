@@ -18,7 +18,7 @@ public:
         NumRootItems
     };
 
-    MainMenu (DocumentWindow&);
+    MainMenu (DocumentWindow&, ApplicationCommandManager&);
     ~MainMenu();
 
     //=========================================================================
@@ -31,6 +31,7 @@ public:
 
 private:
     DocumentWindow& owner;
+    ApplicationCommandManager& commands;
     std::unique_ptr<PopupMenu> macMenu;
 
     static void buildFileMenu (PopupMenu&);

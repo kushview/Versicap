@@ -1,11 +1,13 @@
 
 #include "gui/MainMenu.h"
+#include "Commands.h"
 
 namespace vcp {
 
 
-MainMenu::MainMenu (DocumentWindow& window)
-    : owner (window)
+MainMenu::MainMenu (DocumentWindow& window, ApplicationCommandManager& cmd)
+    : owner (window),
+      commands (cmd)
 {
 
 }
@@ -22,7 +24,8 @@ void MainMenu::setupMenu()
 {
    #if JUCE_MAC
     macMenu.reset (new PopupMenu());
-    macMenu->addItem (1000, "About Vesricap");
+    macMenu->addCommandItem (&commands, Commands::showAbout, "About Vesricap");
+    macMenu->addCommandItem (&commands, Commands::checkForUpdates, "Check for updates...");
     // macMenu->addCommandItem (&cmd, Commands::showAbout, Util::appName ("About"));
     // macMenu->addCommandItem (&cmd, Commands::checkNewerVersion, "Check For Updates...");
     // macMenu->addSeparator();

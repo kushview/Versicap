@@ -70,7 +70,7 @@ public:
                                          DocumentWindow::allButtons),
               versicap (vc)
         {
-            menu.reset (new MainMenu (*this));
+            menu.reset (new MainMenu (*this, versicap.getCommandManager()));
             menu->setupMenu();
 
             setUsingNativeTitleBar (true);
