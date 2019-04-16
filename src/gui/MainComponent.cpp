@@ -136,6 +136,9 @@ public:
         properties.reset (new ObjectPropertiesContentView (versicap));
         addAndMakeVisible (properties.get());
 
+        engine.reset (new EngineTabs (versicap));
+        addAndMakeVisible (engine.get());
+
         progress.onCancel = std::bind (&Versicap::stopRendering, &vc);
         setSize (440, 340);
     }
@@ -170,15 +173,15 @@ public:
         r.removeFromTop (1);
         r2 = r.removeFromLeft (240);
         
-
-        tabs.setBounds (r2.removeFromTop (300));
-        layers->setBounds (r2.removeFromTop (100));
+        layers->setBounds (r2.removeFromTop (120));
         samples->setBounds (r2);
 
         auto r3 = r.removeFromRight (240);
+        engine->setBounds (r3.removeFromBottom (300));
         properties->setBounds (r3);
         
         r.removeFromLeft (2);
+        
         view->setBounds (r);
 
         if (overlay.isVisible())
@@ -256,6 +259,7 @@ private:
     std::unique_ptr<LayersTableContentView> layers;
     std::unique_ptr<SamplesTableContentView> samples;
     std::unique_ptr<ObjectPropertiesContentView> properties;
+    std::unique_ptr<EngineTabs> engine;
 
     TextButton importButton;
     TextButton exportButton;
