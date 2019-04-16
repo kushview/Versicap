@@ -1,5 +1,4 @@
 
-
 #include "gui/ObjectPropertiesContentView.h"
 #include "gui/LayersTableContentView.h"
 #include "gui/SamplesTableContentView.h"
