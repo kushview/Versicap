@@ -177,7 +177,7 @@ public:
         samples->setBounds (r2);
 
         auto r3 = r.removeFromRight (240);
-        engine->setBounds (r3.removeFromBottom (300));
+        engine->setBounds (r3.removeFromTop (300));
         properties->setBounds (r3);
         
         r.removeFromLeft (2);
