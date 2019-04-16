@@ -17,6 +17,7 @@ public:
         keyStart.textFromValueFunction = SettingGroup::noteValue;
         keyStart.onValueChange = [this]() { stabilizeKeyStart(); };
         setupSlider (keyStart);
+        keyStart.setTextBoxIsEditable (true);
 
         addAndMakeVisible (keyEndLabel);
         keyEndLabel.setText ("Note End", dontSendNotification);
@@ -25,9 +26,10 @@ public:
         keyEnd.textFromValueFunction = SettingGroup::noteValue;
         keyEnd.onValueChange = [this]() { stabilizeKeyEnd(); };
         setupSlider (keyEnd);
+        keyEnd.setTextBoxIsEditable (true);
 
         addAndMakeVisible (keyStrideLabel);
-        keyStrideLabel.setText ("Key Stride", dontSendNotification);
+        keyStrideLabel.setText ("Note Step", dontSendNotification);
         addAndMakeVisible (keyStride);
         keyStride.setRange (1, 12, 1);
         setupSlider (keyStride);
