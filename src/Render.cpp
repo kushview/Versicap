@@ -28,7 +28,8 @@ Render::Render (AudioFormatManager& f)
     : formats (f), 
       thread ("vcprt"),
       started (*this),
-      stopped (*this)
+      stopped (*this),
+      cancelled (*this)
 { }
 
 Render::~Render()
@@ -223,31 +224,46 @@ void Render::handleAsyncUpdate()
     const auto captureDir = ctx.getCaptureDir();
     const auto projectDir = captureDir.getParentDirectory();
     const auto samplesDir = projectDir.getChildFile ("samples");
+    const bool wasCancelled = shouldCancel.get() == 1;
 
-    ValueTree manifest (Tags::samples);
-    
-    for (auto* detail : old)
+    if (! wasCancelled)
     {
-        for (auto* const info : detail->samples)
+        ValueTree manifest (Tags::samples);
+        
+        for (auto* detail : old)
         {
-            ValueTree sample (Tags::sample);
-            info->writer.reset();
-            sample.setProperty (Tags::uuid, Uuid().toString(), nullptr)
-                  .setProperty (Tags::layer, info->layerId.toString(), nullptr)
-                  .setProperty (Tags::file, info->file.getFileName(), nullptr)
-                  .setProperty (Tags::note, info->note, nullptr);
-            manifest.appendChild (sample, nullptr);
+            for (auto* const info : detail->samples)
+            {
+                ValueTree sample (Tags::sample);
+                info->writer.reset();
+                sample.setProperty (Tags::uuid, Uuid().toString(), nullptr)
+                    .setProperty (Tags::layer, info->layerId.toString(), nullptr)
+                    .setProperty (Tags::file, info->file.getFileName(), nullptr)
+                    .setProperty (Tags::note, info->note, nullptr);
+                manifest.appendChild (sample, nullptr);
+            }
         }
+        
+        if (samplesDir.exists())
+            samplesDir.deleteRecursively();
+        captureDir.copyDirectoryTo (samplesDir);
+        captureDir.deleteRecursively();
+        
+        samples = manifest;
+        
+        stopped.triggerAsyncUpdate();
     }
-    
-    if (samplesDir.exists())
-        samplesDir.deleteRecursively();
-    captureDir.copyDirectoryTo (samplesDir);
-    captureDir.deleteRecursively();
-    
-    samples = manifest;
-    
-    stopped.triggerAsyncUpdate();
+    else
+    {
+        for (auto* detail : old)
+            for (auto* const info : detail->samples)
+                info->writer.reset();
+        captureDir.deleteRecursively();
+        samples = ValueTree (Tags::samples);
+        cancelled.triggerAsyncUpdate();        
+    }
+
+    shouldCancel.set (0);
 }
 
 void Render::start (const RenderContext& newContext, int latencySamples)
@@ -314,6 +330,11 @@ void Render::start (const RenderContext& newContext, int latencySamples)
         details.swapWith (newDetails);
     }
 
+    if (shouldCancel.compareAndSetBool (0, 1))
+    {
+        DBG("[VCP] cancel flag reset");
+    }
+
     if (renderingRequest.compareAndSetBool (1, 0))
     {
         DBG("[VCP] render start requested");
@@ -323,11 +344,12 @@ void Render::start (const RenderContext& newContext, int latencySamples)
     newDetails.clear();
 }
 
-void Render::stop()
+void Render::cancel()
 {
+    shouldCancel.set (1);
     if (renderingRequest.compareAndSetBool (0, 1))
     {
-        DBG("[VCP] render stop requested");
+        DBG("[VCP] render cancel requested");
     }
 }
 

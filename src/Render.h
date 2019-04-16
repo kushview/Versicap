@@ -21,7 +21,7 @@ public:
     void release();
 
     void start (const RenderContext& newContext, int latencySamples = 0);
-    void stop();
+    void cancel();
 
     bool isRendering() const { return renderingRequest.get() == 1 || rendering.get() == 1; }
     CriticalSection& getCallbackLock() { return lock; }
@@ -35,6 +35,7 @@ public:
 
     std::function<void()> onStopped;
     std::function<void()> onStarted;
+    std::function<void()> onCancelled;
 
 private:
     Identifier samplesType { "samples" };
@@ -50,6 +51,8 @@ private:
 
     Atomic<int> rendering { 0 };
     Atomic<int> renderingRequest { 0 };
+    Atomic<int> shouldCancel { 0 };
+
     int writerDelay = 0;
 
     int64 frame = 0;
@@ -73,6 +76,13 @@ private:
         void handleAsyncUpdate()  { if (render.onStopped) render.onStopped(); }
         Render& render;
     } stopped;
+
+    struct Cancelled : public AsyncUpdater
+    {
+        Cancelled (Render& r) : render (r) { }
+        void handleAsyncUpdate()  { if (render.onCancelled) render.onCancelled(); }
+        Render& render;
+    } cancelled;
 
     void reset();
 };

@@ -262,7 +262,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     {
         const ScopedLock sl (render->getCallbackLock());
 
-        render->stop();
+        render->cancel();
         render->release();
 
         if (processor)
@@ -384,6 +384,12 @@ Versicap::Versicap()
         listeners.call ([](Listener& l) { l.renderWillStop(); });
         auto project = getProject();
         project.setSamples (impl->render->getSamples());
+        listeners.call ([](Listener& l) { l.renderStopped(); });
+    };
+
+    impl->render->onCancelled = [this]()
+    {
+        listeners.call ([](Listener& l) { l.renderWillStop(); });
         listeners.call ([](Listener& l) { l.renderStopped(); });
     };
 }
@@ -705,7 +711,7 @@ Result Versicap::startRendering (const RenderContext&)
 
 void Versicap::stopRendering()
 {
-    impl->render->stop();
+    impl->render->cancel();
     listeners.call ([](Listener& listener) { listener.renderWillStop(); });
 }
 
