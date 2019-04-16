@@ -1,6 +1,7 @@
 
 #ifndef VCP_STLIB
 
+#include "gui/LookAndFeel.h"
 #include "gui/MainComponent.h"
 #include "gui/MainMenu.h"
 
@@ -14,7 +15,7 @@ namespace vcp {
 class Application : public JUCEApplication
 {
 public:
-     Application() { }
+    Application() { }
 
     const String getApplicationName() override       { return ProjectInfo::projectName; }
     const String getApplicationVersion() override    { return ProjectInfo::versionString; }
@@ -22,10 +23,6 @@ public:
 
     void initialise (const String& commandLine) override
     {
-        Project dummy;
-        dummy.writeToFile (File("/Users/mfisher/Desktop/test.versicap"));
-        dummy.loadFile (File("/Users/mfisher/Desktop/test.versicap"));
-
         versicap.reset (new Versicap());
         if (maybeLaunchSlave (commandLine))
             return;
@@ -132,7 +129,7 @@ public:
 
 private:
     std::unique_ptr<MainWindow> mainWindow;
-    kv::LookAndFeel_KV1 look;
+    vcp::LookAndFeel look;
     std::unique_ptr<Versicap> versicap;
     OwnedArray<kv::ChildProcessSlave>   slaves;
 

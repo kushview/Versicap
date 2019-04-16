@@ -45,6 +45,12 @@ void Layer::setMissingProperties()
     stabilizePropertyPOD (Tags::velocity, 127);
 }
 
+void Layer::getProperties (Array<PropertyComponent*>& props)
+{
+    props.add (new SliderPropertyComponent (getPropertyAsValue (Tags::velocity, true),
+        "Velocity", 0, 127, 1, 1, false));
+}
+
 //=========================================================================
 String Sample::getUuidString() const {   return getProperty (Tags::uuid).toString(); }
 
@@ -77,6 +83,11 @@ File Sample::getFile() const
     }
 
     return File();
+}
+
+void Sample::getProperties (Array<PropertyComponent*>&)
+{
+
 }
 
 //=========================================================================

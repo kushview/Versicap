@@ -8,10 +8,10 @@
 
 namespace vcp {
 
-class EngineComponent : public SettingGroup
+class EngineContentView : public SettingGroup
 {
 public:
-    EngineComponent (Versicap& vc)
+    EngineContentView (Versicap& vc)
         : SettingGroup (vc)
     {
         addAndMakeVisible (sourceLabel);
@@ -35,7 +35,7 @@ public:
         addAndMakeVisible (pluginLabel);
         pluginLabel.setText ("Plugin", dontSendNotification);
         addAndMakeVisible (pluginButton);
-        pluginButton.onChoose = std::bind (&EngineComponent::choosePlugin, this);
+        pluginButton.onChoose = std::bind (&EngineContentView::choosePlugin, this);
         pluginButton.onEditor = std::bind (&Versicap::showPluginWindow, &versicap);
         pluginButton.onClose  = [this]()
         {
@@ -44,7 +44,7 @@ public:
         };
 
         auto applyAudioDeviceSettingsCallback = std::bind (
-            &EngineComponent::applyAudioDeviceSettings, this);
+            &EngineContentView::applyAudioDeviceSettings, this);
 
         addAndMakeVisible (sampleRateLabel);
         sampleRateLabel.setText ("Sample Rate", dontSendNotification);
@@ -98,7 +98,7 @@ public:
             menu.addSubMenu ("Mono", mono);
             menu.addSubMenu ("Stereo", stereo);
             menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&inputDevice.channels),
-                                ModalCallbackFunction::forComponent (EngineComponent::inputChannelChosen, this));
+                                ModalCallbackFunction::forComponent (EngineContentView::inputChannelChosen, this));
         };
 
         addAndMakeVisible (outputDeviceLabel);
@@ -128,7 +128,7 @@ public:
             menu.addSubMenu ("Mono", mono);
             menu.addSubMenu ("Stereo", stereo);
             menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&inputDevice.channels),
-                                ModalCallbackFunction::forComponent (EngineComponent::outputChannelChosen, this));
+                                ModalCallbackFunction::forComponent (EngineContentView::outputChannelChosen, this));
         };
 
         addAndMakeVisible (latencyLabel);
@@ -227,9 +227,9 @@ public:
         layout (r, latencyLabel, latency);
     }
 
-    static void pluginChosen (int, EngineComponent*);
-    static void inputChannelChosen (int, EngineComponent*);
-    static void outputChannelChosen (int, EngineComponent*);
+    static void pluginChosen (int, EngineContentView*);
+    static void inputChannelChosen (int, EngineContentView*);
+    static void outputChannelChosen (int, EngineContentView*);
 
 private:
     PluginDescription plugin;

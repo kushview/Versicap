@@ -21,6 +21,8 @@ public:
     bool isValid() const;
     uint8 getVelocity() const;
 
+    void getProperties (Array<PropertyComponent*>&);
+
     Layer& operator= (const Layer& o)
     {
         this->objectData = o.objectData;
@@ -48,6 +50,8 @@ public:
     double getStartTime() const;
     double getLength() const;
 
+    void getProperties (Array<PropertyComponent*>&);
+    
     Sample& operator= (const Sample& o)
     {
         objectData = o.objectData;

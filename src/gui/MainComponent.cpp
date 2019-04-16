@@ -1,8 +1,10 @@
 
-#include "gui/ContentView.h"
+
+#include "gui/ObjectPropertiesContentView.h"
 #include "gui/LayersTableContentView.h"
 #include "gui/SamplesTableContentView.h"
 #include "gui/SampleEditContentView.h"
+
 #include "gui/MainComponent.h"
 #include "gui/MainTabs.h"
 #include "gui/UnlockForm.h"
@@ -131,6 +133,9 @@ public:
         view.reset (new SampleEditContentView (versicap));
         addAndMakeVisible (view.get());
 
+        properties.reset (new ObjectPropertiesContentView (versicap));
+        addAndMakeVisible (properties.get());
+
         progress.onCancel = std::bind (&Versicap::stopRendering, &vc);
         setSize (440, 340);
     }
@@ -164,10 +169,15 @@ public:
 
         r.removeFromTop (1);
         r2 = r.removeFromLeft (240);
+        
+
         tabs.setBounds (r2.removeFromTop (300));
         layers->setBounds (r2.removeFromTop (100));
         samples->setBounds (r2);
 
+        auto r3 = r.removeFromRight (240);
+        properties->setBounds (r3);
+        
         r.removeFromLeft (2);
         view->setBounds (r);
 
@@ -191,7 +201,7 @@ public:
 
     Rectangle<int> getAlertBounds() const
     {
-        return getLocalBounds().reduced (40, 60);
+        return getLocalBounds().withSizeKeepingCentre (380, 180);
     }
 
     void showProgress (bool showIt)
@@ -245,6 +255,7 @@ private:
     std::unique_ptr<ContentView> view;
     std::unique_ptr<LayersTableContentView> layers;
     std::unique_ptr<SamplesTableContentView> samples;
+    std::unique_ptr<ObjectPropertiesContentView> properties;
 
     TextButton importButton;
     TextButton exportButton;

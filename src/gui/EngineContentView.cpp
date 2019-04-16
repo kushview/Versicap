@@ -1,5 +1,5 @@
 
-#include "gui/EngineComponent.h"
+#include "gui/EngineContentView.h"
 #include "gui/MainComponent.h"
 
 #include "Versicap.h"
@@ -9,21 +9,21 @@
 
 namespace vcp {
     
-void EngineComponent::updateSettings()
+void EngineContentView::updateSettings()
 {
     auto project = versicap.getProject();
     sourceCombo.setSelectedId (1 + project.getSourceType(), dontSendNotification);
     latency.getValueObject().referTo (project.getPropertyAsValue (Tags::latencyComp));
 }
 
-void EngineComponent::sourceChanged()
+void EngineContentView::sourceChanged()
 {
     versicap.getProject().setProperty (Tags::source,
         SourceType::getSlug (getSourceType()));
     stabilizeSettings();
 }
 
-void EngineComponent::refreshMidiDevices()
+void EngineContentView::refreshMidiDevices()
 {
     midiInputs = MidiInput::getDevices();
     midiInputCombo.clear (dontSendNotification);
@@ -40,7 +40,7 @@ void EngineComponent::refreshMidiDevices()
     ensureCorrectMidiOutput();
 }
 
-void EngineComponent::refreshAudioDevices()
+void EngineContentView::refreshAudioDevices()
 {
     auto& devices = versicap.getDeviceManager();
     const auto setup = devices.getAudioDeviceSetup();
@@ -82,7 +82,7 @@ void EngineComponent::refreshAudioDevices()
     ensureCorrectChannels();
 }
 
-void EngineComponent::applyAudioDeviceSettings()
+void EngineContentView::applyAudioDeviceSettings()
 {
     auto& devices = versicap.getDeviceManager();
     auto setup = devices.getAudioDeviceSetup();
@@ -116,7 +116,7 @@ void EngineComponent::applyAudioDeviceSettings()
     }
 }
 
-void EngineComponent::applyMidiInput()
+void EngineContentView::applyMidiInput()
 {
     if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
     {
@@ -129,7 +129,7 @@ void EngineComponent::applyMidiInput()
     }
 }
 
-void EngineComponent::applyMidiOutput()
+void EngineContentView::applyMidiOutput()
 {
     if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
     {
@@ -140,7 +140,7 @@ void EngineComponent::applyMidiOutput()
     }
 }
 
-void EngineComponent::ensureTimings()
+void EngineContentView::ensureTimings()
 {
     auto& devices = versicap.getDeviceManager();
     const auto setup = devices.getAudioDeviceSetup();
@@ -148,7 +148,7 @@ void EngineComponent::ensureTimings()
     bufferSizeCombo.setSelectedId (roundToInt (setup.bufferSize), dontSendNotification);
 }
 
-void EngineComponent::ensureCorrectAudioInput()
+void EngineContentView::ensureCorrectAudioInput()
 {
     if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
     {
@@ -166,7 +166,7 @@ void EngineComponent::ensureCorrectAudioInput()
     }
 }
 
-void EngineComponent::ensureCorrectAudioOutput()
+void EngineContentView::ensureCorrectAudioOutput()
 {
     if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
     {
@@ -184,7 +184,7 @@ void EngineComponent::ensureCorrectAudioOutput()
     }
 }
 
-void EngineComponent::ensureCorrectMidiInput()
+void EngineContentView::ensureCorrectMidiInput()
 {
     if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
     {
@@ -202,7 +202,7 @@ void EngineComponent::ensureCorrectMidiInput()
     }
 }
 
-void EngineComponent::ensureCorrectMidiOutput()
+void EngineContentView::ensureCorrectMidiOutput()
 {
     if (auto* main = findParentComponentOfClass<vcp::MainComponent>())
     {
@@ -213,13 +213,13 @@ void EngineComponent::ensureCorrectMidiOutput()
     }
 }
 
-void EngineComponent::pluginChosen (int result, EngineComponent* component)
+void EngineContentView::pluginChosen (int result, EngineContentView* component)
 {
     if (component && result > 0)
         component->pluginChosen (result);
 }
 
-void EngineComponent::pluginChosen (int result)
+void EngineContentView::pluginChosen (int result)
 {
     auto& plugins = versicap.getPluginManager();
     auto& list = plugins.getKnownPlugins();
@@ -232,13 +232,13 @@ void EngineComponent::pluginChosen (int result)
     }
 }
 
-void EngineComponent::inputChannelChosen (int result, EngineComponent* comp)
+void EngineContentView::inputChannelChosen (int result, EngineContentView* comp)
 {
     if (comp && result > 0)
         comp->inputChannelChosen (result);
 }
 
-void EngineComponent::inputChannelChosen (int result)
+void EngineContentView::inputChannelChosen (int result)
 {
     auto& devices = versicap.getDeviceManager();
     auto setup = devices.getAudioDeviceSetup();
@@ -262,13 +262,13 @@ void EngineComponent::inputChannelChosen (int result)
     ensureCorrectChannels();
 }
 
-void EngineComponent::outputChannelChosen (int result, EngineComponent* comp)
+void EngineContentView::outputChannelChosen (int result, EngineContentView* comp)
 {
     if (comp && result > 0)
         comp->outputChannelChosen (result);
 }
 
-void EngineComponent::outputChannelChosen (int result)
+void EngineContentView::outputChannelChosen (int result)
 {
     auto& devices = versicap.getDeviceManager();
     auto setup = devices.getAudioDeviceSetup();
@@ -292,7 +292,7 @@ void EngineComponent::outputChannelChosen (int result)
     ensureCorrectChannels();
 }
 
-void EngineComponent::ensureCorrectChannels()
+void EngineContentView::ensureCorrectChannels()
 {
     auto& devices = versicap.getDeviceManager();
     auto setup = devices.getAudioDeviceSetup();
@@ -323,14 +323,14 @@ void EngineComponent::ensureCorrectChannels()
     }
 }
 
-void EngineComponent::choosePlugin()
+void EngineContentView::choosePlugin()
 {
     auto& plugins = versicap.getPluginManager();
     auto& list = plugins.getKnownPlugins();
     PopupMenu menu;
     list.addToMenu (menu, KnownPluginList::sortByManufacturer);
     menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&pluginButton),
-                        ModalCallbackFunction::forComponent (EngineComponent::pluginChosen, this));
+                        ModalCallbackFunction::forComponent (EngineContentView::pluginChosen, this));
 }
 
 }
