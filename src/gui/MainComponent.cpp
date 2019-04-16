@@ -87,8 +87,7 @@ class MainComponent::Content : public Component
 public:
     Content (MainComponent& o, Versicap& vc)
         : owner (o),
-          versicap (vc),
-          tabs (vc)
+          versicap (vc)
     {
         project = versicap.getProject();
 
@@ -121,8 +120,6 @@ public:
         addAndMakeVisible (recordButton);
         recordButton.setButtonText ("Record");
         recordButton.onClick = [this]() { owner.startRendering(); };
-
-        addAndMakeVisible (tabs);
 
         layers.reset (new LayersTableContentView (versicap));
         addAndMakeVisible (layers.get());
@@ -207,8 +204,6 @@ public:
         }
     }
 
-    MainTabs& getTabs() { return tabs; }
-
     Rectangle<int> getAlertBounds() const
     {
         return getLocalBounds().withSizeKeepingCentre (380, 180);
@@ -260,9 +255,7 @@ private:
     MainComponent& owner;
     Versicap& versicap;
     Project project;
-    
-    MainTabs tabs;
-    
+        
     std::unique_ptr<ContentView> view;
     std::unique_ptr<LayersTableContentView> layers;
     std::unique_ptr<SamplesTableContentView> samples;
