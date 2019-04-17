@@ -14,7 +14,11 @@ public:
 
     void setAudioThumbnail (AudioThumbnail* newThumb);
     AudioThumbnail* getAudioThumbnail();
+
     void setVerticalZoom (float zoom);
+
+    double getPixelsPerSecond() const       { return pixelsPerSecond; }
+    double getSecondsPerPixel() const       { return secondsPerPixel; }
 
     void resized() override;
     void paint (Graphics& g) override;
@@ -27,8 +31,7 @@ private:
     double pixelsPerSecond = 0.0;
     
     Range<double> range;
-    Range<double> loop;
-
+    
     void timerCallback() override
     {
         repaint();

@@ -21,8 +21,6 @@ WaveDisplayComponent::~WaveDisplayComponent()
 void WaveDisplayComponent::setAudioThumbnail (AudioThumbnail* newThumb)
 {
     thumb.reset (newThumb);
-    loop.setStart (0.25);
-    loop.setEnd (0.75);
     range.setStart (0.0);
     range.setLength (newThumb->getTotalLength());
     secondsPerPixel = range.getLength() / static_cast<double> (getWidth());
@@ -49,6 +47,7 @@ void WaveDisplayComponent::paint (Graphics& g)
         wr.setY ((getHeight() / 2) - (wr.getHeight() / 2));
         float step = (float)wr.getHeight() / ((float)thumb->getNumChannels());
         auto iter = wr.getY() + step - (step / 2.f);
+        
         for (int c = 0; c < thumb->getNumChannels(); ++c)
         {
             g.setColour (LookAndFeel::widgetBackgroundColor.darker(.3));
@@ -61,15 +60,15 @@ void WaveDisplayComponent::paint (Graphics& g)
         thumb->drawChannels (g, wr, range.getStart(), range.getEnd(), verticalZoom);
     }
 
-    g.setColour (Colours::red);
-    g.setOpacity (waveOpacity + 0.12);
-    g.fillRect (pixelsPerSecond * loop.getStart(), 0.f,
-                pixelsPerSecond * loop.getEnd(), (float) getHeight());
-    g.setOpacity (.82);
-    g.drawLine (pixelsPerSecond * loop.getStart(), 0.f,
-                pixelsPerSecond * loop.getStart(), getHeight(), 1.2);
-    g.drawLine (pixelsPerSecond * loop.getEnd(), 0.f,
-                pixelsPerSecond * loop.getEnd(), getHeight(), 1.2);
+    // g.setColour (Colours::red);
+    // g.setOpacity (0.12);
+    // g.fillRect (pixelsPerSecond * loop.getStart(), 0.f,
+    //             pixelsPerSecond * loop.getEnd(), (float) getHeight());
+    // g.setOpacity (.82);
+    // g.drawLine (pixelsPerSecond * loop.getStart(), 0.f,
+    //             pixelsPerSecond * loop.getStart(), getHeight(), 1.2);
+    // g.drawLine (pixelsPerSecond * loop.getEnd(), 0.f,
+    //             pixelsPerSecond * loop.getEnd(), getHeight(), 1.2);
 }
 
 void WaveDisplayComponent::setVerticalZoom (float zoom)

@@ -7,6 +7,31 @@
 
 namespace vcp {
 
+class WaveCursor : public Component
+{
+public:
+    WaveCursor() = default;
+    ~WaveCursor() = default;
+
+    double getPosition() const { return position; }
+    
+    void paint (Graphics& g) override
+    {
+        g.setOpacity (opacity);
+        g.fillAll (color);
+    }
+
+    MouseCursor getMouseCursor() override
+    {
+        return MouseCursor::LeftRightResizeCursor;
+    }
+
+private:
+    double position = 0.0;
+    float opacity = 1.f;
+    Colour color;
+};
+
 class SampleEditContentView::Content : public Component
 {
 public:
@@ -23,6 +48,9 @@ public:
                 resized();
             }
         };
+
+        addAndMakeVisible (range);
+        addAndMakeVisible (cursor);
     }
 
     Project getProject() const { return watcher.getProject(); }
@@ -31,13 +59,20 @@ public:
         watcher.setProject (project);
     }
 
-    void resized() override {
+    void resized() override
+    {
         wave.setBounds (getLocalBounds());
+        range.setBounds (getLocalBounds().reduced (20, 0));
+        int cursorX = (getWidth() / 2) - 1;
+        cursor.setBounds (cursorX, 0, 1, getHeight());
     }
+
 private:
     SampleEditContentView& owner;
     ProjectWatcher watcher;
     WaveDisplayComponent wave;
+    WaveCursor cursor;
+    SampleInOutRange range;
 };
 
 SampleEditContentView::SampleEditContentView (Versicap& vc)
