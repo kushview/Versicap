@@ -71,6 +71,10 @@ struct Versicap::Impl : public AudioIODeviceCallback,
 
     void prepare (AudioProcessor& plugin)
     {
+        jassert (sampleRate > 0.0);
+        jassert (bufferSize > 0);
+        plugin.enableAllBuses();
+        plugin.setRateAndBufferSizeDetails (sampleRate, bufferSize);
         plugin.prepareToPlay (sampleRate, bufferSize);
     }
 
@@ -238,7 +242,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         sampleRate        = device->getCurrentSampleRate();
         bufferSize        = device->getCurrentBufferSizeSamples();
         numInputChans     = device->getActiveInputChannels().countNumberOfSetBits();
-        numOutputChans    = device->getActiveInputChannels().countNumberOfSetBits();;
+        numOutputChans    = device->getActiveOutputChannels().countNumberOfSetBits();;
         inputLatency      = device->getInputLatencyInSamples();
         outputLatency     = device->getOutputLatencyInSamples();
 
@@ -447,6 +451,9 @@ void Versicap::initializeAudioDevice()
     auto& settings = impl->settings;
     bool initDefault = true;
     
+    devices.addAudioCallback (impl.get());
+    devices.addMidiInputCallback (String(), impl.get());
+
     if (auto* const props = settings.getUserSettings())
     {
         if (auto* xml = props->getXmlValue ("devices"))
@@ -461,8 +468,7 @@ void Versicap::initializeAudioDevice()
         devices.initialiseWithDefaultDevices (32, 32);
     }
 
-    devices.addAudioCallback (impl.get());
-    devices.addMidiInputCallback (String(), impl.get());
+
 }
 
 void Versicap::initializePlugins()
@@ -557,8 +563,10 @@ void Versicap::setRenderContext (const RenderContext& context)
 
 AudioThumbnail* Versicap::createAudioThumbnail (const File& file)
 {
-    auto* thumb = new AudioThumbnail (1, *impl->formats, impl->peaks);
+    auto* thumb = new AudioThumbnail (10, *impl->formats, impl->peaks);
     thumb->setSource (new FileInputSource (file));
+    impl->peaks.removeThumb (thumb->getHashCode());
+
     return thumb;
 }
 
@@ -591,8 +599,7 @@ void Versicap::loadPlugin (const PluginDescription& type, bool clearProjectPlugi
             impl->prepare (*processor);
             if (clearProjectPlugin)
                 impl->project.clearPlugin();
-            impl->project.setPluginDescription (type);
-
+            
             {
                 ScopedLock sl (impl->render->getCallbackLock());
                 impl->processor.swap (processor);
@@ -600,6 +607,7 @@ void Versicap::loadPlugin (const PluginDescription& type, bool clearProjectPlugi
 
             impl->updatePluginProperties();
             showPluginWindow();
+            impl->project.setPluginDescription (type);
         }
         else
         {
@@ -626,7 +634,6 @@ void Versicap::closePlugin (bool clearProjectPlugin)
         impl->pluginLatency     = 0;
         impl->pluginNumIns      = 0;
         impl->pluginNumOuts     = 0;
-
     }
 
     if (clearProjectPlugin)
