@@ -15,6 +15,8 @@ public:
     ContentView (Versicap& vc) : versicap (vc) { }
     virtual ~ContentView() { }
 
+    Versicap& getVersicap() { return versicap; }
+    
 protected:
     Versicap& versicap;
 };

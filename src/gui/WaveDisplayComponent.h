@@ -25,7 +25,7 @@ public:
 
 private:
     std::unique_ptr<AudioThumbnail> thumb;
-    float verticalZoom = 0.95;
+    float verticalZoom = 1.f;
     float waveOpacity = 0.6f;
     double secondsPerPixel = 0.0;
     double pixelsPerSecond = 0.0;

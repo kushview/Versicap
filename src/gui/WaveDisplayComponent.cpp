@@ -10,14 +10,6 @@ WaveDisplayComponent::~WaveDisplayComponent()
 {
 }
 
-//   1000
-//   ----  =  500
-//    2
-
-//    2
-//   ----  - 0.0002
-//   1000
-
 void WaveDisplayComponent::setAudioThumbnail (AudioThumbnail* newThumb)
 {
     thumb.reset (newThumb);
@@ -59,16 +51,6 @@ void WaveDisplayComponent::paint (Graphics& g)
         g.setOpacity (waveOpacity);
         thumb->drawChannels (g, wr, range.getStart(), range.getEnd(), verticalZoom);
     }
-
-    // g.setColour (Colours::red);
-    // g.setOpacity (0.12);
-    // g.fillRect (pixelsPerSecond * loop.getStart(), 0.f,
-    //             pixelsPerSecond * loop.getEnd(), (float) getHeight());
-    // g.setOpacity (.82);
-    // g.drawLine (pixelsPerSecond * loop.getStart(), 0.f,
-    //             pixelsPerSecond * loop.getStart(), getHeight(), 1.2);
-    // g.drawLine (pixelsPerSecond * loop.getEnd(), 0.f,
-    //             pixelsPerSecond * loop.getEnd(), getHeight(), 1.2);
 }
 
 void WaveDisplayComponent::setVerticalZoom (float zoom)
