@@ -19,9 +19,9 @@ public:
     {
         setModel (this);
         setHeaderHeight (24);
-        getHeader().addColumn ("Note", NoteColumn, 60);
-        getHeader().addColumn ("MIDI", MidiColumn, 60);
-        getHeader().addColumn ("Name", NameColumn, 100);
+        getHeader().addColumn ("Note", NoteColumn, 52);
+        getHeader().addColumn ("MIDI", MidiColumn, 52);
+        getHeader().addColumn ("Name", NameColumn, 96);
 
         watcher.onChanged = [this]() { refreshSamples(); };
         watcher.onSamplesAdded = [this]() { refreshSamples(); };

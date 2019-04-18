@@ -27,6 +27,7 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     
+    void projectChanged() override;
     void renderWillStart() override;
     void renderStarted() override;
     void renderWillStop() override;
