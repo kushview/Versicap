@@ -12,7 +12,7 @@ namespace vcp {
 //=========================================================================
 Layer::Layer()
     : kv::ObjectModel (Tags::layer)
-{ 
+{
     setMissingProperties();
 }
 
@@ -43,6 +43,10 @@ void Layer::setMissingProperties()
 {
     stabilizePropertyString (Tags::uuid, Uuid().toString());
     stabilizePropertyPOD (Tags::velocity, 127);
+    stabilizePropertyPOD (Tags::noteLength, 3000);
+    stabilizePropertyPOD (Tags::tailLength, 1000);
+    stabilizePropertyPOD (Tags::midiChannel, 1);
+    stabilizePropertyPOD (Tags::midiProgram, -1);
 }
 
 //=========================================================================

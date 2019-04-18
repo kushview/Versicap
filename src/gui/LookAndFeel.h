@@ -54,7 +54,6 @@ public:
         return Font (jmin (13.0f, buttonHeight * 0.5f));
     }
 
-
     // property component
     void drawPropertyComponentLabel (Graphics& g, int width, int height, 
                                      PropertyComponent& component) override

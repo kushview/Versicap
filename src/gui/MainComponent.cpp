@@ -1,6 +1,7 @@
 
 #include "gui/ObjectPropertiesContentView.h"
 #include "gui/LayersTableContentView.h"
+#include "gui/NoteParams.h"
 #include "gui/SamplesTableContentView.h"
 #include "gui/SampleEditContentView.h"
 #include "gui/SourceContentView.h"
@@ -123,28 +124,7 @@ public:
         recordButton.setButtonText ("Record");
         recordButton.onClick = [this]() { owner.startRendering(); };
 
-        addAndMakeVisible (notesLabel);
-        notesLabel.setFont (Font (12.f));
-        notesLabel.setText ("Notes: ", dontSendNotification);
-        notesLabel.setJustificationType (Justification::centredRight);
-        addAndMakeVisible (noteStart);
-        noteStart.setSliderStyle (Slider::IncDecButtons);
-        noteStart.setRange (0, 127, 1);
-        noteStart.setTextBoxStyle (noteStart.getTextBoxPosition(), false, 30, noteStart.getTextBoxHeight());
-        noteStart.textFromValueFunction = Util::noteValue;
-        noteStart.updateText();
-
-        addAndMakeVisible (noteEnd);
-        noteEnd.setSliderStyle (Slider::IncDecButtons);
-        noteEnd.setRange (0, 127, 1);
-        noteEnd.setTextBoxStyle (noteEnd.getTextBoxPosition(), false, 30, noteEnd.getTextBoxHeight());
-        noteEnd.textFromValueFunction = Util::noteValue;
-        noteEnd.updateText();
-
-        addAndMakeVisible (noteStep);
-        noteStep.setSliderStyle (Slider::IncDecButtons);
-        noteStep.setRange (1, 12, 1);
-        noteStep.setTextBoxStyle (noteStep.getTextBoxPosition(), false, 24, noteStep.getTextBoxHeight());
+        addAndMakeVisible (notes);
         
         source.reset (new SourceContentView (versicap));
         addAndMakeVisible (source.get());
@@ -204,20 +184,15 @@ public:
        #endif
         Component* buttons [3] = { &importButton, &exportButton, &recordButton };
 
-        int buttonsWidth = 61 * 3;
-        r2.removeFromLeft ((getWidth() / 2) - (buttonsWidth / 2));
+        r2.removeFromRight (14);
         for (int i = 0; i < 3; ++i)
         {
-            buttons[i]->setBounds (r2.removeFromLeft (60));
-            r2.removeFromLeft (1);
+            buttons[i]->setBounds (r2.removeFromRight (60));
+            r2.removeFromRight (1);
         }
 
-        r2.removeFromRight (14);
-        noteStep.setBounds (r2.removeFromRight (64));
-        r2.removeFromRight (4);
-        noteEnd.setBounds (r2.removeFromRight (72));
-        noteStart.setBounds (r2.removeFromRight (72));
-        notesLabel.setBounds (r2.removeFromRight (70));
+        notes.setBounds ((getWidth() / 2) - (notes.getRequiredWidth() / 2), 
+                         r2.getY(), notes.getRequiredWidth(), r2.getHeight());
 
        #if 0
         keyboard->setBounds (r.removeFromBottom (60));
@@ -303,9 +278,7 @@ public:
     void setProject (const Project& newProject)
     {
         project = newProject;
-        noteStart.getValueObject().referTo (project.getPropertyAsValue (Tags::noteStart));
-        noteEnd.getValueObject().referTo (project.getPropertyAsValue (Tags::noteEnd));
-        noteStep.getValueObject().referTo (project.getPropertyAsValue (Tags::noteStep));
+        notes.setProject (project);
     }
 
 private:
@@ -326,8 +299,7 @@ private:
     TextButton recordButton;
     RenderProgress progress;
 
-    Label notesLabel;
-    Slider noteStart, noteEnd, noteStep;
+    NoteParams notes;
 
     ComboBox sourceCombo;
 

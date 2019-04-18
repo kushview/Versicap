@@ -259,10 +259,10 @@ public:
     void resized() override
     {
         auto r1 = getLocalBounds();
-        auto r2 = r1.removeFromTop (22);
-        auto r3 = r1.removeFromBottom (22);
-        zoomOut.setBounds (r2.removeFromRight (24));
-        zoomIn.setBounds (r2.removeFromRight (24));
+        auto r2 = getLocalBounds().removeFromTop (22);
+        auto r3 = getLocalBounds().removeFromBottom (22);
+        zoomOut.setBounds (r3.removeFromRight (24));
+        zoomIn.setBounds (r3.removeFromRight (24));
         panel->setBounds (r1.reduced (1, 1));
     }
 
