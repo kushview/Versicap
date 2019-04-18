@@ -35,6 +35,9 @@ public:
         setColour (TableHeaderComponent::backgroundColourId, widgetBackgroundColor.darker());
         setColour (TableHeaderComponent::textColourId, Colours::black);
         setColour (TableHeaderComponent::highlightColourId, Colours::orange.withAlpha (0.6f));
+
+        setColour (TextEditor::highlightColourId, Colours::whitesmoke);
+        setColour (TextEditor::focusedOutlineColourId, Colours::orange.withAlpha (0.6f));
     }
 
     ~LookAndFeel() { }

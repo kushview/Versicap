@@ -46,6 +46,7 @@ public:
     {
         if (rowIsSelected)
         {
+            g.setOpacity (0.85);
             g.setColour (Colours::orange);
             g.fillAll();
         }
@@ -56,12 +57,13 @@ public:
     {
         const auto project = watcher.getProject();
         const auto layer = project.getLayer (rowNumber);
-        g.setColour (Colours::white);
+        g.setColour (rowIsSelected ? Colours::white
+                                   : kv::LookAndFeel_KV1::textColor);
         auto text = layer.getProperty (Tags::name).toString();
         if (text.isEmpty())
             text = "Layer " + String (1 + project.indexOf (layer));
 
-        g.drawText (text, 0, 0, width, height, 
+        g.drawText (text, 10, 0, width - 10, height, 
                     Justification::centredLeft);
     }
 
@@ -161,7 +163,7 @@ void LayersTableContentView::projectChanged()
 
 void LayersTableContentView::resizeContent (const Rectangle<int>& area)
 {
-    content->setBounds (area);
+    content->setBounds (area.reduced (4, 2));
 }
 
 }

@@ -6,7 +6,7 @@
               bundleIdentifier="net.kushview.Versicap">
   <MAINGROUP id="BYhNP7" name="Versicap">
     <GROUP id="{0AF932B7-4585-6AE9-DC1E-4291EAAEC5EF}" name="data">
-      <FILE id="EYE9Kw" name="versicap_v1.png" compile="0" resource="0" file="../data/versicap_v1.png"/>
+      <FILE id="EYE9Kw" name="versicap_v1.png" compile="0" resource="1" file="../data/versicap_v1.png"/>
     </GROUP>
     <GROUP id="{8705BA76-3319-E94D-E01D-9874E3FB2A67}" name="src">
       <GROUP id="{2BCB9EB1-7372-7805-D8B6-2FD3CA5FE674}" name="controllers">

@@ -3,6 +3,7 @@
 #include "gui/LayersTableContentView.h"
 #include "gui/SamplesTableContentView.h"
 #include "gui/SampleEditContentView.h"
+#include "gui/SourceContentView.h"
 
 #include "gui/MainComponent.h"
 #include "gui/MainTabs.h"
@@ -12,6 +13,7 @@
 #include "RenderContext.h"
 #include "UnlockStatus.h"
 
+#define VCP_DO_LOGO  0
 namespace vcp {
 
 class RenderProgress : public Component
@@ -120,6 +122,9 @@ public:
         recordButton.setButtonText ("Record");
         recordButton.onClick = [this]() { owner.startRendering(); };
 
+        source.reset (new SourceContentView (versicap));
+        addAndMakeVisible (source.get());
+
         layers.reset (new LayersTableContentView (versicap));
         addAndMakeVisible (layers.get());
 
@@ -140,6 +145,9 @@ public:
         keyboard->setKeyWidth (24);
         addAndMakeVisible (keyboard.get());
 
+        logo = ImageCache::getFromMemory (BinaryData::versicap_v1_png,
+                                          BinaryData::versicap_v1_pngSize);
+
         progress.onCancel = std::bind (&Versicap::stopRendering, &vc);
         setSize (440, 340);
     }
@@ -153,12 +161,19 @@ public:
     void paint (Graphics& g) override
     {
         g.fillAll (kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
+       #if VCP_DO_LOGO
+        g.drawImageWithin (logo, 14, 10, 32, 32, RectanglePlacement::centred, false);
+        g.setColour (kv::LookAndFeel_KV1::textColor);
+        g.drawText (project.getProperty (Tags::name), 50, 10, 150, 32, Justification::centredLeft);
+       #endif
     }
 
     void resized() override
     {
         auto r = getLocalBounds();
-        r.removeFromTop (1);
+       #if VCP_DO_LOGO
+        r.removeFromTop (60);
+       #endif
         auto r2 = r.removeFromTop (18);
         Component* buttons [2] = { &importButton, &exportButton };
 
@@ -176,7 +191,8 @@ public:
         r.removeFromTop (1);
         r2 = r.removeFromLeft (240);
         
-        layers->setBounds (r2.removeFromTop (120));
+        // source->setBounds (r2.removeFromTop (80));
+        layers->setBounds (r2.removeFromTop (140));
         samples->setBounds (r2);
 
         auto r3 = r.removeFromRight (240);
@@ -256,6 +272,7 @@ private:
     Project project;
         
     std::unique_ptr<ContentView> view;
+    std::unique_ptr<SourceContentView> source;
     std::unique_ptr<LayersTableContentView> layers;
     std::unique_ptr<SamplesTableContentView> samples;
     std::unique_ptr<ObjectPropertiesContentView> properties;
@@ -269,6 +286,8 @@ private:
     std::unique_ptr<MidiKeyboardComponent> keyboard;
 
     Component::SafePointer<UnlockForm> unlock;
+
+    Image logo;
 
     struct Overlay : public Component
     {

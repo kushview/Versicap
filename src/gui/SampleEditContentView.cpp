@@ -263,7 +263,7 @@ public:
         auto r3 = r1.removeFromBottom (22);
         zoomOut.setBounds (r2.removeFromRight (24));
         zoomIn.setBounds (r2.removeFromRight (24));
-        panel->setBounds (r1.reduced (10, 2));
+        panel->setBounds (r1.reduced (1, 1));
     }
 
     Viewport& getViewPort() { return view; }

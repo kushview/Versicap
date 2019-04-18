@@ -114,7 +114,8 @@ def build_mac (bld):
     libEnv = bld.env.derive()
     bld.stlib (
         source      = bld.path.ant_glob ("src/**/*.cpp") +
-                      bld.path.ant_glob ("jucer/JuceLibraryCode/*.mm"),
+                      bld.path.ant_glob ("jucer/JuceLibraryCode/*.mm") +
+                      [ 'jucer/JuceLibraryCode/BinaryData.cpp' ],
         includes    = [ 'jucer/JuceLibraryCode', \
                         'libs/kv/modules', \
                         'src', \

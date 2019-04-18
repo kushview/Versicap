@@ -9,12 +9,19 @@ class SampleTable : public TableListBox,
                     public TableListBoxModel
 {
 public:
+    enum Columns {
+        NoteColumn = 1,
+        MidiColumn = 2,
+        NameColumn = 3
+    };
+    
     SampleTable()
     {
         setModel (this);
         setHeaderHeight (24);
-        getHeader().addColumn ("Note", 1, 100);
-        getHeader().addColumn ("Name", 2, 100);
+        getHeader().addColumn ("Note", NoteColumn, 60);
+        getHeader().addColumn ("MIDI", MidiColumn, 60);
+        getHeader().addColumn ("Name", NameColumn, 100);
 
         watcher.onChanged = [this]() { refreshSamples(); };
         watcher.onSamplesAdded = [this]() { refreshSamples(); };
@@ -44,13 +51,8 @@ public:
         auto layerIdx = project.indexOf (layer);
         if (isPositiveAndBelow (layerIdx, project.getNumLayers()))
             project.getSamples (layerIdx, filtered);
-
-        for (auto* sample : filtered)
-        {
-            DBG("sample: " << sample->getNote());   
-        }
-        
         updateContent();
+        repaint();
     }
 
     //=========================================================================
@@ -61,6 +63,7 @@ public:
     {
         if (rowIsSelected)
         {
+            g.setOpacity (0.84);
             g.setColour (Colours::orange);
             g.fillAll();
         }
@@ -69,12 +72,20 @@ public:
     void paintCell (Graphics& g, int rowNumber, int columnId,
                     int width, int height, bool rowIsSelected) override
     {
-        g.setColour (Colours::white);
+        g.setColour (rowIsSelected ? Colours::white
+                                   : kv::LookAndFeel_KV1::textColor);
+
         if (auto* const sample = filtered [rowNumber])
         {
-            String text = (columnId == 1) ? String (sample->getNote())
-                : MidiMessage::getMidiNoteName (sample->getNote(), true, true, 4);
-            g.drawText (text, 0, 0, width, height, Justification::centredLeft);
+            String text;
+            switch (columnId)
+            {
+                case MidiColumn: text = String (sample->getNote()); break;
+                case NoteColumn: text = MidiMessage::getMidiNoteName (sample->getNote(), true, true, 4); break;
+                case NameColumn: text = sample->getProperty (Tags::name);
+            } 
+
+            g.drawText (text, 10, 0, width - 10, height, Justification::centredLeft);
         }
     }
 
@@ -144,7 +155,7 @@ SamplesTableContentView::~SamplesTableContentView()
 
 void SamplesTableContentView::resizeContent (const Rectangle<int>& area)
 {
-    content->setBounds (area);
+    content->setBounds (area.reduced (4, 2));
 }
 
 void SamplesTableContentView::projectChanged()
