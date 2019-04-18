@@ -47,7 +47,11 @@ public:
 
     File getFile() const;
     int getNote() const { return getProperty (Tags::note); }
+    
+    double getSampleRate() const;
+    double getTotalTime() const;
     double getStartTime() const;
+    double getEndTime() const;
     double getLength() const;
 
     void getProperties (Array<PropertyComponent*>&);

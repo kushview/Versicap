@@ -119,7 +119,7 @@ public:
 
     void paint (Graphics& g) override
     {
-        g.fillAll (kv::LookAndFeel_KV1::widgetBackgroundColor);
+        //g.fillAll (kv::LookAndFeel_KV1::widgetBackgroundColor);
     }
 
     void resized() override
@@ -138,8 +138,9 @@ private:
 };
 
 LayersTableContentView::LayersTableContentView (Versicap& vc)
-    : ContentView (vc)
+    : PanelContentView (vc)
 {
+    setName ("Layers");
     content.reset (new Content());
     addAndMakeVisible (content.get());
     auto& table = content->table;
@@ -158,9 +159,9 @@ void LayersTableContentView::projectChanged()
     table.setProject (project);
 }
 
-void LayersTableContentView::resized()
+void LayersTableContentView::resizeContent (const Rectangle<int>& area)
 {
-    content->setBounds (getLocalBounds());
+    content->setBounds (area);
 }
 
 }

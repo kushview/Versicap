@@ -236,10 +236,16 @@ void Render::handleAsyncUpdate()
             {
                 ValueTree sample (Tags::sample);
                 info->writer.reset();
+                auto totalTime = static_cast<double> (info->stop - info->start) / sampleRate;
+
                 sample.setProperty (Tags::uuid, Uuid().toString(), nullptr)
-                    .setProperty (Tags::layer, info->layerId.toString(), nullptr)
-                    .setProperty (Tags::file, info->file.getFileName(), nullptr)
-                    .setProperty (Tags::note, info->note, nullptr);
+                      .setProperty (Tags::layer, info->layerId.toString(), nullptr)
+                      .setProperty (Tags::file, info->file.getFileName(), nullptr)
+                      .setProperty (Tags::note, info->note, nullptr)
+                      .setProperty (Tags::sampleRate, sampleRate, nullptr)
+                      .setProperty (Tags::length, totalTime, nullptr)
+                      .setProperty (Tags::timeIn, 0.0, nullptr)
+                      .setProperty (Tags::timeOut, totalTime, nullptr);
                 manifest.appendChild (sample, nullptr);
             }
         }
@@ -260,7 +266,7 @@ void Render::handleAsyncUpdate()
                 info->writer.reset();
         captureDir.deleteRecursively();
         samples = ValueTree (Tags::samples);
-        cancelled.triggerAsyncUpdate();        
+        cancelled.triggerAsyncUpdate();
     }
 
     shouldCancel.set (0);

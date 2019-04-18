@@ -93,6 +93,12 @@ void Sample::getProperties (Array<PropertyComponent*>& props)
         "Name", 100, false, true));
 }
 
+double Sample::getSampleRate() const    { return getProperty (Tags::sampleRate); }
+double Sample::getTotalTime() const     { return getProperty (Tags::length); }
+double Sample::getStartTime() const     { return getProperty (Tags::timeIn); }
+double Sample::getEndTime() const       { return getProperty (Tags::timeOut); }
+double Sample::getLength() const        { return getEndTime() - getStartTime(); }
+
 //=========================================================================
 Project::Project()
     : ObjectModel (Tags::project)
@@ -255,6 +261,9 @@ void Project::getSamples (int layerIdx, OwnedArray<Sample>& out) const
         if (samples[i].isForLayer (layer))
             out.add (new Sample (samples [i]));
 }
+
+
+
 
 //=========================================================================
 void Project::clearPlugin()

@@ -5,10 +5,13 @@
 namespace vcp {
 
 ObjectPropertiesContentView::ObjectPropertiesContentView (Versicap& vc)
-    : ContentView (vc)
+    : PanelContentView (vc)
 {
+    setName ("Properties");
     addAndMakeVisible (panel);
     watcher.setProject (vc.getProject());
+
+    addComponentListener (this);
 
     watcher.onActiveLayerChanged = [this]()
     {
@@ -17,6 +20,8 @@ ObjectPropertiesContentView::ObjectPropertiesContentView (Versicap& vc)
         Array<PropertyComponent*> props;
         layer.getProperties (props);
         panel.addProperties (props);
+
+        setName ("Layer Properties");
     };
 
     watcher.onActiveSampleChanged = [this]()
@@ -26,6 +31,8 @@ ObjectPropertiesContentView::ObjectPropertiesContentView (Versicap& vc)
         Array<PropertyComponent*> props;
         sample.getProperties (props);
         panel.addProperties (props);
+
+        setName ("Sample Properties");
     };
 }
 
@@ -34,9 +41,9 @@ ObjectPropertiesContentView::~ObjectPropertiesContentView()
 
 }
 
-void ObjectPropertiesContentView::resized()
+void ObjectPropertiesContentView::resizeContent (const Rectangle<int>& area)
 {
-    panel.setBounds (getLocalBounds());
+    panel.setBounds (area);
 }
 
 }

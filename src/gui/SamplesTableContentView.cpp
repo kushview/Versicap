@@ -12,6 +12,7 @@ public:
     SampleTable()
     {
         setModel (this);
+        setHeaderHeight (24);
         getHeader().addColumn ("Note", 1, 100);
         getHeader().addColumn ("Name", 2, 100);
 
@@ -126,8 +127,9 @@ private:
 };
 
 SamplesTableContentView::SamplesTableContentView (Versicap& vc)
-    : ContentView (vc)
+    : PanelContentView (vc)
 {
+    setName ("Samples");
     content.reset (new Content());
     addAndMakeVisible (content.get());
     versicap.addListener (this);
@@ -140,9 +142,9 @@ SamplesTableContentView::~SamplesTableContentView()
 
 }
 
-void SamplesTableContentView::resized()
+void SamplesTableContentView::resizeContent (const Rectangle<int>& area)
 {
-    content->setBounds (getLocalBounds());
+    content->setBounds (area);
 }
 
 void SamplesTableContentView::projectChanged()

@@ -7,13 +7,24 @@
 
 namespace vcp {
 
+class WaveZoomBar : public Component
+{
+public:
+    WaveZoomBar() { }
+    ~WaveZoomBar() { }
+
+    void resized() override { }
+    void paint (Graphics&) override { }
+    void mouseMove (const MouseEvent&) override { }
+};
+
 class WaveCursor : public Component,
                    public Value::Listener
 {
 public:
     WaveCursor()
     {
-        color = Colours::black;
+        color = Colours::red;
         position.addListener (this);
     }
 
@@ -45,7 +56,8 @@ public:
 
     void mouseDrag (const MouseEvent& ev) override
     {
-        position.setValue (dragPos + (secondsPerPixel * static_cast<double> (ev.getDistanceFromDragStartX())));
+        double newPos = dragPos + (secondsPerPixel * static_cast<double> (ev.getDistanceFromDragStartX()));
+        position.setValue (jlimit (minPos, maxPos, newPos));
         update();
     }
 
@@ -76,17 +88,34 @@ public:
             : 0.0;
     }
 
+    void setMinPosition (double newMin)
+    {
+        minPos = newMin;
+        if (getPosition() < minPos)
+            position.setValue (minPos);
+    }
+
+    void setMaxPosition (double newMax)
+    {
+        maxPos = newMax;
+        if (getPosition() > maxPos)
+            position.setValue (maxPos);
+    }
+
 private:
     bool dragging = false;
     double dragPos  = 0.0;
+    double minPos = 0.0;
+    double maxPos = 0.0;
     Value position;
-    float opacity = 1.f;
+    float opacity = 0.85;
     Colour color;
     double pixelsPerSecond = 0.0;
     double secondsPerPixel = 0.0;
 };
 
-class SampleDisplayPanel : public Component
+class SampleDisplayPanel : public Component,
+                           public Value::Listener
 {
 public:
     SampleDisplayPanel (SampleEditContentView& view)
@@ -95,6 +124,28 @@ public:
         addAndMakeVisible (wave);
         addAndMakeVisible (inPoint);
         addAndMakeVisible (outPoint);
+
+        timeIn.addListener (this);
+        timeOut.addListener (this);
+    }
+
+    void valueChanged (Value& value) override
+    {
+        const double spread = 0.01;
+        if (value.refersToSameSourceAs (timeIn))
+        {
+            double ti = timeIn.getValue();
+            double to = timeOut.getValue();
+            if (ti > to - spread)
+                timeOut.setValue (ti + spread);
+        }
+        else if (value.refersToSameSourceAs (timeOut))
+        {
+            double ti = timeIn.getValue();
+            double to = timeOut.getValue();
+            if (to < ti + spread)
+                timeIn.setValue (to - spread);
+        }
     }
 
     void setSample (const Sample& newSample)
@@ -109,8 +160,18 @@ public:
             setSize (owner.getWidth(), owner.getHeight());
         }
 
-        inPoint.getPositionValue().referTo (sample.getPropertyAsValue ("startTime"));
-        outPoint.getPositionValue().referTo (sample.getPropertyAsValue ("endTime"));
+        timeIn.removeListener (this);
+        timeIn = sample.getPropertyAsValue (Tags::timeIn);
+        inPoint.getPositionValue().referTo (timeIn);
+        inPoint.setMaxPosition (sample.getTotalTime() - 0.01);
+        timeIn.addListener (this);
+
+        timeOut.removeListener (this);
+        timeOut = sample.getPropertyAsValue (Tags::timeOut);
+        outPoint.getPositionValue().referTo (timeOut);
+        outPoint.setMinPosition (0.01);
+        outPoint.setMaxPosition (sample.getTotalTime());
+        timeOut.addListener (this);
     }
 
     void resized() override
@@ -145,6 +206,7 @@ public:
 private:
     SampleEditContentView& owner;
     Sample sample;
+    Value timeIn, timeOut;
     WaveDisplayComponent wave;
     WaveCursor inPoint, outPoint;
 };
@@ -196,28 +258,12 @@ public:
 
     void resized() override
     {
-        // view.setBounds (getLocalBounds());
-        // auto pr = panel->getBoundsInParent();
-
-        // auto& scroll = view.getHorizontalScrollBar();
-        // int vh = view.getHeight();
-        // if (scroll.isShowing())
-        //     vh -= view.getScrollBarThickness();
-
-        // if (pr.getHeight() != vh)
-        //     pr.setHeight (vh);
-        // if (pr.getWidth() < view.getWidth())
-        //     pr.setWidth (view.getWidth());
-        // if (pr != panel->getBoundsInParent())
-        //     panel->setBounds (pr);
-
-        panel->setBounds (getLocalBounds());
-        
-        auto r = getLocalBounds();
-        r = r.removeFromTop (22);
-
-        zoomOut.setBounds (r.removeFromRight (24));
-        zoomIn.setBounds (r.removeFromRight (24));
+        auto r1 = getLocalBounds();
+        auto r2 = r1.removeFromTop (22);
+        auto r3 = r1.removeFromBottom (22);
+        zoomOut.setBounds (r2.removeFromRight (24));
+        zoomIn.setBounds (r2.removeFromRight (24));
+        panel->setBounds (r1.reduced (10, 2));
     }
 
     Viewport& getViewPort() { return view; }

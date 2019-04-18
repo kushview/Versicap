@@ -18,8 +18,11 @@ namespace Tags {
     static const Identifier uuid            = "uuid";
     static const Identifier identifier      = "identifier";
     static const Identifier latencyComp     = "latencyComp";
+    
     static const Identifier layer           = "layer";
     static const Identifier layers          = "layers";
+    static const Identifier length          = "length";
+
     static const Identifier midi            = "midi";
     static const Identifier name            = "name";
     static const Identifier note            = "note";
@@ -33,10 +36,15 @@ namespace Tags {
 
     static const Identifier sample          = "sample";
     static const Identifier samples         = "samples";
+    static const Identifier sampleRate      = "sampleRate";
 
     static const Identifier source          = "source";
     static const Identifier state           = "state";
     static const Identifier tailLength      = "tailLength";
+
+    static const Identifier timeIn          = "timeIn";
+    static const Identifier timeOut         = "timeOut";
+
     static const Identifier value           = "value";
     static const Identifier velocity        = "velocity";
     static const Identifier version         = "version";

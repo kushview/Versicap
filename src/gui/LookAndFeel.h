@@ -31,6 +31,10 @@ public:
 
         // List Box
         setColour (ListBox::textColourId, textColor);
+
+        setColour (TableHeaderComponent::backgroundColourId, widgetBackgroundColor.darker());
+        setColour (TableHeaderComponent::textColourId, Colours::black);
+        setColour (TableHeaderComponent::highlightColourId, Colours::orange.withAlpha (0.6f));
     }
 
     ~LookAndFeel() { }
