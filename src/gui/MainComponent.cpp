@@ -13,7 +13,7 @@
 #include "RenderContext.h"
 #include "UnlockStatus.h"
 
-#define VCP_DO_LOGO  0
+#define VCP_DO_LOGO  1
 namespace vcp {
 
 class RenderProgress : public Component
@@ -122,6 +122,19 @@ public:
         recordButton.setButtonText ("Record");
         recordButton.onClick = [this]() { owner.startRendering(); };
 
+        addAndMakeVisible (notesLabel);
+        notesLabel.setFont (Font (12.f));
+        notesLabel.setText ("Notes: ", dontSendNotification);
+        notesLabel.setJustificationType (Justification::centredRight);
+        addAndMakeVisible (noteStart);
+        noteStart.setSliderStyle (Slider::IncDecButtons);
+        noteStart.setRange (0, 127, 1);
+        noteStart.setTextBoxStyle (noteStart.getTextBoxPosition(), false, 30, noteStart.getTextBoxHeight());
+        addAndMakeVisible (noteEnd);
+        noteEnd.setSliderStyle (Slider::IncDecButtons);
+        noteEnd.setRange (0, 127, 1);
+        noteEnd.setTextBoxStyle (noteEnd.getTextBoxPosition(), false, 30, noteEnd.getTextBoxHeight());
+
         source.reset (new SourceContentView (versicap));
         addAndMakeVisible (source.get());
 
@@ -162,9 +175,9 @@ public:
     {
         g.fillAll (kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
        #if VCP_DO_LOGO
-        g.drawImageWithin (logo, 14, 10, 32, 32, RectanglePlacement::centred, false);
+        g.drawImageWithin (logo, 14, 6, 32, 32, RectanglePlacement::centred, false);
         g.setColour (kv::LookAndFeel_KV1::textColor);
-        g.drawText (project.getProperty (Tags::name), 50, 10, 150, 32, Justification::centredLeft);
+        g.drawText (project.getProperty (Tags::name), 50, 6, 150, 32, Justification::centredLeft);
        #endif
     }
 
@@ -172,21 +185,27 @@ public:
     {
         auto r = getLocalBounds();
        #if VCP_DO_LOGO
-        r.removeFromTop (60);
-       #endif
+        auto r2 = r.removeFromTop (40).reduced (0, 11);
+       #else
         auto r2 = r.removeFromTop (18);
-        Component* buttons [2] = { &importButton, &exportButton };
+       #endif
+        Component* buttons [3] = { &importButton, &exportButton, &recordButton };
 
-        r2.removeFromLeft (2);
-        for (int i = 0; i < 2; ++i)
+        int buttonsWidth = 61 * 3;
+        r2.removeFromLeft ((getWidth() / 2) - (buttonsWidth / 2));
+        for (int i = 0; i < 3; ++i)
         {
             buttons[i]->setBounds (r2.removeFromLeft (60));
             r2.removeFromLeft (1);
         }
 
-        recordButton.setBounds (r2.removeFromRight (60));
+        noteEnd.setBounds (r2.removeFromRight (72));
+        noteStart.setBounds (r2.removeFromRight (72));
+        notesLabel.setBounds (r2.removeFromRight (70));
 
+       #if 0
         keyboard->setBounds (r.removeFromBottom (60));
+       #endif
 
         r.removeFromTop (1);
         r2 = r.removeFromLeft (240);
@@ -282,6 +301,11 @@ private:
     TextButton exportButton;
     TextButton recordButton;
     RenderProgress progress;
+
+    Label notesLabel;
+    Slider noteStart, noteEnd;
+
+    ComboBox sourceCombo;
 
     std::unique_ptr<MidiKeyboardComponent> keyboard;
 

@@ -26,7 +26,7 @@ public:
         setColour (TabbedComponent::backgroundColourId, colour);
         colour = kv::LookAndFeel_KV1::widgetBackgroundColor;
         addTab ("Devices",  colour, new EngineContentView (vc), true);
-        addTab ("Notes",    colour, new NotesComponent (vc),    true);
+        // addTab ("Notes",    colour, new NotesComponent (vc),    true);
         // addTab ("Looping",  colour, new LoopingComponent (vc),  true);
         addTab ("Output",   colour, new OutputComponent (vc),   true);
 
