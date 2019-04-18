@@ -563,7 +563,7 @@ void Versicap::setRenderContext (const RenderContext& context)
 
 AudioThumbnail* Versicap::createAudioThumbnail (const File& file)
 {
-    auto* thumb = new AudioThumbnail (10, *impl->formats, impl->peaks);
+    auto* thumb = new AudioThumbnail (1, *impl->formats, impl->peaks);
     thumb->setSource (new FileInputSource (file));
     impl->peaks.removeThumb (thumb->getHashCode());
 

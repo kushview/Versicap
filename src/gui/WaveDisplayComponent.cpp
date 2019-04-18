@@ -53,6 +53,43 @@ void WaveDisplayComponent::paint (Graphics& g)
     }
 }
 
+void WaveDisplayComponent::setStartTime (double t)
+{
+    range.setStart (t);
+    setSecondsPerPixel (range.getLength() / static_cast<double> (getWidth()));
+    repaint();
+}
+
+void WaveDisplayComponent::setEndTime (double t)
+{
+    if (t > range.getStart())
+    {
+        range.setEnd (t);
+        setSecondsPerPixel (range.getLength() / static_cast<double> (getWidth()));
+        repaint();
+    }
+}
+
+void WaveDisplayComponent::setPixelsPerSecond (double newVal)
+{
+    if (newVal == pixelsPerSecond)
+        return;
+    pixelsPerSecond = jmax (1.0, newVal);
+    secondsPerPixel = 1.0 / pixelsPerSecond;
+    resized();
+    repaint();
+}
+
+void WaveDisplayComponent::setSecondsPerPixel (double newVal)
+{
+    if (newVal == secondsPerPixel)
+        return;
+    secondsPerPixel = jlimit (0.000001, 1.0, newVal);
+    pixelsPerSecond = 1.0 / secondsPerPixel;
+    resized();
+    repaint();
+}
+
 void WaveDisplayComponent::setVerticalZoom (float zoom)
 {
     verticalZoom = jlimit (0.001f, 1.0f, zoom);

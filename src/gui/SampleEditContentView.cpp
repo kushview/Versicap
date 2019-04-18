@@ -7,18 +7,31 @@
 
 namespace vcp {
 
-class WaveCursor : public Component
+class WaveCursor : public Component,
+                   public Value::Listener
 {
 public:
-    WaveCursor() = default;
+    WaveCursor()
+    {
+        color = Colours::black;
+        position.addListener (this);
+    }
+
     ~WaveCursor() = default;
 
-    double getPosition() const { return position; }
-    
+    void valueChanged (Value& value) override
+    {
+        if (value.refersToSameSourceAs (position))
+            update();
+    }
+
+    double getPosition() const { return position.getValue(); }
+    Value& getPositionValue() { return position; }
+
     void paint (Graphics& g) override
     {
         g.setOpacity (opacity);
-        g.fillAll (Colours::red);
+        g.fillAll (color);
     }
 
     void mouseDown (const MouseEvent& ev) override
@@ -26,14 +39,19 @@ public:
         if (! dragging)
         {
             dragging = true;
-            dragPos = position;
+            dragPos = getPosition();
         }
     }
 
     void mouseDrag (const MouseEvent& ev) override
     {
-        position = dragPos + (secondsPerPixel * static_cast<double> (ev.getDistanceFromDragStartX()));
-        setBounds (getBoundsInParent().withX (roundToInt (position * pixelsPerSecond)));
+        position.setValue (dragPos + (secondsPerPixel * static_cast<double> (ev.getDistanceFromDragStartX())));
+        update();
+    }
+
+    void update()
+    {
+        setBounds (getBoundsInParent().withX (roundToInt (getPosition() * pixelsPerSecond)));
     }
 
     void mouseUp (const MouseEvent& ev) override
@@ -41,7 +59,7 @@ public:
         if (dragging)
         {
             dragging = false;
-            dragPos = position;
+            dragPos = getPosition();
         }
     }
 
@@ -61,7 +79,7 @@ public:
 private:
     bool dragging = false;
     double dragPos  = 0.0;
-    double position = 0.0;
+    Value position;
     float opacity = 1.f;
     Colour color;
     double pixelsPerSecond = 0.0;
@@ -82,6 +100,7 @@ public:
     void setSample (const Sample& newSample)
     {
         sample = newSample;
+    
         if (sample.getFile().existsAsFile())
         {
             wave.setAudioThumbnail (owner.getVersicap().createAudioThumbnail (sample.getFile()));
@@ -89,6 +108,9 @@ public:
             outPoint.setSecondsPerPixel (wave.getSecondsPerPixel());
             setSize (owner.getWidth(), owner.getHeight());
         }
+
+        inPoint.getPositionValue().referTo (sample.getPropertyAsValue ("startTime"));
+        outPoint.getPositionValue().referTo (sample.getPropertyAsValue ("endTime"));
     }
 
     void resized() override
@@ -96,6 +118,28 @@ public:
         wave.setBounds (getLocalBounds());
         inPoint.setBounds (roundToInt (wave.getPixelsPerSecond() * inPoint.getPosition()), 0, 1, getHeight());
         outPoint.setBounds (roundToInt (wave.getPixelsPerSecond() * outPoint.getPosition()), 0, 1, getHeight());
+    }
+
+    void zoomIn() 
+    {
+        auto step = static_cast<double> (wave.getWidth() / 4) * wave.getSecondsPerPixel();
+        wave.setEndTime (wave.getEndTime() - step);
+        updateMarkers();
+    }
+
+    void zoomOut()
+    {
+        auto step = static_cast<double> (wave.getWidth() / 4) * wave.getSecondsPerPixel();
+        wave.setEndTime (wave.getEndTime() + step);
+        updateMarkers();
+    }
+
+    void updateMarkers()
+    {
+        inPoint.setSecondsPerPixel (wave.getSecondsPerPixel());
+        outPoint.setSecondsPerPixel (wave.getSecondsPerPixel());
+        inPoint.update();
+        outPoint.update();
     }
 
 private:
@@ -111,10 +155,24 @@ public:
     Content (SampleEditContentView& o)
         : owner (o)
     {
-        addAndMakeVisible (view);
+        // addAndMakeVisible (view);
         panel.reset (new SampleDisplayPanel (o));
-        view.setViewedComponent (panel.get(), false);
-        view.setScrollBarsShown (false, true, false, false);
+        addAndMakeVisible (panel.get());
+        // view.setViewedComponent (panel.get(), false);
+        // view.setScrollBarsShown (false, true, false, false);
+
+        addAndMakeVisible (zoomIn);
+        zoomIn.setButtonText ("+");
+        zoomIn.onClick = [this]() {
+            panel->zoomIn();
+        };
+
+        addAndMakeVisible (zoomOut);
+        zoomOut.setButtonText ("-");
+        zoomOut.onClick = [this]() {
+            panel->zoomOut();
+        };
+
         watcher.onActiveSampleChanged = [this]()
         {
             auto sample = watcher.getProject().getActiveSample();
@@ -138,20 +196,28 @@ public:
 
     void resized() override
     {
-        view.setBounds (getLocalBounds());
-        auto pr = panel->getBoundsInParent();
+        // view.setBounds (getLocalBounds());
+        // auto pr = panel->getBoundsInParent();
 
-        auto& scroll = view.getHorizontalScrollBar();
-        int vh = view.getHeight();
-        if (scroll.isShowing())
-            vh -= view.getScrollBarThickness();
+        // auto& scroll = view.getHorizontalScrollBar();
+        // int vh = view.getHeight();
+        // if (scroll.isShowing())
+        //     vh -= view.getScrollBarThickness();
 
-        if (pr.getHeight() != vh)
-            pr.setHeight (vh);
-        if (pr.getWidth() < view.getWidth())
-            pr.setWidth (view.getWidth());
-        if (pr != panel->getBoundsInParent())
-            panel->setBounds (pr);
+        // if (pr.getHeight() != vh)
+        //     pr.setHeight (vh);
+        // if (pr.getWidth() < view.getWidth())
+        //     pr.setWidth (view.getWidth());
+        // if (pr != panel->getBoundsInParent())
+        //     panel->setBounds (pr);
+
+        panel->setBounds (getLocalBounds());
+        
+        auto r = getLocalBounds();
+        r = r.removeFromTop (22);
+
+        zoomOut.setBounds (r.removeFromRight (24));
+        zoomIn.setBounds (r.removeFromRight (24));
     }
 
     Viewport& getViewPort() { return view; }
@@ -161,6 +227,7 @@ private:
     ProjectWatcher watcher;
     Viewport view;
     std::unique_ptr<SampleDisplayPanel> panel;
+    TextButton zoomIn, zoomOut;
 };
 
 SampleEditContentView::SampleEditContentView (Versicap& vc)

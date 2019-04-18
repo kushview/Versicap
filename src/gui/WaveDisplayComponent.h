@@ -17,6 +17,16 @@ public:
 
     void setVerticalZoom (float zoom);
 
+    void setStartTime (double);
+    void setEndTime (double);
+
+    double getStartTime() const             { return range.getStart(); }
+    double getEndTime() const               { return range.getEnd(); }
+    double getViewedTimespan() const        { return range.getLength(); }
+
+    void setSecondsPerPixel (double);
+    void setPixelsPerSecond (double);
+
     double getPixelsPerSecond() const       { return pixelsPerSecond; }
     double getSecondsPerPixel() const       { return secondsPerPixel; }
 
@@ -25,10 +35,10 @@ public:
 
 private:
     std::unique_ptr<AudioThumbnail> thumb;
-    float verticalZoom = 1.f;
-    float waveOpacity = 0.6f;
-    double secondsPerPixel = 0.0;
-    double pixelsPerSecond = 0.0;
+    float verticalZoom      = 1.f;
+    float waveOpacity       = 0.6f;
+    double secondsPerPixel  = 0.0;
+    double pixelsPerSecond  = 0.0;
     
     Range<double> range;
     
