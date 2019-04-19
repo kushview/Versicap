@@ -228,10 +228,19 @@ struct Versicap::Impl : public AudioIODeviceCallback,
 
         const auto nbytes = sizeof(float) * static_cast<size_t> (nframes);
         for (int c = 0; c < numOutputs; ++c)
-            memset (output [c], 0, nbytes);        
-        for (int c = jmin(numOutputs, renderCtx.channels); --c >= 0;)
-            memcpy (output[c], renderBuffer.getReadPointer (c), nbytes);
-
+            memset (output [c], 0, nbytes);
+        
+        if (renderCtx.channels == 1)
+        {
+            for (int c = numOutputs; --c >= 0;)
+                memcpy (output[c], renderBuffer.getReadPointer (0), nbytes);
+        }
+        else
+        {
+            for (int c = jmin(numOutputs, renderCtx.channels); --c >= 0;)
+                memcpy (output[c], renderBuffer.getReadPointer (c), nbytes);
+        }
+        
         renderMidi.clear();
         incomingMidi.clear();
     }
