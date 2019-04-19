@@ -58,6 +58,7 @@ private:
 
 struct LayerInfo
 {
+    LayerInfo() = default;
     LayerInfo (const String& layerId, int layerVelocity)
         : uuid (layerId), velocity (static_cast<uint8> (layerVelocity)) {}
     LayerInfo (const String& layerId, uint8 layerVelocity)
