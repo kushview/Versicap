@@ -53,7 +53,7 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layerIdx,
                                                              AudioFormatManager& formats,
                                                              TimeSliceThread& thread) const
 {
-    jassert (sampleRate > 0.0);
+    jassert (sourceSampleRate > 0.0);
     jassert (isPositiveAndBelow (layerIdx, layers.size()));
     jassert (keyStride > 0);
     const auto& layer = layers.getReference (layerIdx);
@@ -64,11 +64,20 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layerIdx,
 
     int key = keyStart;
     int64 frame = 0;
-    const int64 noteFrames = static_cast<int64> (sourceSampleRate * ((double) noteLength / 1000.0));
-    const int64 tailFrames = static_cast<int64> (sourceSampleRate * ((double) tailLength / 1000.0));
 
+    const int64 noteFrames = static_cast<int64> (sourceSampleRate * ((double) layer.noteLength / 1000.0));
+    const int64 tailFrames = static_cast<int64> (sourceSampleRate * ((double) layer.tailLength / 1000.0));
+   
     const File directory (getCaptureDir());
     const auto extension = FormatType::getFileExtension (FormatType::fromSlug (format));
+
+    if (isPositiveAndBelow (layer.midiProgram, 127))
+    {
+        auto pgc = MidiMessage::programChange (layer.midiChannel, layer.midiProgram);
+        pgc.setTimeStamp (static_cast<double> (frame));
+        seq.addEvent (pgc);
+        frame += roundToInt (sourceSampleRate); // program delay
+    }
 
     while (key <= keyEnd)
     {
@@ -84,12 +93,12 @@ LayerRenderDetails* RenderContext::createLayerRenderDetails (const int layerIdx,
         fileName << "." << extension;
         sample->file = directory.getChildFile (fileName);
 
-        auto noteOn  = MidiMessage::noteOn (1, key, layer.velocity);
+        auto noteOn  = MidiMessage::noteOn (layer.midiChannel, key, layer.velocity);
         noteOn.setTimeStamp (static_cast<double> (frame));
         sample->start = frame;
         frame += noteFrames;
         
-        auto noteOff = MidiMessage::noteOff (1, key);
+        auto noteOff = MidiMessage::noteOff (layer.midiChannel, key);
         noteOff.setTimeStamp (static_cast<double> (frame));
         frame += tailFrames;
         sample->stop = frame;

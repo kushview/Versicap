@@ -64,13 +64,21 @@ struct LayerInfo
         : uuid (layerId), velocity (layerVelocity) {}
     LayerInfo (const LayerInfo& o) { operator= (o); }
 
-    Uuid uuid;
-    uint8 velocity;
+    Uuid    uuid;
+    uint8   velocity        = 127;
+    int     noteLength      = 3000;
+    int     tailLength      = 1000;
+    int     midiChannel     = 1;
+    int     midiProgram     = -1;
 
     LayerInfo& operator= (const LayerInfo& o)
     {
-        uuid = o.uuid;
-        velocity = o.velocity;
+        uuid            = o.uuid;
+        velocity        = o.velocity;
+        noteLength      = o.noteLength;
+        tailLength      = o.tailLength;
+        midiChannel     = o.midiChannel;
+        midiProgram     = o.midiProgram;
         return *this;
     }
 };

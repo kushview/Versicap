@@ -39,6 +39,11 @@ bool Layer::isValid() const
 }
 
 uint8 Layer::getVelocity() const    { return static_cast<uint8> ((int) getProperty (Tags::velocity)); }
+int Layer::getNoteLength() const    { return (int) getProperty (Tags::noteLength); }
+int Layer::getTailLength() const    { return (int) getProperty (Tags::tailLength); }
+int Layer::getMidiChannel() const   { return (int) getProperty (Tags::midiChannel); }
+int Layer::getMidiProgram() const   { return (int) getProperty (Tags::midiProgram); }
+
 void Layer::setMissingProperties()
 {
     stabilizePropertyString (Tags::uuid, Uuid().toString());
@@ -184,6 +189,10 @@ void Project::getRenderContext (RenderContext& context) const
     {
         const auto layer (getLayer (i));
         LayerInfo info (layer.getUuidString(), layer.getVelocity());
+        info.noteLength  = layer.getNoteLength();
+        info.tailLength  = layer.getTailLength();
+        info.midiChannel = layer.getMidiChannel();
+        info.midiProgram = layer.getMidiProgram();
         context.layers.add (info);
     }
 }

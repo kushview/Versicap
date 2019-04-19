@@ -20,6 +20,10 @@ public:
 
     bool isValid() const;
     uint8 getVelocity() const;
+    int getNoteLength() const;
+    int getTailLength() const;
+    int getMidiChannel() const;
+    int getMidiProgram() const;
 
     void getProperties (Array<PropertyComponent*>&);
 

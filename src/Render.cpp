@@ -117,14 +117,18 @@ void Render::getNextMidiBlock (MidiBuffer& buffer, int nframes)
         buffer.addEvent (msg, roundToInt (timestamp - start));
         
        #if 1
+        if (msg.isProgramChange())
+        {
+            DBG("[VCP] program change: " << msg.getProgramChangeNumber());
+        }
         if (msg.isNoteOn())
         {
-            DBG("note on: " << MidiMessage::getMidiNoteName (msg.getNoteNumber(), true, true, 4) << " - "
+            DBG("[VCP] note on: " << MidiMessage::getMidiNoteName (msg.getNoteNumber(), true, true, 4) << " - "
                 << static_cast<int64> (msg.getTimeStamp()));
         }
         else if (msg.isNoteOff())
         {
-            DBG("note off: " << MidiMessage::getMidiNoteName (msg.getNoteNumber(), true, true, 4) << " - "
+            DBG("[VCP] note off: " << MidiMessage::getMidiNoteName (msg.getNoteNumber(), true, true, 4) << " - "
                 << static_cast<int64> (msg.getTimeStamp()));
         }
        #endif
