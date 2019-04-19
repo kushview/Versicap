@@ -1,16 +1,9 @@
 
 #pragma once
 
-#include "Versicap.h"
-#include "RenderContext.h"
-
 #include "gui/EngineContentView.h"
-#include "gui/LoopingComponent.h"
-#include "gui/NotesComponent.h"
 #include "gui/OutputComponent.h"
-#include "gui/SamplingComponent.h"
-#include "gui/LayersComponent.h"
-#include "gui/SettingGroup.h"
+#include "Versicap.h"
 
 namespace vcp {
 
@@ -21,13 +14,11 @@ public:
         : TabbedComponent (TabbedButtonBar::TabsAtTop),
           versicap (vc)
     {
-        setTabBarDepth (25);
+        setTabBarDepth (22);
         auto colour = kv::LookAndFeel_KV1::widgetBackgroundColor.darker();
         setColour (TabbedComponent::backgroundColourId, colour);
         colour = kv::LookAndFeel_KV1::widgetBackgroundColor;
         addTab ("Devices",  colour, new EngineContentView (vc), true);
-        // addTab ("Notes",    colour, new NotesComponent (vc),    true);
-        // addTab ("Looping",  colour, new LoopingComponent (vc),  true);
         addTab ("Output",   colour, new OutputComponent (vc),   true);
 
         updateSettings();

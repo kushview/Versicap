@@ -40,6 +40,9 @@ public:
     void setProject (const Project& newProject)
     {
         watcher.setProject (newProject);
+        layer = watcher.getProject().getActiveLayer();
+        refreshSamples();
+        selectActiveSample();
     }
 
     Project getProject() const { return watcher.getProject(); }
@@ -53,6 +56,24 @@ public:
             project.getSamples (layerIdx, filtered);
         updateContent();
         repaint();
+    }
+
+    int indexOf (const Sample& sample)
+    {
+        for (int i = 0; i < filtered.size(); ++i)
+            if (sample.getUuidString() == filtered[i]->getUuidString())
+                return i;
+        return -1;
+    }
+
+    void selectActiveSample()
+    {
+        const auto project = watcher.getProject();
+        const auto sample = project.getActiveSample();
+        auto sampleIdx = indexOf (sample);
+        ProjectWatcher::ScopedBlock sb (watcher);
+        if (isPositiveAndBelow (sampleIdx, filtered.size()))
+            selectRow (sampleIdx);
     }
 
     //=========================================================================

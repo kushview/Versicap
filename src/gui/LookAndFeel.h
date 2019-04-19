@@ -48,6 +48,9 @@ public:
         return Font (jmin (12.0f, box.getHeight() * 0.75f));
     }
 
+    // scrollbar
+    int getDefaultScrollbarWidth() override { return 14; }
+
     // text button
     Font getTextButtonFont (TextButton&, int buttonHeight) override
     {

@@ -9,6 +9,17 @@ class ProjectWatcher : private ValueTree::Listener
 public:
     ProjectWatcher() = default;
     virtual ~ProjectWatcher() {}
+    
+    class ScopedBlock
+    {
+    public:
+        ScopedBlock (ProjectWatcher& w)
+            : watcher (w) { watcher.blocked = true; }
+        ~ScopedBlock() { watcher.blocked = false; }
+    private:
+        ProjectWatcher& watcher;
+        
+    };
 
     void setProject (const Project& newProject)
     {
@@ -35,11 +46,14 @@ public:
     std::function<void()> onActiveSampleChanged;
 
 private:
+    bool blocked = false;
     Project project;
     ValueTree data;
 
     void valueTreePropertyChanged (ValueTree& tree, const Identifier& property) override
     {
+        if (blocked) return;
+
         if (tree.hasType (Tags::layers) && property == Tags::active)
         {
             if (onActiveLayerChanged)
@@ -54,6 +68,8 @@ private:
 
     void valueTreeChildAdded (ValueTree& parent, ValueTree& child) override
     {
+        if (blocked) return;
+
         if (child.hasType (Tags::layer) && parent.getParent() == data)
         {
             if (onLayerAdded)
@@ -68,6 +84,8 @@ private:
 
     void valueTreeChildRemoved (ValueTree& parent, ValueTree& child, int index) override
     {
+        if (blocked) return;
+
         if (child.hasType (Tags::layer) && parent.getParent() == data)
         {
             if (onLayerRemoved)
@@ -82,18 +100,23 @@ private:
 
     void valueTreeChildOrderChanged (ValueTree& parent, int oldIndex, int newIndex) override
     {
+        if (blocked) return;
         ignoreUnused (parent, oldIndex, newIndex);
     }
 
     void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged) override
     {
+        if (blocked) return;
         ignoreUnused (treeWhoseParentHasChanged);
     }
 
     void valueTreeRedirected (ValueTree& tree) override
     {
+        if (blocked) return;
         ignoreUnused (tree);
     }
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ProjectWatcher)
 };
 
 }

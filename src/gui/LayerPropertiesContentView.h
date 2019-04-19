@@ -5,12 +5,12 @@
 
 namespace vcp {
 
-class ObjectPropertiesContentView : public PanelContentView,
-                                    private ComponentListener
+class LayerPropertiesContentView : public PanelContentView,
+                                   private ComponentListener
 {
 public:
-    ObjectPropertiesContentView (Versicap&);
-    virtual ~ObjectPropertiesContentView();
+    LayerPropertiesContentView (Versicap&);
+    virtual ~LayerPropertiesContentView();
 
 protected:
     void resizeContent (const Rectangle<int>&) override;

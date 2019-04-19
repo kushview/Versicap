@@ -109,7 +109,7 @@ void Project::setActiveLayer (const Layer& layer)
 {
     auto layers = objectData.getChildWithName (Tags::layers);
     if (layers.getProperty (Tags::active).toString() == layer.getUuidString())
-        return;
+        layers.removeProperty (Tags::active, nullptr);
     layers.setProperty (Tags::active, layer.getUuidString(), nullptr);
 }
 
@@ -124,7 +124,7 @@ void Project::setActiveSample (const Sample& sample)
 {
     auto samples = objectData.getChildWithName (Tags::samples);
     if (samples.getProperty (Tags::active).toString() == sample.getUuidString())
-        return;
+        samples.removeProperty (Tags::active, nullptr);
     samples.setProperty (Tags::active, sample.getUuidString(), nullptr);
 }
 

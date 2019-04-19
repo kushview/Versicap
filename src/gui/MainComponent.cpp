@@ -1,7 +1,8 @@
 
-#include "gui/ObjectPropertiesContentView.h"
+#include "gui/LayerPropertiesContentView.h"
 #include "gui/LayersTableContentView.h"
 #include "gui/NoteParams.h"
+#include "gui/SamplePropertiesContentView.h"
 #include "gui/SamplesTableContentView.h"
 #include "gui/SampleEditContentView.h"
 #include "gui/SourceContentView.h"
@@ -138,8 +139,11 @@ public:
         view.reset (new SampleEditContentView (versicap));
         addAndMakeVisible (view.get());
 
-        properties.reset (new ObjectPropertiesContentView (versicap));
-        addAndMakeVisible (properties.get());
+        layer.reset (new LayerPropertiesContentView (versicap));
+        addAndMakeVisible (layer.get());
+
+        sample.reset (new SamplePropertiesContentView (versicap));
+        addAndMakeVisible (sample.get());
 
         engine.reset (new EngineTabs (versicap));
         addAndMakeVisible (engine.get());
@@ -199,18 +203,24 @@ public:
        #endif
 
         r.removeFromTop (1);
+        r.removeFromLeft (6);
+        r.removeFromRight (6);
+        r.removeFromBottom (8);
+
         r2 = r.removeFromLeft (220);
         
         // source->setBounds (r2.removeFromTop (80));
+        r2.removeFromTop (4);
         layers->setBounds (r2.removeFromTop (140));
         samples->setBounds (r2);
 
         auto r3 = r.removeFromRight (240);
+        r3.removeFromTop (4);
         engine->setBounds (r3.removeFromBottom (260));
-        properties->setBounds (r3);
-        
-        r.removeFromLeft (2);
-        
+        sample->setBounds (r3.removeFromBottom (50));
+        layer->setBounds (r3);
+
+        r.removeFromLeft (2);        
         view->setBounds (r);
 
         if (overlay.isVisible())
@@ -291,7 +301,8 @@ private:
     std::unique_ptr<SourceContentView> source;
     std::unique_ptr<LayersTableContentView> layers;
     std::unique_ptr<SamplesTableContentView> samples;
-    std::unique_ptr<ObjectPropertiesContentView> properties;
+    std::unique_ptr<LayerPropertiesContentView> layer;
+    std::unique_ptr<SamplePropertiesContentView> sample;
     std::unique_ptr<EngineTabs> engine;
 
     TextButton importButton;

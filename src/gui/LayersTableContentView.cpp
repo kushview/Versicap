@@ -34,8 +34,23 @@ public:
     }
 
     //=========================================================================
-    void setProject (const Project& newProject) { watcher.setProject (newProject); }
+    void setProject (const Project& newProject)
+    { 
+        watcher.setProject (newProject);
+        selectActiveLayer();
+    }
+    
     Project getProject() const { return watcher.getProject(); }
+
+    void selectActiveLayer()
+    {
+        const auto project = watcher.getProject();
+        const auto layer = project.getActiveLayer();
+        auto layerIdx = project.indexOf (layer);
+        ProjectWatcher::ScopedBlock sb (watcher);
+        if (isPositiveAndBelow (layerIdx, project.getNumLayers()))
+            selectRow (layerIdx);
+    }
 
     //=========================================================================
     int getNumRows() override { return watcher.getProject().getNumLayers(); }
@@ -67,6 +82,16 @@ public:
                     Justification::centredLeft);
     }
 
+    void cellClicked (int rowNumber, int columnId, const MouseEvent&) override
+    {
+        ignoreUnused (columnId);
+        if (rowNumber == getSelectedRow())
+        {
+            // needed to updated active layer even when clicked row is already selected
+            selectedRowsChanged (rowNumber);
+        }
+    }
+
     void selectedRowsChanged (int lastRowSelected) override
     {
         auto project = watcher.getProject();
@@ -84,7 +109,7 @@ public:
    #if 0
     virtual Component* refreshComponentForCell (int rowNumber, int columnId, bool isRowSelected,
                                                 Component* existingComponentToUpdate);
-    virtual void cellClicked (int rowNumber, int columnId, const MouseEvent&);
+    
     virtual void cellDoubleClicked (int rowNumber, int columnId, const MouseEvent&);
     virtual void backgroundClicked (const MouseEvent&);
     virtual void sortOrderChanged (int newSortColumnId, bool isForwards);
