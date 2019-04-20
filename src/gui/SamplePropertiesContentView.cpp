@@ -5,7 +5,7 @@
 namespace vcp {
 
 SamplePropertiesContentView::SamplePropertiesContentView (Versicap& vc)
-    : PanelContentView (vc)
+    : ContentView (vc)
 {
     setName ("Sample");
     addAndMakeVisible (panel);
@@ -29,9 +29,9 @@ SamplePropertiesContentView::~SamplePropertiesContentView()
 
 }
 
-void SamplePropertiesContentView::resizeContent (const Rectangle<int>& area)
+void SamplePropertiesContentView::resized()
 {
-    panel.setBounds (area);
+    panel.setBounds (getLocalBounds());
 }
 
 }

@@ -5,15 +5,13 @@
 
 namespace vcp {
 
-class SamplePropertiesContentView : public PanelContentView,
+class SamplePropertiesContentView : public ContentView,
                                     private ComponentListener
 {
 public:
     SamplePropertiesContentView (Versicap&);
     virtual ~SamplePropertiesContentView();
-
-protected:
-    void resizeContent (const Rectangle<int>&) override;
+    void resized() override;
 
 private:
     ProjectWatcher watcher;

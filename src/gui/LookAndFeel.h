@@ -48,6 +48,18 @@ public:
         return Font (jmin (12.0f, box.getHeight() * 0.75f));
     }
 
+    void drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
+                                    bool isMouseOver, bool isMouseDown,
+                                    ConcertinaPanel&, Component& component) override
+    {
+        ignoreUnused (isMouseOver, isMouseDown);
+        Rectangle<float> lb (area.toFloat());
+        g.setColour (kv::LookAndFeel_KV1::widgetBackgroundColor.brighter());
+        g.fillRect (lb.withHeight (lb.getHeight() - 1.4f));
+        g.setColour (kv::LookAndFeel_KV1::textColor);
+        g.drawText (component.getName(), lb, Justification::centred);
+    }
+
     // scrollbar
     int getDefaultScrollbarWidth() override { return 14; }
 

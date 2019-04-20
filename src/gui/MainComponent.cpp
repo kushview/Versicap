@@ -2,10 +2,11 @@
 #include "gui/LayerPropertiesContentView.h"
 #include "gui/LayersTableContentView.h"
 #include "gui/NoteParams.h"
+#include "gui/ProjectPropertiesContentView.h"
+#include "gui/ProjectConcertinaPanel.h"
 #include "gui/SamplePropertiesContentView.h"
 #include "gui/SamplesTableContentView.h"
 #include "gui/SampleEditContentView.h"
-#include "gui/SourceContentView.h"
 
 #include "gui/MainComponent.h"
 #include "gui/MainTabs.h"
@@ -125,16 +126,28 @@ public:
         recordButton.setButtonText ("Record");
         recordButton.onClick = [this]() { owner.startRendering(); };
 
+        // addAndMakeVisible (projectConfigButton);
+        projectConfigButton.setButtonText ("Project");
+        projectConfigButton.setColour (TextButton::buttonOnColourId, Colours::orange);
+        projectConfigButton.setColour (TextButton::textColourOnId, Colours::white);
+        projectConfigButton.onClick = [this]()
+        {
+            if (nullptr == dynamic_cast<ProjectPropertiesContentView*> (view.get()))
+            {
+                view.reset (new ProjectPropertiesContentView (versicap));
+                projectConfigButton.setToggleState (true, dontSendNotification);
+            }
+            else
+            {
+                view.reset (new SampleEditContentView (versicap));
+                projectConfigButton.setToggleState (false, dontSendNotification);
+            }
+
+            addAndMakeVisible (view.get());
+            resized();
+        };
+
         addAndMakeVisible (notes);
-        
-        source.reset (new SourceContentView (versicap));
-        addAndMakeVisible (source.get());
-
-        layers.reset (new LayersTableContentView (versicap));
-        addAndMakeVisible (layers.get());
-
-        samples.reset (new SamplesTableContentView (versicap));
-        addAndMakeVisible (samples.get());
 
         view.reset (new SampleEditContentView (versicap));
         addAndMakeVisible (view.get());
@@ -148,10 +161,8 @@ public:
         engine.reset (new EngineTabs (versicap));
         addAndMakeVisible (engine.get());
 
-        keyboard.reset (new MidiKeyboardComponent (versicap.getMidiKeyboardState(), 
-            MidiKeyboardComponent::horizontalKeyboard));
-        keyboard->setKeyWidth (24);
-        addAndMakeVisible (keyboard.get());
+        addAndMakeVisible (projectPanel);
+        projectPanel.createPanels (versicap);
 
         logo = ImageCache::getFromMemory (BinaryData::versicap_v1_png,
                                           BinaryData::versicap_v1_pngSize);
@@ -198,9 +209,7 @@ public:
         notes.setBounds ((getWidth() / 2) - (notes.getRequiredWidth() / 2), 
                          r2.getY(), notes.getRequiredWidth(), r2.getHeight());
 
-       #if 0
-        keyboard->setBounds (r.removeFromBottom (60));
-       #endif
+        projectConfigButton.setBounds (224, r2.getY(), 40, r2.getHeight());
 
         r.removeFromTop (1);
         r.removeFromLeft (6);
@@ -208,16 +217,13 @@ public:
         r.removeFromBottom (8);
 
         r2 = r.removeFromLeft (220);
-        
-        // source->setBounds (r2.removeFromTop (80));
         r2.removeFromTop (4);
-        layers->setBounds (r2.removeFromTop (140));
-        samples->setBounds (r2);
+        projectPanel.setBounds (r2);
 
         auto r3 = r.removeFromRight (240);
         r3.removeFromTop (4);
         engine->setBounds (r3.removeFromBottom (260));
-        sample->setBounds (r3.removeFromBottom (50));
+        // sample->setBounds (r3.removeFromBottom (50));
         layer->setBounds (r3);
 
         r.removeFromLeft (2);        
@@ -298,9 +304,6 @@ private:
     Project project;
         
     std::unique_ptr<ContentView> view;
-    std::unique_ptr<SourceContentView> source;
-    std::unique_ptr<LayersTableContentView> layers;
-    std::unique_ptr<SamplesTableContentView> samples;
     std::unique_ptr<LayerPropertiesContentView> layer;
     std::unique_ptr<SamplePropertiesContentView> sample;
     std::unique_ptr<EngineTabs> engine;
@@ -308,13 +311,14 @@ private:
     TextButton importButton;
     TextButton exportButton;
     TextButton recordButton;
+    TextButton projectConfigButton;
+    ProjectConcertinaPanel projectPanel;
+
     RenderProgress progress;
 
     NoteParams notes;
 
     ComboBox sourceCombo;
-
-    std::unique_ptr<MidiKeyboardComponent> keyboard;
 
     Component::SafePointer<UnlockForm> unlock;
 

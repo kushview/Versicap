@@ -5,7 +5,7 @@
 namespace vcp {
 
 LayerPropertiesContentView::LayerPropertiesContentView (Versicap& vc)
-    : PanelContentView (vc)
+    : ContentView (vc)
 {
     setName ("Layer");
     addAndMakeVisible (panel);
@@ -23,14 +23,11 @@ LayerPropertiesContentView::LayerPropertiesContentView (Versicap& vc)
     };
 }
 
-LayerPropertiesContentView::~LayerPropertiesContentView()
-{
+LayerPropertiesContentView::~LayerPropertiesContentView() { }
 
-}
-
-void LayerPropertiesContentView::resizeContent (const Rectangle<int>& area)
+void LayerPropertiesContentView::resized()
 {
-    panel.setBounds (area);
+    panel.setBounds (getLocalBounds());
 }
 
 }

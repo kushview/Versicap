@@ -165,7 +165,7 @@ private:
 };
 
 LayersTableContentView::LayersTableContentView (Versicap& vc)
-    : PanelContentView (vc)
+    : ContentView (vc)
 {
     setName ("Layers");
     content.reset (new Content());
@@ -186,9 +186,9 @@ void LayersTableContentView::projectChanged()
     table.setProject (project);
 }
 
-void LayersTableContentView::resizeContent (const Rectangle<int>& area)
+void LayersTableContentView::resized()
 {
-    content->setBounds (area.reduced (4, 2));
+    content->setBounds (getLocalBounds().reduced (4, 2));
 }
 
 }

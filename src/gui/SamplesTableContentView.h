@@ -4,7 +4,7 @@
 
 namespace vcp {
 
-class SamplesTableContentView : public PanelContentView,
+class SamplesTableContentView : public ContentView,
                                 public Versicap::Listener
 {
 public:
@@ -12,9 +12,7 @@ public:
     ~SamplesTableContentView();
 
     void projectChanged() override;
-
-protected:
-    void resizeContent (const Rectangle<int>& area) override;
+    void resized() override;
 
 private:
     class Content; std::unique_ptr<Content> content;

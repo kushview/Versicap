@@ -159,7 +159,7 @@ private:
 };
 
 SamplesTableContentView::SamplesTableContentView (Versicap& vc)
-    : PanelContentView (vc)
+    : ContentView (vc)
 {
     setName ("Samples");
     content.reset (new Content());
@@ -174,9 +174,9 @@ SamplesTableContentView::~SamplesTableContentView()
 
 }
 
-void SamplesTableContentView::resizeContent (const Rectangle<int>& area)
+void SamplesTableContentView::resized ()
 {
-    content->setBounds (area.reduced (4, 2));
+    content->setBounds (getLocalBounds().reduced (4, 2));
 }
 
 void SamplesTableContentView::projectChanged()

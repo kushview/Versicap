@@ -365,7 +365,8 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     int extraLatency  = 0;
     double sampleRate { 0.0 };
     int bufferSize = 0;
-    int numInputChans = 0, numOutputChans = 0;
+    int numInputChans = 0;
+    int numOutputChans = 0;
 
     //=========================================================================
     HeapBlock<float*> channels;

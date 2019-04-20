@@ -146,6 +146,9 @@ public:
     void clearPlugin();
     
     //=========================================================================
+    void getProperties (Array<PropertyComponent*>&) {}
+
+    //=========================================================================
     inline Project& operator= (const Project& o)
     {
         this->objectData = o.objectData;
