@@ -2,9 +2,12 @@
 
 #include "controllers/Controller.h"
 
-class ProjectsController
+namespace vcp {
+class ProjectsController : public Controller
 {
 public:
-    ProjectsController() = default;
+    ProjectsController (Versicap& vc)
+        : Controller (vc) { }
     ~ProjectsController() = default;
 };
+}

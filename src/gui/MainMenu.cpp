@@ -71,8 +71,11 @@ void MainMenu::menuItemSelected (int index, int menu)
 
 void MainMenu::buildFileMenu (PopupMenu& menu)
 {
-    menu.addItem (3000, "Open Project");
-    menu.addItem (3001, "New Project");
+    menu.addCommandItem (&commands, Commands::projectSave);
+    menu.addCommandItem (&commands, Commands::projectSaveAs);
+    menu.addCommandItem (&commands, Commands::projectNew);
+    menu.addCommandItem (&commands, Commands::projectOpen);
+
    #if ! JUCE_MAC
     menu.addItem (2000, "Quit");
    #endif

@@ -19,6 +19,9 @@ public:
         versicap.removeListener (this);
     }
 
+    virtual void initialize() { }
+    virtual void shutdown() { }
+
 private:
     Versicap& versicap;
 };

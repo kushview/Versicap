@@ -1,6 +1,10 @@
 
+#include "controllers/GuiController.h"
+#include "controllers/ProjectsController.h"
+
 #include "gui/PluginWindow.h"
 
+#include "Commands.h"
 #include "Exporter.h"
 #include "PluginManager.h"
 #include "Project.h"
@@ -12,7 +16,8 @@ namespace vcp {
 
 struct Versicap::Impl : public AudioIODeviceCallback,
                         public MidiInputCallback,
-                        public ChangeListener
+                        public ChangeListener,
+                        public ApplicationCommandTarget
 {
     Impl()
         : peaks (32)
@@ -294,7 +299,75 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     }
 
     //=========================================================================
+    ApplicationCommandTarget* getNextCommandTarget() override
+    {
+        return nullptr;
+    }
+
+    void getAllCommands (Array<CommandID>& commands) override
+    {
+        commands.addArray ({
+            Commands::projectSave,
+            Commands::projectSaveAs,
+            Commands::projectNew,
+            Commands::projectOpen
+           #if 0
+            Commands::showAbout,
+            Commands::checkForUpdates
+           #endif
+        });
+    }
+
+    void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result) override
+    {
+        switch (commandID)
+        {
+            case Commands::projectSave:
+                result.setInfo ("Save Project As", "Save the current project", "Project", 0);
+                break;
+            case Commands::projectSaveAs:
+                result.setInfo ("Save Project", "Save the current project", "Project", 0);
+                break;
+            case Commands::projectOpen:
+                result.setInfo ("Open Project", "Open an existing project", "Project", 0);
+                break;
+            case Commands::projectNew:
+                result.setInfo ("New Project", "Create a new project", "Project", 0);
+                break;
+        }
+    }
+
+    bool perform (const InvocationInfo& info) override
+    {
+        bool handled = true;
+
+        switch (info.commandID)
+        {
+            case Commands::projectSave: {
+                DBG("done");
+            } break;
+
+            case Commands::projectSaveAs: {
+                DBG("done");
+            } break;
+
+            case Commands::projectNew: {
+                DBG("done");
+            } break;
+
+            case Commands::projectOpen: {
+                DBG("done");
+            } break;
+
+            default: handled = false;
+        }
+
+        return handled;
+    }
+
+    //=========================================================================
     Project project;
+    OwnedArray<Controller> controllers;
 
     Settings settings;
     AudioThumbnailCache peaks;
@@ -352,6 +425,9 @@ Versicap::Versicap()
     impl->unlock.reset (new UnlockStatus (impl->settings));
     impl->render.reset (new Render (*impl->formats));
     
+    impl->controllers.add (new GuiController (*this));
+    impl->controllers.add (new ProjectsController (*this));
+
     impl->render->onStarted = [this]()
     {
         listeners.call ([](Listener& l) { l.renderStarted(); });
@@ -379,7 +455,7 @@ Versicap::~Versicap()
     impl.reset();
 }
 
-File Versicap::getApplicationDataPath() 
+File Versicap::getApplicationDataPath()
 {
    #if JUCE_MAC
     return File::getSpecialLocation (File::userApplicationDataDirectory)
@@ -441,8 +517,6 @@ void Versicap::initializeAudioDevice()
     {
         devices.initialiseWithDefaultDevices (32, 32);
     }
-
-
 }
 
 void Versicap::initializePlugins()
@@ -469,11 +543,19 @@ void Versicap::initialize()
     initializeUnlockStatus();
     initializeRenderContext();
 
+    for (auto* const controller : impl->controllers)
+        controller->initialize();
+
     impl->keyboardState.addListener (&impl->messageCollector);
+    impl->commands.registerAllCommandsForTarget (impl.get());
+    impl->commands.setFirstCommandTarget (impl.get());
 }
 
 void Versicap::shutdown()
 {
+    for (auto* const controller : impl->controllers)
+        controller->shutdown();
+
     impl->keyboardState.removeListener (&impl->messageCollector);
 
     auto& unlock = getUnlockStatus();

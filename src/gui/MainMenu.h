@@ -34,9 +34,9 @@ private:
     ApplicationCommandManager& commands;
     std::unique_ptr<PopupMenu> macMenu;
 
-    static void buildFileMenu (PopupMenu&);
-    static void buildDebugMenu (PopupMenu&);
-    static void buildHelpMenu (PopupMenu&);
+    void buildFileMenu (PopupMenu&);
+    void buildDebugMenu (PopupMenu&);
+    void buildHelpMenu (PopupMenu&);
 };
 
 }
