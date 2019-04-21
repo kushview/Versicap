@@ -4,7 +4,6 @@
 
 namespace vcp {
 
-
 class MillisecondIntSliderPropertyComponent : public SliderPropertyComponent
 {
 public:

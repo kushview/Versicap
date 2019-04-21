@@ -9,7 +9,6 @@
 #include "gui/SampleEditContentView.h"
 
 #include "gui/MainComponent.h"
-#include "gui/MainTabs.h"
 #include "gui/UnlockForm.h"
 
 #include "Versicap.h"
@@ -158,9 +157,6 @@ public:
         sample.reset (new SamplePropertiesContentView (versicap));
         addAndMakeVisible (sample.get());
 
-        engine.reset (new EngineTabs (versicap));
-        addAndMakeVisible (engine.get());
-
         addAndMakeVisible (projectPanel);
         projectPanel.createPanels (versicap);
 
@@ -304,7 +300,6 @@ private:
     std::unique_ptr<ContentView> view;
     std::unique_ptr<LayerPropertiesContentView> layer;
     std::unique_ptr<SamplePropertiesContentView> sample;
-    std::unique_ptr<EngineTabs> engine;
 
     TextButton importButton;
     TextButton exportButton;
@@ -352,14 +347,6 @@ MainComponent::MainComponent (Versicap& vc)
     content.reset (new Content (*this, vc));
     addAndMakeVisible (content.get());
     setSize (600, 400);
-
-    auto& tabs = *content->engine;
-    tabs.refresh();
-
-    if (auto* props = versicap.getSettings().getUserSettings())
-        tabs.setCurrentTabIndex (props->getIntValue ("currentTab", 0));
-
-    tabs.updateSettings();
 
     versicap.addListener (this);
     versicap.getUnlockStatus().addChangeListener (this);
@@ -415,8 +402,7 @@ void MainComponent::renderWillStop()
 
 void MainComponent::saveSettings()
 {
-    if (auto* props = versicap.getSettings().getUserSettings())
-        props->setValue ("currentTab", content->engine->getCurrentTabIndex());
+    
 }
 
 void MainComponent::startRendering()
