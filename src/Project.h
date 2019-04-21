@@ -152,6 +152,9 @@ public:
     void getRecordingProperties (Versicap&, Array<PropertyComponent*>&);
 
     //=========================================================================
+    void getAudioDeviceSetup (AudioDeviceManager::AudioDeviceSetup& setup) const;
+
+    //=========================================================================
     inline Project& operator= (const Project& o)
     {
         this->objectData = o.objectData;

@@ -9,6 +9,8 @@ public:
     GuiController (Versicap& vc)
         : Controller (vc) { }
     ~GuiController() = default;
+
+    String getName() const override { return "GUI"; }
 };
 
 }

@@ -537,18 +537,24 @@ void Versicap::initialize()
     initializeUnlockStatus();
     initializeRenderContext();
 
-    for (auto* const controller : impl->controllers)
-        controller->initialize();
-
     impl->keyboardState.addListener (&impl->messageCollector);
     impl->commands.registerAllCommandsForTarget (impl.get());
     impl->commands.setFirstCommandTarget (impl.get());
+
+    for (auto* const controller : impl->controllers)
+    {
+        DBG("[VCP] initialize " << controller->getName());
+        controller->initialize();
+    }
 }
 
 void Versicap::shutdown()
 {
     for (auto* const controller : impl->controllers)
+    {
+        DBG("[VCP] shutting down " << controller->getName());
         controller->shutdown();
+    }
 
     impl->keyboardState.removeListener (&impl->messageCollector);
 

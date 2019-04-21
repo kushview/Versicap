@@ -1,8 +1,74 @@
 
 #include "controllers/ProjectsController.h"
 #include "Commands.h"
+#include "Project.h"
 
 namespace vcp {
+
+class ProjectDocument : public FileBasedDocument
+{
+public:
+    ProjectDocument()
+        : FileBasedDocument ("versicap", "*.versicap", "Open Project", "Save Project")
+    { }
+
+    ~ProjectDocument() = default;
+
+protected:
+    String getDocumentTitle() override
+    {
+        return String();
+    }
+
+    Result loadDocument (const File& file) override
+    {
+        return Result::ok();
+    }
+
+    Result saveDocument (const File& file) override
+    {
+        return Result::ok();
+    }
+
+    File getLastDocumentOpened() override
+    {
+        return File();
+    }
+
+    void setLastDocumentOpened (const File& file) override
+    {
+
+    }
+
+private:
+    Project project;
+};
+
+void ProjectsController::initialize()
+{
+    versicap.getDeviceManager().addChangeListener (this);
+}
+
+void ProjectsController::shutdown() 
+{
+    versicap.getDeviceManager().removeChangeListener (this);
+}
+
+void ProjectsController::save (bool saveAs)
+{
+}
+
+void ProjectsController::changeListenerCallback (ChangeBroadcaster*)
+{
+    auto project = versicap.getProject();
+    AudioDeviceManager::AudioDeviceSetup setup;
+    versicap.getDeviceManager().getAudioDeviceSetup (setup);
+    project.setProperty (Tags::sampleRate, setup.sampleRate)
+           .setProperty (Tags::bufferSize, setup.bufferSize)
+           .setProperty (Tags::audioInput, setup.inputDeviceName)
+           .setProperty (Tags::audioOutput, setup.outputDeviceName);
+    DBG(project.getValueTree().toXmlString());
+}
 
 void ProjectsController::getCommandInfo (CommandID commandID, ApplicationCommandInfo& result)
 {

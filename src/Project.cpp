@@ -227,6 +227,19 @@ int Project::indexOf (const Layer& layer) const
 }
 
 //=========================================================================
+void Project::getAudioDeviceSetup (AudioDeviceManager::AudioDeviceSetup& setup) const
+{
+    setup.inputDeviceName   = getProperty (Tags::audioInput);
+    setup.outputDeviceName  = getProperty (Tags::audioOutput);
+    setup.bufferSize        = getProperty (Tags::bufferSize);
+    setup.sampleRate        = getProperty (Tags::sampleRate);
+    setup.useDefaultInputChannels   = false;
+    setup.useDefaultOutputChannels  = false;
+    setup.inputChannels.setRange (0, 32, true);
+    setup.outputChannels.setRange (0, 32, true);
+}
+
+//=========================================================================
 void Project::setSamples (const ValueTree& newSamples)
 {
     int lastIndex = -1;

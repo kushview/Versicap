@@ -7,6 +7,8 @@ namespace vcp {
 namespace Tags {
 
     static const Identifier active          = "active";
+    static const Identifier audioInput      = "audioInput";
+    static const Identifier audioOutput     = "audioInput";
     static const Identifier baseName        = "baseName";
     static const Identifier bitDepth        = "bitDepth";
     static const Identifier bufferSize      = "bufferSize";

@@ -19,13 +19,14 @@ public:
         versicap.removeListener (this);
     }
 
+    virtual String getName() const =0;
+
     virtual void initialize() { }
     virtual void shutdown() { }
-
     virtual void getCommandInfo (CommandID commandID, ApplicationCommandInfo&) { }
     virtual bool perform (const ApplicationCommandTarget::InvocationInfo&) { return false; }
 
-private:
+protected:
     Versicap& versicap;
 };
 
