@@ -82,6 +82,9 @@ public:
     void stopRendering();
 
     //=========================================================================
+    template<class ControllerType> ControllerType* findController() const;
+
+    //=========================================================================
     void addListener (Listener* listener)       { listeners.add (listener); }
     void removeListener (Listener* listener)    { listeners.remove (listener); }
 

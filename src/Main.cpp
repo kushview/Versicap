@@ -75,6 +75,9 @@ public:
 
             setUsingNativeTitleBar (true);
             setBackgroundColour (kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
+
+            addKeyListener (versicap.getCommandManager().getKeyMappings());
+
             setContentOwned (new MainComponent (vc), true);
 
             setResizable (true, false);

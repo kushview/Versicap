@@ -320,46 +320,30 @@ struct Versicap::Impl : public AudioIODeviceCallback,
 
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo& result) override
     {
-        switch (commandID)
-        {
-            case Commands::projectSave:
-                result.setInfo ("Save Project As", "Save the current project", "Project", 0);
-                break;
-            case Commands::projectSaveAs:
-                result.setInfo ("Save Project", "Save the current project", "Project", 0);
-                break;
-            case Commands::projectOpen:
-                result.setInfo ("Open Project", "Open an existing project", "Project", 0);
-                break;
-            case Commands::projectNew:
-                result.setInfo ("New Project", "Create a new project", "Project", 0);
-                break;
-        }
+        for (auto* const controller : controllers)
+            controller->getCommandInfo (commandID, result);
     }
 
     bool perform (const InvocationInfo& info) override
     {
-        bool handled = true;
+        bool handled = false;
 
-        switch (info.commandID)
+        for (auto* const controller : controllers)
         {
-            case Commands::projectSave: {
-                DBG("done");
-            } break;
+            handled = controller->perform (info);
+            if (handled)
+                break;
+        }
 
-            case Commands::projectSaveAs: {
-                DBG("done");
-            } break;
-
-            case Commands::projectNew: {
-                DBG("done");
-            } break;
-
-            case Commands::projectOpen: {
-                DBG("done");
-            } break;
-
-            default: handled = false;
+        if (! handled)
+        {
+            handled = true;
+            switch (info.commandID)
+            {
+                default:
+                    handled = false;
+                    break;
+            }
         }
 
         return handled;
@@ -425,8 +409,9 @@ Versicap::Versicap()
     impl->unlock.reset (new UnlockStatus (impl->settings));
     impl->render.reset (new Render (*impl->formats));
     
-    impl->controllers.add (new GuiController (*this));
-    impl->controllers.add (new ProjectsController (*this));
+    auto& controllers = impl->controllers;
+    controllers.add (new GuiController (*this));
+    controllers.add (new ProjectsController (*this));
 
     impl->render->onStarted = [this]()
     {
@@ -452,7 +437,16 @@ Versicap::~Versicap()
 {
     impl->render.reset();
     impl->formats->clearFormats();
+    impl->controllers.clear (true);
     impl.reset();
+}
+
+template<class ControllerType> ControllerType* Versicap::findController() const
+{
+    for (auto* const c : impl->controllers)
+        if (auto* const fc = dynamic_cast<ControllerType*> (c))
+            return fc;
+    return nullptr;
 }
 
 File Versicap::getApplicationDataPath()
