@@ -42,6 +42,8 @@ public:
 
     ~LookAndFeel() { }
 
+    float getPanelSpacing() const { return 1.4f; }
+
     // combobox
     Font getComboBoxFont (ComboBox& box) override
     { 
@@ -55,7 +57,15 @@ public:
         ignoreUnused (isMouseOver, isMouseDown);
         Rectangle<float> lb (area.toFloat());
         g.setColour (kv::LookAndFeel_KV1::widgetBackgroundColor.brighter());
-        g.fillRect (lb.withHeight (lb.getHeight() - 1.4f));
+        g.fillRect (lb.withHeight (lb.getHeight() - getPanelSpacing()));
+
+       #if 0
+        auto buttonSize = area.getHeight() * 0.75f;
+        auto buttonIndent = (area.getHeight() - buttonSize) * 0.5f;
+        drawTreeviewPlusMinusBox (g, Rectangle<float> (buttonIndent, buttonIndent, buttonSize, buttonSize), 
+                                  Colours::white, component.isShowing(), false);
+       #endif
+
         g.setColour (kv::LookAndFeel_KV1::textColor);
         g.drawText (component.getName(), lb, Justification::centred);
     }
@@ -70,6 +80,24 @@ public:
     }
 
     // property component
+    void drawPropertyPanelSectionHeader (Graphics& g, const String& name, 
+                                         bool isOpen, int width, int height) override
+    {
+        Rectangle<float> lb (0.f, 0.f, (float)width, (float)height);
+        g.setColour (kv::LookAndFeel_KV1::widgetBackgroundColor.brighter());
+        g.fillRect (lb.withHeight (lb.getHeight() - getPanelSpacing()));
+
+        auto buttonSize = height * 0.75f;
+        auto buttonIndent = (height - buttonSize) * 0.5f;
+
+        drawTreeviewPlusMinusBox (g, Rectangle<float> (buttonIndent, buttonIndent, buttonSize, buttonSize), 
+                                  Colours::white, isOpen, false);
+
+        g.setColour (kv::LookAndFeel_KV1::textColor);
+        g.drawText (name, 0, 0, width, height, 
+                    Justification::centred);
+    }
+
     void drawPropertyComponentLabel (Graphics& g, int width, int height, 
                                      PropertyComponent& component) override
     {
@@ -87,7 +115,6 @@ public:
     }
 
 #if 0
-    virtual void drawPropertyPanelSectionHeader (Graphics& g, const String& name, bool isOpen, int width, int height) override;
     virtual void drawPropertyComponentBackground (Graphics&, int width, int height, PropertyComponent&) = 0;
     virtual Rectangle<int> getPropertyComponentContentPosition (PropertyComponent&) = 0;
     virtual int getPropertyPanelSectionHeaderHeight (const String& sectionTitle) = 0;

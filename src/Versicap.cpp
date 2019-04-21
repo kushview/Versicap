@@ -1,4 +1,6 @@
 
+#include "gui/PluginWindow.h"
+
 #include "Exporter.h"
 #include "PluginManager.h"
 #include "Project.h"
@@ -7,44 +9,6 @@
 #include "UnlockStatus.h"
 
 namespace vcp {
-
-//=============================================================================
-class PluginWindow : public DocumentWindow
-{
-public:
-    PluginWindow (std::unique_ptr<PluginWindow>& o, AudioProcessorEditor* ed)
-        : DocumentWindow (ed->getAudioProcessor()->getName(),
-                          Colours::black, DocumentWindow::closeButton),
-          owner (o)
-    {
-        owner.reset (this);
-        editor.reset (ed);
-        setUsingNativeTitleBar (true);
-        setContentNonOwned (editor.get(), true);
-        setResizable (editor->isResizable(), false);
-        centreWithSize (getWidth(), getHeight());
-        setVisible (true);
-    }
-
-    ~PluginWindow()
-    {
-        if (editor)
-        {
-            if (auto* proc = editor->getAudioProcessor())
-                proc->editorBeingDeleted (editor.get());
-            editor.reset();
-        }
-    }
-
-    void closeButtonPressed() override
-    {
-        owner.reset();
-    }
-
-private:
-    std::unique_ptr<PluginWindow>& owner;
-    std::unique_ptr<AudioProcessorEditor> editor;
-};
 
 struct Versicap::Impl : public AudioIODeviceCallback,
                         public MidiInputCallback,

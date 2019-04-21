@@ -19,6 +19,22 @@ struct FormatType
         End = NumTypes
     };
 
+    static StringArray getChoices()
+    {
+        StringArray choices;
+        for (int i = Begin; i < End; ++i)
+            choices.add (getName (i));
+        return choices;
+    }
+
+    static Array<var> getValues()
+    {
+        Array<var> values;
+        for (int i = Begin; i < End; ++i)
+            values.add (getSlug (i));
+        return values;
+    }
+
     static String getName (int t)
     {
         switch (t)
@@ -143,6 +159,33 @@ struct SourceType
         Begin = 0,
         End = NumTypes
     };
+
+    static StringArray getChoices()
+    {
+        StringArray names;
+        for (int i = Begin; i < End; ++i)
+            names.add (getName (i));
+        return names;
+    }
+
+    static Array<var> getValues()
+    {
+        Array<var> values;
+        for (int i = Begin; i < End; ++i)
+            values.add (getSlug (i));
+        return values;
+    }
+
+    static String getName (int t)
+    {
+        switch (t)
+        {
+            case MidiDevice: return "MIDI Device"; break;
+            case AudioPlugin: return "Audio Plugin"; break;
+        }
+
+        return "none";
+    }
 
     static String getSlug (int t)
     {

@@ -151,8 +151,8 @@ public:
 
     void resized() override
     {
-        auto r1 = getLocalBounds();
-        auto r2 = r1.removeFromTop (22);
+        auto r1 = getLocalBounds().withHeight (jmax (24, getHeight()));
+        auto r2 = r1.removeFromTop(22);
         addButton.setBounds (r2.removeFromLeft (24));
         r1.removeFromTop (2);
         table.setBounds (r1);
@@ -188,7 +188,7 @@ void LayersTableContentView::projectChanged()
 
 void LayersTableContentView::resized()
 {
-    content->setBounds (getLocalBounds().reduced (4, 2));
+    content->setBounds (getLocalBounds());
 }
 
 }

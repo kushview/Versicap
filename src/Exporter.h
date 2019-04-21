@@ -4,6 +4,15 @@
 
 namespace vcp {
 
+class ExporterType
+{
+protected:
+    ExporterType() = default;
+
+public:
+    virtual ~ExporterType() = default;
+};
+
 class Exporter
 {
 protected:

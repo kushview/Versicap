@@ -126,7 +126,7 @@ public:
         recordButton.setButtonText ("Record");
         recordButton.onClick = [this]() { owner.startRendering(); };
 
-        // addAndMakeVisible (projectConfigButton);
+//        addAndMakeVisible (projectConfigButton);
         projectConfigButton.setButtonText ("Project");
         projectConfigButton.setColour (TextButton::buttonOnColourId, Colours::orange);
         projectConfigButton.setColour (TextButton::textColourOnId, Colours::white);
@@ -222,8 +222,6 @@ public:
 
         auto r3 = r.removeFromRight (240);
         r3.removeFromTop (4);
-        engine->setBounds (r3.removeFromBottom (260));
-        // sample->setBounds (r3.removeFromBottom (50));
         layer->setBounds (r3);
 
         r.removeFromLeft (2);        

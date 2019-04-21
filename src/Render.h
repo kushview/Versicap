@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ChannelDelay.h"
+#include "engine/ChannelDelay.h"
 #include "RenderContext.h"
 
 namespace vcp {

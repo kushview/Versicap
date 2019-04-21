@@ -176,7 +176,7 @@ SamplesTableContentView::~SamplesTableContentView()
 
 void SamplesTableContentView::resized ()
 {
-    content->setBounds (getLocalBounds().reduced (4, 2));
+    content->setBounds (getLocalBounds());
 }
 
 void SamplesTableContentView::projectChanged()

@@ -9,6 +9,7 @@ namespace Tags {
     static const Identifier active          = "active";
     static const Identifier baseName        = "baseName";
     static const Identifier bitDepth        = "bitDepth";
+    static const Identifier bufferSize      = "bufferSize";
     static const Identifier channels        = "channels";
     static const Identifier dataPath        = "dataPath";
     static const Identifier file            = "file";

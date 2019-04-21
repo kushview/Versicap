@@ -6,6 +6,7 @@ namespace vcp {
 
 class PluginManager;
 class Project;
+class Versicap;
 struct RenderContext;
 
 class Layer : public kv::ObjectModel
@@ -146,7 +147,9 @@ public:
     void clearPlugin();
     
     //=========================================================================
-    void getProperties (Array<PropertyComponent*>&) {}
+    void getProperties (Versicap&, Array<PropertyComponent*>&);
+    void getDevicesProperties (Versicap&, Array<PropertyComponent*>&);
+    void getRecordingProperties (Versicap&, Array<PropertyComponent*>&);
 
     //=========================================================================
     inline Project& operator= (const Project& o)

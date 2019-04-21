@@ -22,7 +22,7 @@ public:
 
     void resized() override
     {
-        panel.setBounds (getLocalBounds());
+        panel.setBounds (getLocalBounds().reduced (4));
     }
 
 private:
@@ -32,7 +32,9 @@ private:
     void updateProperties()
     {
         Array<PropertyComponent*> props;
-        project.getProperties (props);
+        project.getProperties (versicap, props);
+        project.getRecordingProperties (versicap, props);
+        project.getDevicesProperties (versicap, props);
         panel.clear();
         panel.addProperties (props);
     }

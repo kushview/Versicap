@@ -17,6 +17,7 @@ private:
     ProjectWatcher watcher;
     PropertyPanel panel;
 
+    void refreshCompletePanel();
     void componentNameChanged (Component& component) override
     { 
         repaint (0, 0, getWidth(), 24);
