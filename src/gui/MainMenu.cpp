@@ -71,11 +71,13 @@ void MainMenu::menuItemSelected (int index, int menu)
 
 void MainMenu::buildFileMenu (PopupMenu& menu)
 {
-    menu.addCommandItem (&commands, Commands::projectSave);
-    menu.addCommandItem (&commands, Commands::projectSaveAs);
-    menu.addCommandItem (&commands, Commands::projectNew);
-    menu.addCommandItem (&commands, Commands::projectOpen);
-
+    menu.addCommandItem (&commands, Commands::projectNew, "New Project");
+    menu.addSeparator();
+    menu.addCommandItem (&commands, Commands::projectOpen, "Open...");
+    menu.addSeparator();
+    menu.addCommandItem (&commands, Commands::projectSave, "Save");
+    menu.addCommandItem (&commands, Commands::projectSaveAs, "Save As...");
+    
    #if ! JUCE_MAC
     menu.addItem (2000, "Quit");
    #endif
