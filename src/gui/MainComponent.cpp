@@ -101,7 +101,7 @@ public:
         importButton.setButtonText ("Open");
         importButton.onClick = [this]()
         {
-            FileChooser chooser ("Open Versicap File", Versicap::getPresetsPath(), 
+            FileChooser chooser ("Open Versicap File", Versicap::getProjectsPath(), 
                 "*.versicap", true, false, this);
             if (chooser.browseForFileToOpen())
             {
@@ -113,7 +113,7 @@ public:
         exportButton.setButtonText ("Save");
         exportButton.onClick = [this]()
         {
-            FileChooser chooser ("Save Versicap File", Versicap::getPresetsPath(), 
+            FileChooser chooser ("Save Versicap File", Versicap::getProjectsPath(), 
                 "*.versicap", true, false, this);
             if (chooser.browseForFileToSave (true))
             {

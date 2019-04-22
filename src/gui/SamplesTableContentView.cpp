@@ -165,13 +165,12 @@ SamplesTableContentView::SamplesTableContentView (Versicap& vc)
     content.reset (new Content());
     addAndMakeVisible (content.get());
     versicap.addListener (this);
-    auto& table = content->table;
-    table.setProject (versicap.getProject());
+    projectChanged();
 }
 
 SamplesTableContentView::~SamplesTableContentView()
 {
-
+    versicap.removeListener (this);
 }
 
 void SamplesTableContentView::resized ()

@@ -170,13 +170,13 @@ LayersTableContentView::LayersTableContentView (Versicap& vc)
     setName ("Layers");
     content.reset (new Content());
     addAndMakeVisible (content.get());
-    auto& table = content->table;
-    table.setProject (vc.getProject());
+    versicap.addListener (this);
+    projectChanged();
 }
 
 LayersTableContentView::~LayersTableContentView()
 {
-
+    versicap.removeListener (this);
 }
 
 void LayersTableContentView::projectChanged()

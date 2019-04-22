@@ -4,10 +4,10 @@
 #include "gui/LookAndFeel.h"
 #include "gui/MainWindow.h"
 
+#include "Commands.h"
 #include "PluginManager.h"
 #include "Project.h"
 #include "Versicap.h"
-#include "UnlockStatus.h"
 
 namespace vcp {
 
@@ -50,6 +50,10 @@ public:
 
     void systemRequestedQuit() override
     {
+        if (versicap->hasProjectChanged())
+            if (AlertWindow::showNativeDialogBox ("Versicap", "This project has changed. Would you like to save?", true))
+                versicap->getCommandManager().invokeDirectly (Commands::projectSave, false);
+    
         quit();
     }
 

@@ -11,7 +11,6 @@ class ProjectConcertinaPanel : public ConcertinaPanel
 public:
     ProjectConcertinaPanel();
     ~ProjectConcertinaPanel();
-
     void createPanels (Versicap&);
 };
 

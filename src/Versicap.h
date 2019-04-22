@@ -35,7 +35,7 @@ public:
     static File getApplicationDataPath();
     static File getUserDataPath();
     static File getSamplesPath();
-    static File getPresetsPath();
+    static File getProjectsPath();
 
     //=========================================================================
     void initialize();
@@ -50,6 +50,8 @@ public:
     bool saveProject (const File& file);
     bool loadProject (const File& file);
     bool setProject (const Project& project);
+    bool hasProjectChanged() const;
+    
     
     //=========================================================================
     UnlockStatus& getUnlockStatus();

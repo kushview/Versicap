@@ -16,6 +16,8 @@ public:
 
     String getName() const override { return "Projects"; }
     
+    bool hasProjectChanged() const;
+
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo&) override;
     bool perform (const ApplicationCommandTarget::InvocationInfo&) override;
     void projectChanged() override;

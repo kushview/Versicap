@@ -54,6 +54,8 @@ ProjectsController::ProjectsController (Versicap& vc)
         : Controller (vc) { }
 ProjectsController::~ProjectsController() {}
 
+bool ProjectsController::hasProjectChanged() const { return document && document->hasChangedSinceSaved(); }
+
 void ProjectsController::initialize()
 {
     document.reset (new ProjectDocument (versicap));
@@ -82,7 +84,8 @@ void ProjectsController::save()
 
 void ProjectsController::saveAs()
 {
-    FileChooser chooser ("Save Project As...", File(), "*.versicap", true, false, nullptr);
+    FileChooser chooser ("Save Project As...", Versicap::getProjectsPath(), 
+                         "*.versicap", true, false, nullptr);
     if (! chooser.browseForFileToSave (true))
         return;
     const auto result = document->saveAs (chooser.getResult(), false, false, false);
@@ -90,7 +93,10 @@ void ProjectsController::saveAs()
 
 void ProjectsController::open()
 {
-    FileChooser chooser ("Open Project", File(), "*.versicap", true, false, nullptr);
+    document->saveIfNeededAndUserAgrees();
+
+    FileChooser chooser ("Open Project", Versicap::getProjectsPath(), 
+                         "*.versicap", true, false, nullptr);
     if (! chooser.browseForFileToOpen())
         return;
     auto result = document->loadFrom (chooser.getResult(), false);
@@ -106,25 +112,36 @@ void ProjectsController::open()
 
 void ProjectsController::create()
 {
+    document->saveIfNeededAndUserAgrees();
 
     AlertWindow window ("New Project", "Enter the project's name", AlertWindow::NoIcon);
     window.addTextEditor ("Name", "");
-    window.addButton ("Ok", 1);
-    window.addButton ("Cancel", 0);
+    window.addButton ("Ok", 1, KeyPress (KeyPress::returnKey));
+    window.addButton ("Cancel", 0, KeyPress (KeyPress::escapeKey));
     const int result = window.runModalLoop();
     if (result == 0)
         return;
 
-    document->saveIfNeededAndUserAgrees();
-
     Project newProject;
     String name = window.getTextEditor("Name")->getText();
     newProject.setProperty (Tags::name, name);
-    const auto dataPath = Versicap::getUserDataPath().getChildFile("Projects").getNonexistentChildFile (name,"");
-    dataPath.createDirectory();
-    newProject.setProperty (Tags::dataPath, dataPath.getFullPathName());
+    const auto dataPath = Versicap::getProjectsPath().getNonexistentChildFile (name, "");
+    
+    if (! dataPath.createDirectory())
+    {
+        AlertWindow::showNativeDialogBox ("Versicap", "Could not create project directory", false);
+        return;
+    }
+
     const auto filename = dataPath.getChildFile (name + String (".versicap"));
-    newProject.writeToFile (filename);
+    newProject.setProperty (Tags::dataPath, dataPath.getFullPathName());
+
+    if (! newProject.writeToFile (filename))
+    {
+        AlertWindow::showNativeDialogBox ("Versicap", "Could not create project file", false);
+        return;
+    }
+    
     document->setFile (filename);
     document->setChangedFlag (false);
     versicap.loadProject (filename);

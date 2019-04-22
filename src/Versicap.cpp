@@ -462,7 +462,7 @@ File Versicap::getApplicationDataPath()
 }
 
 File Versicap::getUserDataPath()    { return File::getSpecialLocation(File::userMusicDirectory).getChildFile ("Versicap"); }
-File Versicap::getPresetsPath()     { return getUserDataPath().getChildFile ("Presets"); }
+File Versicap::getProjectsPath()    { return getUserDataPath().getChildFile ("Projects"); }
 File Versicap::getSamplesPath()     { return getUserDataPath().getChildFile ("Samples"); }
 
 void Versicap::initializeDataPath()
@@ -473,8 +473,8 @@ void Versicap::initializeDataPath()
         getUserDataPath().createDirectory();
     if (! getSamplesPath().exists())
         getSamplesPath().createDirectory();
-    if (! getPresetsPath().exists())
-        getPresetsPath().createDirectory();
+    if (! getProjectsPath().exists())
+        getProjectsPath().createDirectory();
 }
 
 void Versicap::initializeExporters()
@@ -814,6 +814,13 @@ bool Versicap::setProject (const Project& newProject)
     listeners.call ([](Listener& listener) { listener.projectChanged(); });
 
     return true;
+}
+
+bool Versicap::hasProjectChanged() const
+{
+    if (auto* const pc = findController<ProjectsController>())
+        return pc->hasProjectChanged();
+    return false;
 }
 
 }
