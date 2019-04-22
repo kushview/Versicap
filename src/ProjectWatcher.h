@@ -18,7 +18,6 @@ public:
         ~ScopedBlock() { watcher.blocked = false; }
     private:
         ProjectWatcher& watcher;
-        
     };
 
     void setProject (const Project& newProject)
@@ -45,10 +44,18 @@ public:
     std::function<void()> onSamplesAdded;
     std::function<void()> onActiveSampleChanged;
 
+    std::function<void()> onProjectModified;
+
 private:
     bool blocked = false;
     Project project;
     ValueTree data;
+
+    void notifyModified()
+    {
+        if (onProjectModified)
+            onProjectModified();
+    }
 
     void valueTreePropertyChanged (ValueTree& tree, const Identifier& property) override
     {
@@ -64,6 +71,9 @@ private:
             if (onActiveSampleChanged)
                 onActiveSampleChanged();
         }
+
+        if (tree.hasType (Tags::project))
+            notifyModified();
     }
 
     void valueTreeChildAdded (ValueTree& parent, ValueTree& child) override
@@ -80,6 +90,8 @@ private:
             if (onSamplesAdded)
                 onSamplesAdded();
         }
+
+        notifyModified();
     }
 
     void valueTreeChildRemoved (ValueTree& parent, ValueTree& child, int index) override
@@ -96,18 +108,21 @@ private:
             if (onSamplesRemoved)
                 onSamplesRemoved();
         }
+
+        notifyModified();
     }
 
     void valueTreeChildOrderChanged (ValueTree& parent, int oldIndex, int newIndex) override
     {
         if (blocked) return;
         ignoreUnused (parent, oldIndex, newIndex);
+        notifyModified();
     }
 
-    void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged) override
+    void valueTreeParentChanged (ValueTree& tree) override
     {
         if (blocked) return;
-        ignoreUnused (treeWhoseParentHasChanged);
+        ignoreUnused (tree);
     }
 
     void valueTreeRedirected (ValueTree& tree) override

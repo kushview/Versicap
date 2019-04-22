@@ -3,6 +3,9 @@
 #include "controllers/Controller.h"
 
 namespace vcp {
+
+class ProjectDocument;
+
 class ProjectsController : public Controller,
                            private ChangeListener
 {
@@ -18,7 +21,9 @@ public:
 
     void initialize() override;
     void shutdown() override;
+
 private:
+    std::unique_ptr<ProjectDocument> document;
     void save (bool saveAs = false);
     void changeListenerCallback (ChangeBroadcaster*) override;
 };

@@ -2,14 +2,17 @@
 #include "controllers/ProjectsController.h"
 #include "Commands.h"
 #include "Project.h"
+#include "ProjectWatcher.h"
 
 namespace vcp {
 
-class ProjectDocument : public FileBasedDocument
+class ProjectDocument : public FileBasedDocument,
+                        public ProjectWatcher
 {
 public:
-    ProjectDocument()
-        : FileBasedDocument ("versicap", "*.versicap", "Open Project", "Save Project")
+    ProjectDocument (Versicap& vc)
+        : FileBasedDocument ("versicap", "*.versicap", "Open Project", "Save Project"),
+          versicap (vc)
     { }
 
     ~ProjectDocument() = default;
@@ -41,11 +44,13 @@ protected:
     }
 
 private:
-    Project project;
+    Versicap& versicap;
 };
 
 void ProjectsController::initialize()
 {
+    document.reset (new ProjectDocument (versicap));
+    document->setProject (versicap.getProject());
     versicap.getDeviceManager().addChangeListener (this);
 }
 
