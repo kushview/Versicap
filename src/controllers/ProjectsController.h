@@ -10,9 +10,8 @@ class ProjectsController : public Controller,
                            private ChangeListener
 {
 public:
-    ProjectsController (Versicap& vc)
-        : Controller (vc) { }
-    ~ProjectsController() = default;
+    ProjectsController (Versicap& vc);
+    ~ProjectsController();
 
     String getName() const override { return "Projects"; }
     
@@ -24,7 +23,10 @@ public:
 
 private:
     std::unique_ptr<ProjectDocument> document;
-    void save (bool saveAs = false);
+    void save();
+    void saveAs();
+    void open();
+    void create();
     void changeListenerCallback (ChangeBroadcaster*) override;
 };
 

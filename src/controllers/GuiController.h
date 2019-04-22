@@ -11,6 +11,11 @@ public:
     ~GuiController() = default;
 
     String getName() const override { return "GUI"; }
+    void initialize() override;
+    void shutdown() override;
+
+    void getCommandInfo (CommandID commandID, ApplicationCommandInfo&) override;
+    bool perform (const ApplicationCommandTarget::InvocationInfo&) override;
 };
 
 }
