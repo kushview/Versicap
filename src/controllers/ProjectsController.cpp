@@ -17,7 +17,8 @@ public:
 protected:
     String getDocumentTitle() override
     {
-        return versicap.getProject().getProperty (Tags::name).toString();
+        const auto title = versicap.getProject().getProperty (Tags::name).toString();
+        return title.isNotEmpty() ? title : "Untitled Project";
     }
 
     Result loadDocument (const File& file) override
@@ -36,16 +37,17 @@ protected:
 
     File getLastDocumentOpened() override
     {
-        return File();
+        return lastOpenedFile;
     }
 
     void setLastDocumentOpened (const File& file) override
     {
-
+        lastOpenedFile = file;
     }
 
 private:
     Versicap& versicap;
+    File lastOpenedFile;
 };
 
 ProjectsController::ProjectsController (Versicap& vc)
@@ -56,11 +58,21 @@ void ProjectsController::initialize()
 {
     document.reset (new ProjectDocument (versicap));
     versicap.getDeviceManager().addChangeListener (this);
+    watcher.setProject (versicap.getProject());
+    watcher.onProjectModified = std::bind (&ProjectDocument::changed, document.get());
 }
 
-void ProjectsController::shutdown() 
+void ProjectsController::shutdown()
 {
+    watcher.onProjectModified = nullptr;
     versicap.getDeviceManager().removeChangeListener (this);
+    document.reset();
+}
+
+void ProjectsController::projectChanged()
+{
+    watcher.setProject (versicap.getProject());
+    document->setChangedFlag (false);
 }
 
 void ProjectsController::save()
@@ -84,17 +96,38 @@ void ProjectsController::open()
     auto result = document->loadFrom (chooser.getResult(), false);
     if (! result.wasOk())
     {
-        DBG("alert: " << result.getErrorMessage());
+        AlertWindow::showNativeDialogBox ("Versicap", result.getErrorMessage(), false);
     }
     else
     {
-        DBG("project loaded ok");
+        DBG("[VCP] project opened ok");
     }
 }
 
 void ProjectsController::create()
 {
 
+    AlertWindow window ("New Project", "Enter the project's name", AlertWindow::NoIcon);
+    window.addTextEditor ("Name", "");
+    window.addButton ("Ok", 1);
+    window.addButton ("Cancel", 0);
+    const int result = window.runModalLoop();
+    if (result == 0)
+        return;
+
+    document->saveIfNeededAndUserAgrees();
+
+    Project newProject;
+    String name = window.getTextEditor("Name")->getText();
+    newProject.setProperty (Tags::name, name);
+    const auto dataPath = Versicap::getUserDataPath().getChildFile("Projects").getNonexistentChildFile (name,"");
+    dataPath.createDirectory();
+    newProject.setProperty (Tags::dataPath, dataPath.getFullPathName());
+    const auto filename = dataPath.getChildFile (name + String (".versicap"));
+    newProject.writeToFile (filename);
+    document->setFile (filename);
+    document->setChangedFlag (false);
+    versicap.loadProject (filename);
 }
 
 void ProjectsController::changeListenerCallback (ChangeBroadcaster*)

@@ -154,9 +154,6 @@ public:
         layer.reset (new LayerPropertiesContentView (versicap));
         addAndMakeVisible (layer.get());
 
-        sample.reset (new SamplePropertiesContentView (versicap));
-        addAndMakeVisible (sample.get());
-
         addAndMakeVisible (projectPanel);
         projectPanel.createPanels (versicap);
 
@@ -289,6 +286,7 @@ public:
     {
         project = newProject;
         notes.setProject (project);
+        layer->setProject (project);
     }
 
 private:
@@ -299,7 +297,6 @@ private:
         
     std::unique_ptr<ContentView> view;
     std::unique_ptr<LayerPropertiesContentView> layer;
-    std::unique_ptr<SamplePropertiesContentView> sample;
 
     TextButton importButton;
     TextButton exportButton;

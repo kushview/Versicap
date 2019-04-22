@@ -482,13 +482,6 @@ void Versicap::initializeExporters()
     getAudioFormats().registerBasicFormats();
 }
 
-void Versicap::initializeRenderContext()
-{
-    File contextFile = getApplicationDataPath().getChildFile ("context.versicap");
-    if (contextFile.existsAsFile())
-        loadProject (contextFile);
-}
-
 void Versicap::initializeAudioDevice()
 {
     auto& devices = getDeviceManager();
@@ -535,7 +528,6 @@ void Versicap::initialize()
     initializePlugins();
     initializeAudioDevice();
     initializeUnlockStatus();
-    initializeRenderContext();
 
     impl->keyboardState.addListener (&impl->messageCollector);
     impl->commands.registerAllCommandsForTarget (impl.get());
@@ -798,6 +790,11 @@ bool Versicap::loadProject (const File& file)
     if (! newProject.loadFile (file))
         return false;
     
+    return setProject (newProject);
+}
+
+bool Versicap::setProject (const Project& newProject)
+{
     impl->project = newProject;
     auto& project = impl->project;
 
@@ -812,6 +809,8 @@ bool Versicap::loadProject (const File& file)
         if (auto* proc = impl->processor.get())
             impl->project.applyPluginState (*proc);
     }
+
+    listeners.call ([](Listener& listener) { listener.projectChanged(); });
 
     return true;
 }

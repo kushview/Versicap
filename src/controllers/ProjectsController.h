@@ -1,6 +1,7 @@
 #pragma once
 
 #include "controllers/Controller.h"
+#include "ProjectWatcher.h"
 
 namespace vcp {
 
@@ -17,12 +18,14 @@ public:
     
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo&) override;
     bool perform (const ApplicationCommandTarget::InvocationInfo&) override;
+    void projectChanged() override;
 
     void initialize() override;
     void shutdown() override;
 
 private:
     std::unique_ptr<ProjectDocument> document;
+    ProjectWatcher watcher;
     void save();
     void saveAs();
     void open();

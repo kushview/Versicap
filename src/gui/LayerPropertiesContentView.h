@@ -13,6 +13,8 @@ public:
     virtual ~LayerPropertiesContentView();
     void resized() override;
 
+    void setProject (const Project& project) { watcher.setProject (project); }
+
 private:
     ProjectWatcher watcher;
     PropertyPanel panel;

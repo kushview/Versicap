@@ -49,6 +49,7 @@ public:
     Project getProject() const;
     bool saveProject (const File& file);
     bool loadProject (const File& file);
+    bool setProject (const Project& project);
     
     //=========================================================================
     UnlockStatus& getUnlockStatus();
@@ -98,7 +99,6 @@ private:
     void initializeAudioDevice();
     void initializePlugins();
     void initializeUnlockStatus();
-    void initializeRenderContext();
 };
 
 }

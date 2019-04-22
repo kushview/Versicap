@@ -12,8 +12,7 @@ LayerPropertiesContentView::LayerPropertiesContentView (Versicap& vc)
     watcher.setProject (vc.getProject());
 
     addComponentListener (this);
-
-    watcher.onActiveLayerChanged = watcher.onActiveSampleChanged = 
+    watcher.onChanged = watcher.onActiveLayerChanged = watcher.onActiveSampleChanged = 
         std::bind (&LayerPropertiesContentView::refreshCompletePanel, this);
 }
 
@@ -34,7 +33,7 @@ void LayerPropertiesContentView::refreshCompletePanel()
     panel.addSection ("Project", props);
     
     props.clearQuick();
-    auto layer = watcher.getProject().getActiveLayer();
+    auto layer = project.getActiveLayer();
     layer.getProperties (props);
     panel.addSection ("Layer", props);
 
