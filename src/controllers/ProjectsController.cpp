@@ -54,7 +54,10 @@ ProjectsController::ProjectsController (Versicap& vc)
         : Controller (vc) { }
 ProjectsController::~ProjectsController() {}
 
-bool ProjectsController::hasProjectChanged() const { return document && document->hasChangedSinceSaved(); }
+bool ProjectsController::hasProjectChanged() const
+{
+    return document && document->hasChangedSinceSaved();
+}
 
 void ProjectsController::initialize()
 {
@@ -119,6 +122,7 @@ void ProjectsController::create()
     window.addButton ("Ok", 1, KeyPress (KeyPress::returnKey));
     window.addButton ("Cancel", 0, KeyPress (KeyPress::escapeKey));
     const int result = window.runModalLoop();
+
     if (result == 0)
         return;
 
