@@ -3,12 +3,13 @@
 
 namespace vcp {
 
+class MainWindow;
+
 class GuiController : public Controller
 {
 public:
-    GuiController (Versicap& vc)
-        : Controller (vc) { }
-    ~GuiController() = default;
+    GuiController (Versicap& vc);
+    ~GuiController();
 
     String getName() const override { return "GUI"; }
     void initialize() override;
@@ -16,6 +17,9 @@ public:
 
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo&) override;
     bool perform (const ApplicationCommandTarget::InvocationInfo&) override;
+
+private:
+    std::unique_ptr<MainWindow> window;
 };
 
 }

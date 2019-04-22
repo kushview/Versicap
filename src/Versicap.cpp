@@ -310,9 +310,10 @@ struct Versicap::Impl : public AudioIODeviceCallback,
             Commands::projectSave,
             Commands::projectSaveAs,
             Commands::projectNew,
-            Commands::projectOpen
-           #if 0
+            Commands::projectOpen,
+
             Commands::showAbout,
+           #if 0
             Commands::checkForUpdates
            #endif
         });

@@ -50,6 +50,7 @@ public:
         return Font (jmin (12.0f, box.getHeight() * 0.75f));
     }
 
+    // concertina panel
     void drawConcertinaPanelHeader (Graphics& g, const Rectangle<int>& area,
                                     bool isMouseOver, bool isMouseDown,
                                     ConcertinaPanel&, Component& component) override
@@ -70,6 +71,9 @@ public:
         g.drawText (component.getName(), lb, Justification::centred);
     }
 
+    // label
+    Font getLabelFont (Label&) override { return Font (13.f); }
+    
     // scrollbar
     int getDefaultScrollbarWidth() override { return 14; }
 
