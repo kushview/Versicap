@@ -468,10 +468,11 @@ bool Versicap::saveProject (const File& file)
     if (! project.getValueTree().isValid())
         return false;
 
-   #if 0
-    if (auto* processor = impl->processor.get())
+    project.setProperty (Tags::midiOutput, impl->engine->getDefaultMidiOutputName());
+    // TODO: set midi input(s) here
+
+    if (auto* processor = impl->engine->getAudioProcessor())
         project.updatePluginState (*processor);
-   #endif
 
     return project.writeToFile (file);
 }
@@ -510,7 +511,7 @@ bool Versicap::setProject (const Project& newProject)
         if (auto* const proc = engine.getAudioProcessor())
             project.applyPluginState (*proc);
     }
-
+    
     listeners.call ([](Listener& listener) { listener.projectChanged(); });
 
     return true;

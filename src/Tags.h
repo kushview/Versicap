@@ -28,6 +28,8 @@ namespace Tags {
 
     static const Identifier midi            = "midi";
     static const Identifier midiChannel     = "midiChannel";
+    static const Identifier midiInput       = "midiInput";
+    static const Identifier midiOutput      = "midiOutput";
     static const Identifier midiProgram     = "midiProgram";
     
     static const Identifier name            = "name";

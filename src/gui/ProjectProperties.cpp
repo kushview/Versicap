@@ -232,7 +232,11 @@ public:
                 devices.addChangeListener (this);
 
                 if (combo.getText().isNotEmpty())
+                {
                     devices.setMidiInputEnabled (combo.getText(), true);
+                    // TODO: set this in project save and/or in another handler
+                    project.setProperty (Tags::midiInput, combo.getText());
+                }
             }
             else
             {
