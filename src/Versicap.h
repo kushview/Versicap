@@ -47,13 +47,12 @@ public:
     
     //=========================================================================
     Project getProject() const;
+    bool setProject (const Project& project);
     File getProjectFile() const;
     void setProjectFile (const File&);
     bool saveProject (const File& file);
-    bool loadProject (const File& file);
-    bool setProject (const Project& project);
+    bool loadProject (const File& file);    
     bool hasProjectChanged() const;
-    
     
     //=========================================================================
     UnlockStatus& getUnlockStatus();
