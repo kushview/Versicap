@@ -11,10 +11,14 @@ AudioEngine::AudioEngine (AudioFormatManager& formatManager,
       plugins (pluginManager)
 {
     render.reset (new Render (formatManager));
+    render->onCancelled = [this]() { if (onRenderCancelled) onRenderCancelled(); };
+    render->onStarted   = [this]() { if (onRenderStarted)   onRenderStarted(); };
+    render->onStopped   = [this]() { if (onRenderStopped)   onRenderStopped(); };
 }
 
 AudioEngine::~AudioEngine()
 {
+    render->onCancelled = render->onStarted = render->onStopped = nullptr;
     render.reset();
 }
 
@@ -86,6 +90,11 @@ Result AudioEngine::startRendering (const RenderContext& context)
     return Result::ok();
 }
 
+ValueTree AudioEngine::getRenderedSamples() const
+{
+    return (render != nullptr) ? render->getSamples() : ValueTree();
+}
+
 void AudioEngine::updatePluginProperties()
 {
     if (! processor)
@@ -135,6 +144,7 @@ void AudioEngine::process (const float** input, int numInputs,
     messageCollector.removeNextBlockOfMessages (incomingMidi, nframes);
     ScopedLock slr (render->getCallbackLock());
 
+    const bool rendering = render->isRendering();
     const auto& context = render->getContext();
     const int source = sourceType.get();
     renderBuffer.setSize (context.channels, nframes, false, false, true);

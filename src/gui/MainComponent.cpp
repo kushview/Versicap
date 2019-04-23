@@ -86,7 +86,8 @@ private:
     DropShadowEffect shadow;
 };
 
-class MainComponent::Content : public Component
+class MainComponent::Content : public Component,
+                               public Value::Listener
 {
 public:
     Content (MainComponent& o, Versicap& vc)
@@ -163,13 +164,25 @@ public:
         progress.onCancel = std::bind (&Versicap::stopRendering, &vc);
         setSize (440, 340);
 
+        projectName.addListener (this);
         setProject (versicap.getProject());
     }
 
     ~Content()
     {
+        projectName.removeListener (this);
         if (auto* _unlock = unlock.getComponent())
             delete _unlock;
+    }
+
+    Rectangle<int> getNameRectangle() const { return { 50, 6, 150, 32 }; }
+
+    void valueChanged (Value& value) override
+    {
+        if (value.refersToSameSourceAs (projectName))
+        {
+            repaint (getNameRectangle());
+        }
     }
 
     void paint (Graphics& g) override
@@ -178,7 +191,8 @@ public:
        #if VCP_DO_LOGO
         g.drawImageWithin (logo, 12, 6, 32, 32, RectanglePlacement::centred, false);
         g.setColour (kv::LookAndFeel_KV1::textColor);
-        g.drawText (project.getProperty (Tags::name), 50, 6, 150, 32, Justification::centredLeft);
+        g.drawText (project.getProperty (Tags::name), getNameRectangle(), 
+                    Justification::centredLeft);
        #endif
     }
 
@@ -285,8 +299,10 @@ public:
     void setProject (const Project& newProject)
     {
         project = newProject;
+        projectName.referTo (project.getPropertyAsValue (Tags::name));
         notes.setProject (project);
         layer->setProject (project);
+        repaint();
     }
 
 private:
@@ -294,7 +310,8 @@ private:
     MainComponent& owner;
     Versicap& versicap;
     Project project;
-        
+    Value projectName;
+
     std::unique_ptr<ContentView> view;
     std::unique_ptr<LayerPropertiesContentView> layer;
 

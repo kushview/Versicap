@@ -27,6 +27,7 @@ public:
     bool isRendering() const;
     void cancelRendering();
     Result startRendering (const RenderContext& ctx);
+    ValueTree getRenderedSamples() const;
 
     //=========================================================================
     void prepare (double expectedSampleRate, int maxBufferSize,
@@ -35,6 +36,10 @@ public:
     void process (const float** input, int numInputs, 
                   float** output, int numOutputs, int nframes);
     void release();
+
+    std::function<void()> onRenderStopped;
+    std::function<void()> onRenderStarted;
+    std::function<void()> onRenderCancelled;
 
 private:
     //=========================================================================

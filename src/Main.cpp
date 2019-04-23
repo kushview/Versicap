@@ -7,11 +7,13 @@
 #include "Commands.h"
 #include "PluginManager.h"
 #include "Project.h"
+#include "Settings.h"
 #include "Versicap.h"
 
 namespace vcp {
 
-class Application : public JUCEApplication
+class Application : public JUCEApplication,
+                    public AsyncUpdater
 {
 public:
     Application() { }
@@ -23,6 +25,7 @@ public:
     void initialise (const String& commandLine) override
     {
         versicap.reset (new Versicap());
+
         if (maybeLaunchSlave (commandLine))
             return;
 
@@ -37,6 +40,8 @@ public:
         look.setColour (Slider::backgroundColourId, kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
         LookAndFeel::setDefaultLookAndFeel (&look);
         mainWindow.reset (new MainWindow (getApplicationName(), *versicap));
+
+        triggerAsyncUpdate();
     }
 
     void shutdown() override
@@ -62,6 +67,16 @@ public:
         ignoreUnused (commandLine);
         if (mainWindow)
             mainWindow->toFront (true);
+    }
+
+    void handleAsyncUpdate() override
+    {
+        const auto file = versicap->getSettings().getLastProject();
+        if (file.existsAsFile())
+        {
+            DBG("[VCP] loading last project: " << file.getFullPathName());
+            versicap->loadProject (file);
+        }
     }
 
 private:

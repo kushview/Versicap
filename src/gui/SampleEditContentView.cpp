@@ -235,11 +235,8 @@ public:
             panel->zoomOut();
         };
 
-        watcher.onActiveSampleChanged = [this]()
-        {
-            auto sample = watcher.getProject().getActiveSample();
-            panel->setSample (sample);
-            resized();
+        watcher.onActiveSampleChanged = [this]() {
+            refreshWithActiveSample();
         };
     }
 
@@ -249,11 +246,19 @@ public:
         panel.reset();
     }
 
+    void refreshWithActiveSample()
+    {
+        auto sample = watcher.getProject().getActiveSample();
+        panel->setSample (sample);
+        resized();
+    }
+
     Project getProject() const { return watcher.getProject(); }
     
     void setProject (const Project& project)
     {
         watcher.setProject (project);
+        refreshWithActiveSample();
     }
 
     void resized() override
@@ -281,12 +286,25 @@ SampleEditContentView::SampleEditContentView (Versicap& vc)
 {
     content.reset (new Content (*this));
     addAndMakeVisible (content.get());
-    content->setProject (versicap.getProject());
+    versicap.addListener (this);
+    projectChanged();
+}
+
+SampleEditContentView::~SampleEditContentView()
+{
+    versicap.removeListener (this);
+    content.reset();
 }
 
 void SampleEditContentView::resized()
 {
     content->setBounds (getLocalBounds());
+}
+
+void SampleEditContentView::projectChanged()
+{
+    if (content)
+        content->setProject (versicap.getProject());
 }
 
 }

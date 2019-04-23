@@ -13,7 +13,7 @@ public:
         addAndMakeVisible (channels);
     }
 
-    ~AudioDeviceSelect() {}
+    ~AudioDeviceSelect() { }
 
     void resized() override
     {
