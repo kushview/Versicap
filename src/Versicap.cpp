@@ -154,26 +154,24 @@ Versicap::Versicap()
     controllers.add (new GuiController (*this));
     controllers.add (new ProjectsController (*this));
 
-   #if 0
-    impl->render->onStarted = [this]()
+    impl->engine->onRenderStarted = [this]()
     {
         listeners.call ([](Listener& l) { l.renderStarted(); });
     };
     
-    impl->render->onStopped = [this]()
+    impl->engine->onRenderStopped = [this]()
     {
         listeners.call ([](Listener& l) { l.renderWillStop(); });
         auto project = getProject();
-        project.setSamples (impl->render->getSamples());
+        project.setSamples (impl->engine->getRenderedSamples());
         listeners.call ([](Listener& l) { l.renderStopped(); });
     };
 
-    impl->render->onCancelled = [this]()
+    impl->engine->onRenderCancelled = [this]()
     {
         listeners.call ([](Listener& l) { l.renderWillStop(); });
         listeners.call ([](Listener& l) { l.renderStopped(); });
     };
-   #endif
 }
 
 Versicap::~Versicap()
@@ -478,10 +476,16 @@ bool Versicap::loadProject (const File& file)
     if (! newProject.loadFile (file))
         return false;
 
+    const auto oldFile = getProjectFile();
+    setProjectFile (file); // workaround so file is updated before 
+                           // calling listeners
     if (setProject (newProject))
     {
-        setProjectFile (file);
         return true;
+    }
+    else
+    {
+        setProjectFile (oldFile);
     }
 
     return false;
@@ -489,17 +493,16 @@ bool Versicap::loadProject (const File& file)
 
 bool Versicap::setProject (const Project& newProject)
 {
+    auto& engine = getAudioEngine();
     impl->project = newProject;
     auto& project = impl->project;
 
     PluginDescription desc;
-    if (impl->project.getPluginDescription (getPluginManager(), desc))
+    if (project.getPluginDescription (getPluginManager(), desc))
     {
         loadPlugin (desc, false);
-       #if 0
-        if (auto* proc = impl->processor.get())
-            impl->project.applyPluginState (*proc);
-       #endif
+        if (auto* const proc = engine.getAudioProcessor())
+            project.applyPluginState (*proc);
     }
 
     listeners.call ([](Listener& listener) { listener.projectChanged(); });
