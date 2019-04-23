@@ -45,10 +45,16 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         AlertWindow::showNativeDialogBox ("Versicap", errorMessage, false);
     }
 
-    void handleIncomingMidiMessage (MidiInput*, const MidiMessage& message) override { }
+    void handleIncomingMidiMessage (MidiInput*, const MidiMessage& message) override
+    { 
+        engine->addMidiMessage (message);
+    }
+
     void handlePartialSysexMessage (MidiInput* source, const uint8* messageData,
                                     int numBytesSoFar, double timestamp) override
-    { }
+    { 
+        ignoreUnused (source, messageData, numBytesSoFar, timestamp);
+    }
 
     void updateLockedStatus()
     {
