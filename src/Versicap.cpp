@@ -42,24 +42,19 @@ struct Versicap::Impl : public AudioIODeviceCallback,
 
     void audioDeviceError (const String& errorMessage) override
     {
-        DBG("[VCP] " << errorMessage);
+        AlertWindow::showNativeDialogBox ("Versicap", errorMessage, false);
     }
 
-    void handleIncomingMidiMessage (MidiInput*, const MidiMessage& message) override
-    {
-        
-    }
-
+    void handleIncomingMidiMessage (MidiInput*, const MidiMessage& message) override { }
     void handlePartialSysexMessage (MidiInput* source, const uint8* messageData,
                                     int numBytesSoFar, double timestamp) override
-    {
-        
-    }
+    { }
 
     void updateLockedStatus()
     {
         const bool unlocked = (bool) unlock->isUnlocked();
         shouldProcess.set (unlocked ? 1 : 0);
+        engine->setEnabled (unlocked);
     }
 
     //=========================================================================
@@ -127,7 +122,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     File projectFile;
     Project project;
     Atomic<int> shouldProcess { 0 };
-    
+
     OwnedArray<Controller> controllers;
 
     std::unique_ptr<AudioEngine> engine;
@@ -363,71 +358,41 @@ UnlockStatus& Versicap::getUnlockStatus()                   { return *impl->unlo
 
 void Versicap::loadPlugin (const PluginDescription& type, bool clearProjectPlugin)
 {
-   #if 0
     auto& plugins = getPluginManager();
     String errorMessage;
     std::unique_ptr<AudioProcessor> processor (plugins.createAudioPlugin (type, errorMessage));
     
     if (errorMessage.isNotEmpty())
     {
-        AlertWindow::showNativeDialogBox ("Versicap", "Could not create plugin", false);
+        AlertWindow::showNativeDialogBox ("Versicap", errorMessage, false);
     }
     else
     {
         if (processor)
         {
-            impl->window.reset();            
-            impl->prepare (*processor);
+            closePluginWindow();
             if (clearProjectPlugin)
                 impl->project.clearPlugin();
-            
-            {
-                ScopedLock sl (impl->render->getCallbackLock());
-                impl->processor.swap (processor);
-            }
-
-            impl->updatePluginProperties();
-            showPluginWindow();
+            impl->engine->setAudioProcessor (processor.release());
             impl->project.setPluginDescription (type);
+            showPluginWindow();
         }
         else
         {
             AlertWindow::showNativeDialogBox ("Versicap", "Could not instantiate plugin", false);
         }
     }
-
-    if (processor)
-    {
-        processor->releaseResources();
-        processor.reset();
-    }
-   #endif
 }
 
 void Versicap::closePlugin (bool clearProjectPlugin)
 {
-   #if 0
     closePluginWindow();
     std::unique_ptr<AudioProcessor> oldProc;
 
-    {
-        ScopedLock sl (impl->render->getCallbackLock());
-        oldProc.swap (impl->processor);
-        impl->pluginChannels    = 0;
-        impl->pluginLatency     = 0;
-        impl->pluginNumIns      = 0;
-        impl->pluginNumOuts     = 0;
-    }
+    impl->engine->clearAudioProcessor();
 
     if (clearProjectPlugin)
         impl->project.clearPlugin();
-
-    if (oldProc)
-    {
-        oldProc->releaseResources();
-        oldProc.reset();
-    }
-   #endif
 }
 
 void Versicap::closePluginWindow()
@@ -437,8 +402,9 @@ void Versicap::closePluginWindow()
 
 void Versicap::showPluginWindow()
 {
-   #if 0
-    if (impl->processor == nullptr)
+    auto* const processor = impl->engine->getAudioProcessor();
+
+    if (nullptr == processor)
         return;
 
     if (impl->window)
@@ -448,19 +414,17 @@ void Versicap::showPluginWindow()
     }
 
     PluginWindow* window = nullptr;
-    if (auto* editor = impl->processor->createEditorIfNeeded())
+    if (auto* const editor = processor->createEditorIfNeeded())
     {
         window = new PluginWindow (impl->window, editor);
     }
     else
     {
-        window = new PluginWindow (impl->window,
-            new GenericAudioProcessorEditor (impl->processor.get()));
+        window = new PluginWindow (impl->window, new GenericAudioProcessorEditor (processor));
     }
 
     if (window)
         window->toFront (false);
-   #endif
 }
 
 Result Versicap::startRendering()

@@ -11,12 +11,17 @@ class RenderContext;
 class AudioEngine
 {
 public:
-    AudioEngine (AudioFormatManager& formatManager, 
+    AudioEngine (AudioFormatManager& formatManager,
                  AudioPluginFormatManager& pluginManager);
     ~AudioEngine();
 
     //=========================================================================
     void setSourceType (SourceType type);
+    void setEnabled (bool enabled) { shouldProcess.set (enabled ? 1 : 0); }
+
+    AudioProcessor* getAudioProcessor() const { return processor.get(); }
+    void setAudioProcessor (AudioProcessor* newProcessor);
+    void clearAudioProcessor();
     
     //=========================================================================
     bool isRendering() const;
@@ -37,6 +42,7 @@ private:
     AudioPluginFormatManager& plugins;
 
     //=========================================================================
+    bool prepared = false;
     Atomic<int> shouldProcess { 0 };
     Atomic<int> sourceType { SourceType::MidiDevice };
 

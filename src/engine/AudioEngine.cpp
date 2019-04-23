@@ -25,8 +25,42 @@ void AudioEngine::setSourceType (SourceType type)
     sourceType.set (type);
 }
 
+void AudioEngine::setAudioProcessor (AudioProcessor* newProcessor)
+{
+    jassert(newProcessor != nullptr);
+    if (! newProcessor) return;
+
+    std::unique_ptr<AudioProcessor> next (newProcessor);
+    if (prepared)
+        prepare (*next);
+
+    {
+        ScopedLock sl (render->getCallbackLock());
+        processor.swap (next);
+    }
+
+    updatePluginProperties();
+
+    if (next)
+        next->releaseResources();
+}
+
+void AudioEngine::clearAudioProcessor()
+{
+    std::unique_ptr<AudioProcessor> deleter;
+    {
+        ScopedLock sl (render->getCallbackLock());
+        processor.swap (deleter);
+    }
+
+    updatePluginProperties();
+
+    if (deleter)
+        deleter->releaseResources();
+}
+
 bool AudioEngine::isRendering() const { return render && render->isRendering(); }
-void AudioEngine::cancelRendering() { render->cancel(); }
+void AudioEngine::cancelRendering() { if (render) render->cancel(); }
 Result AudioEngine::startRendering (const RenderContext& context)
 {
     int latency = 0;
@@ -55,8 +89,14 @@ Result AudioEngine::startRendering (const RenderContext& context)
 void AudioEngine::updatePluginProperties()
 {
     if (! processor)
+    {
+        pluginLatency   = 0;
+        pluginNumIns    = 0;
+        pluginNumIns    = 0;
+        pluginChannels  = 0;
         return;
-    
+    }
+
     ScopedLock psl (processor->getCallbackLock());
     pluginLatency  = processor->getLatencySamples();
     pluginNumIns   = processor->getTotalNumInputChannels();
@@ -203,6 +243,9 @@ void AudioEngine::process (const float** input, int numInputs,
 void AudioEngine::prepare (double expectedSampleRate, int maxBufferSize,
                            int numInputs, int numOutputs)
 {
+    if (prepared)
+        release();
+    
     ScopedLock sl (render->getCallbackLock());
     sampleRate          = expectedSampleRate;
     bufferSize          = maxBufferSize;
@@ -224,6 +267,8 @@ void AudioEngine::prepare (double expectedSampleRate, int maxBufferSize,
         updatePluginProperties();
         pluginBuffer.setSize (pluginChannels, bufferSize, false, false, true);
     }
+
+    prepared = true;
 }
 
 void AudioEngine::prepare (AudioIODevice* device)
@@ -239,6 +284,7 @@ void AudioEngine::prepare (AudioIODevice* device)
 void AudioEngine::release()
 {
     const ScopedLock sl (render->getCallbackLock());
+    prepared = false;
 
     render->cancel();
     render->release();
