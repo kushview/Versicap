@@ -43,6 +43,8 @@ protected:
     void setLastDocumentOpened (const File& file) override
     {
         versicap.setProjectFile (file);
+        versicap.getSettings().setLastProject (file.getFullPathName());
+        versicap.getSettings().saveIfNeeded();
     }
 
 private:
@@ -76,6 +78,7 @@ void ProjectsController::shutdown()
 void ProjectsController::projectChanged()
 {
     watcher.setProject (versicap.getProject());
+    document->setFile (versicap.getProjectFile());
     document->setChangedFlag (false);
 }
 
