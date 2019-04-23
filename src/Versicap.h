@@ -6,6 +6,7 @@
 
 namespace vcp {
 
+class AudioEngine;
 class Exporter;
 class PluginManager;
 class Render;
@@ -61,6 +62,7 @@ public:
     const OwnedArray<Exporter>& getExporters() const;
 
     //=========================================================================
+    AudioEngine& getAudioEngine();
     AudioThumbnailCache& getAudioThumbnailCache();
     ApplicationCommandManager& getCommandManager();
     AudioDeviceManager& getDeviceManager();

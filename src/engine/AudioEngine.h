@@ -9,25 +9,21 @@ namespace vcp {
 class PluginManager;
 class Render;
 
-class AudioEngine : public AudioIODeviceCallback,
-                    public MidiInputCallback
+class AudioEngine
 {
 public:
     AudioEngine();
     ~AudioEngine();
 
+    void setSourceType (SourceType type);
+    
     //=========================================================================
-    void audioDeviceIOCallback (const float** input, int numInputs, 
-                                float** output, int numOutputs,
-                                int nframes) override;
-    void audioDeviceAboutToStart (AudioIODevice* device) override;
-    void audioDeviceStopped() override;
-    void audioDeviceError (const String& errorMessage) override;
-
-    //=========================================================================
-    void handleIncomingMidiMessage (MidiInput*, const MidiMessage& message) override;
-    void handlePartialSysexMessage (MidiInput* source, const uint8* messageData,
-                                    int numBytesSoFar, double timestamp) override;
+    void prepare (double expectedSampleRate, int maxBufferSize,
+                  int numInputs, int numOutputs);
+    void prepare (AudioIODevice* device);
+    void process (const float** input, int numInputs, 
+                  float** output, int numOutputs, int nframes);
+    void release();
 
 private:
     //=========================================================================
@@ -47,7 +43,6 @@ private:
 
     //=========================================================================
     std::unique_ptr<Render> render;
-    RenderContext context;
     AudioSampleBuffer renderBuffer;
 
     //=========================================================================

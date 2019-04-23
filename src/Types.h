@@ -160,6 +160,11 @@ struct SourceType
         End = NumTypes
     };
 
+    SourceType() : type (MidiDevice) { }
+    SourceType (const int t)            { operator= (t); }
+    SourceType (const ID t)             { operator= (t); }
+    SourceType (const SourceType& o)    { operator= (o); }
+
     static StringArray getChoices()
     {
         StringArray names;
@@ -176,6 +181,7 @@ struct SourceType
         return values;
     }
 
+    String getName() const { return getName (type); }
     static String getName (int t)
     {
         switch (t)
@@ -187,6 +193,7 @@ struct SourceType
         return "none";
     }
 
+    String getSlug() const { return getSlug (type); }
     static String getSlug (int t)
     {
         switch (t)
@@ -205,6 +212,21 @@ struct SourceType
         jassertfalse;
         return -1;
     }
+
+    operator int() const                            { return type; }
+    operator var() const                            { return var (type); }
+    SourceType& operator= (const SourceType& o)     { type = o.type; return *this; }
+    SourceType& operator= (const SourceType::ID t)  { type = t; return *this; }
+    SourceType& operator= (const int t)             { type = jlimit ((int) Begin, (int) End - 1, t); return *this; }
+    bool operator== (const SourceType& o) const     { return type == o.type; }
+    bool operator== (const int t) const             { return type == t; }
+    bool operator== (const SourceType::ID t) const  { return type == static_cast<int> (t); }
+    bool operator!= (const SourceType& o) const     { return type != o.type; }
+    bool operator!= (const int t) const             { return type != t; }
+    bool operator!= (const SourceType::ID t) const  { return type != static_cast<int> (t); }
+
+private:
+    int type;
 };
 
 }
