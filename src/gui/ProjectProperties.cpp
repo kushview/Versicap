@@ -1,6 +1,6 @@
 
+#include "engine/AudioEngine.h"
 #include "gui/PluginPicker.h"
-
 #include "PluginManager.h"
 #include "Project.h"
 #include "Types.h"
@@ -236,7 +236,8 @@ public:
             }
             else
             {
-                devices.setDefaultMidiOutput (combo.getText());
+                auto& engine = versicap.getAudioEngine();
+                engine.setDefaultMidiOutput (combo.getText());
             }
         };
     }
@@ -256,11 +257,12 @@ public:
             return {};
         }
         
-        return devices.getDefaultMidiOutputName();
+        auto& engine = versicap.getAudioEngine();
+        return engine.getDefaultMidiOutputName();
     }
 
     void refresh() override
-    {        
+    {
         if (deviceNames.isEmpty() || deviceNames.size() != combo.getNumItems())
         {
             deviceNames = inputDevice ? MidiInput::getDevices() : MidiOutput::getDevices();

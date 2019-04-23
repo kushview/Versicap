@@ -19,6 +19,7 @@ public:
     void setSourceType (SourceType type);
     void setEnabled (bool enabled) { shouldProcess.set (enabled ? 1 : 0); }
 
+    //=========================================================================
     AudioProcessor* getAudioProcessor() const { return processor.get(); }
     void setAudioProcessor (AudioProcessor* newProcessor);
     void clearAudioProcessor();
@@ -28,6 +29,11 @@ public:
     void cancelRendering();
     Result startRendering (const RenderContext& ctx);
     ValueTree getRenderedSamples() const;
+
+    //=========================================================================
+    void addMidiMessage (const MidiMessage& msg);
+    void setDefaultMidiOutput (const String& name);
+    String getDefaultMidiOutputName() const { return midiOutName; }
 
     //=========================================================================
     void prepare (double expectedSampleRate, int maxBufferSize,
@@ -77,7 +83,12 @@ private:
     AudioSampleBuffer pluginBuffer;
     
     //=========================================================================
+    std::unique_ptr<MidiOutput> midiOut;
+    String midiOutName;
+
+    //=========================================================================
     MidiBuffer incomingMidi;
+    MidiBuffer pluginMidi;
     MidiBuffer renderMidi;
     MidiMessageCollector messageCollector;
 

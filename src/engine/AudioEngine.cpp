@@ -95,6 +95,49 @@ ValueTree AudioEngine::getRenderedSamples() const
     return (render != nullptr) ? render->getSamples() : ValueTree();
 }
 
+void AudioEngine::addMidiMessage (const MidiMessage& msg)
+{
+    messageCollector.addMessageToQueue (msg);
+}
+
+void AudioEngine::setDefaultMidiOutput (const String& name)
+{
+    if (name.isEmpty())
+    {
+        midiOutName = String();
+        std::unique_ptr<MidiOutput> deleter;
+
+        {
+            ScopedLock rsl (render->getCallbackLock());
+            deleter.swap (midiOut);
+        }
+        
+        if (deleter)
+            deleter->stopBackgroundThread();
+
+        return;
+    }
+
+    const int index = MidiOutput::getDevices().indexOf (name);
+    std::unique_ptr<MidiOutput> newout (MidiOutput::openDevice (index));
+
+    if (newout)
+    {
+        newout->startBackgroundThread();
+        midiOutName = newout->getName();
+        ScopedLock rsl (render->getCallbackLock());
+        midiOut.swap (newout);
+        DBG("[VCP] midi out: " << midiOut->getName());
+    }
+
+    if (newout)
+    {
+        DBG("[VCP] stopping: " << newout->getName());
+        newout->stopBackgroundThread();
+        newout.reset();
+    }
+}
+
 void AudioEngine::updatePluginProperties()
 {
     if (! processor)
@@ -193,14 +236,13 @@ void AudioEngine::process (const float** input, int numInputs,
     }
     else if (source == SourceType::MidiDevice)
     {
-       #if 0
-        if (auto* const out = devices->getDefaultMidiOutput())
+        if (auto* const out = midiOut.get())
         {
             out->sendBlockOfMessages (renderMidi,
                 Time::getMillisecondCounterHiRes() + 1.0,
                 sampleRate);
         }
-       #endif
+
         if (numInputs == context.channels)
         {
             // one-to-one channel match
