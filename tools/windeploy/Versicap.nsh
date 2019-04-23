@@ -93,7 +93,7 @@ RequestExecutionLevel admin
 ;Pages
 ; !define MUI_FINISHPAGE_NOAUTOCLOSE
 !insertmacro MUI_PAGE_WELCOME
-; !insertmacro MUI_PAGE_LICENSE "${TOPDIR}\data\EULA.txt"
+!insertmacro MUI_PAGE_LICENSE "${TOPDIR}\data\EULA.txt"
 
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_INSTFILES
