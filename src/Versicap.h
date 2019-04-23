@@ -47,6 +47,8 @@ public:
     
     //=========================================================================
     Project getProject() const;
+    File getProjectFile() const;
+    void setProjectFile (const File&);
     bool saveProject (const File& file);
     bool loadProject (const File& file);
     bool setProject (const Project& project);

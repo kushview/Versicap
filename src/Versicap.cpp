@@ -351,7 +351,9 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     }
 
     //=========================================================================
+    File projectFile;
     Project project;
+
     OwnedArray<Controller> controllers;
 
     Settings settings;
@@ -790,8 +792,14 @@ bool Versicap::loadProject (const File& file)
     auto newProject = Project();
     if (! newProject.loadFile (file))
         return false;
-    
-    return setProject (newProject);
+
+    if (setProject (newProject))
+    {
+        setProjectFile (file);
+        return true;
+    }
+
+    return false;
 }
 
 bool Versicap::setProject (const Project& newProject)
@@ -815,6 +823,9 @@ bool Versicap::setProject (const Project& newProject)
 
     return true;
 }
+
+File Versicap::getProjectFile() const { return impl->projectFile; }
+void Versicap::setProjectFile (const File& file) { impl->projectFile = file; }
 
 bool Versicap::hasProjectChanged() const
 {

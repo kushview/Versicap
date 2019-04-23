@@ -37,17 +37,16 @@ protected:
 
     File getLastDocumentOpened() override
     {
-        return lastOpenedFile;
+        return versicap.getProjectFile();
     }
 
     void setLastDocumentOpened (const File& file) override
     {
-        lastOpenedFile = file;
+        versicap.setProjectFile (file);
     }
 
 private:
     Versicap& versicap;
-    File lastOpenedFile;
 };
 
 ProjectsController::ProjectsController (Versicap& vc)
