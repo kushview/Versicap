@@ -80,8 +80,6 @@ public:
     void showPluginWindow();
 
     //=========================================================================
-    const RenderContext& getRenderContext() const;
-    void setRenderContext (const RenderContext& context);
     void saveRenderContext();
     Result startRendering (const RenderContext& context);
     Result startRendering();

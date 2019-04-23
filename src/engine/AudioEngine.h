@@ -1,22 +1,28 @@
 
 #pragma once
 
-#include "RenderContext.h"
 #include "Types.h"
 
 namespace vcp {
 
-class PluginManager;
 class Render;
+class RenderContext;
 
 class AudioEngine
 {
 public:
-    AudioEngine();
+    AudioEngine (AudioFormatManager& formatManager, 
+                 AudioPluginFormatManager& pluginManager);
     ~AudioEngine();
 
+    //=========================================================================
     void setSourceType (SourceType type);
     
+    //=========================================================================
+    bool isRendering() const;
+    void cancelRendering();
+    Result startRendering (const RenderContext& ctx);
+
     //=========================================================================
     void prepare (double expectedSampleRate, int maxBufferSize,
                   int numInputs, int numOutputs);
@@ -27,8 +33,8 @@ public:
 
 private:
     //=========================================================================
-    AudioDeviceManager* devices = nullptr;
-    PluginManager* plugins = nullptr;
+    AudioFormatManager& formats;
+    AudioPluginFormatManager& plugins;
 
     //=========================================================================
     Atomic<int> shouldProcess { 0 };

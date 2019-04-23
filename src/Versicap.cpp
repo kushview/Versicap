@@ -28,31 +28,9 @@ struct Versicap::Impl : public AudioIODeviceCallback,
 
     void updatePluginProperties()
     {
-        if (! processor)
-            return;
         
-        ScopedLock psl (processor->getCallbackLock());
-        pluginLatency  = processor->getLatencySamples();
-        pluginNumIns   = processor->getTotalNumInputChannels();
-        pluginNumOuts  = processor->getTotalNumOutputChannels();
-        pluginChannels = jmax (pluginNumIns, pluginNumOuts);
     }
 
-    void prepare (AudioProcessor& plugin)
-    {
-        jassert (sampleRate > 0.0);
-        jassert (bufferSize > 0);
-        plugin.enableAllBuses();
-        plugin.setRateAndBufferSizeDetails (sampleRate, bufferSize);
-        plugin.prepareToPlay (sampleRate, bufferSize);
-    }
-
-    void release (AudioProcessor& plugin)
-    {
-        plugin.releaseResources();
-    }
-
-    
     void audioDeviceAboutToStart (AudioIODevice* device) override   { engine->prepare (device); }
     void audioDeviceStopped() override                              { engine->release(); }
     void audioDeviceIOCallback (const float** input, int numInputs, 
@@ -69,13 +47,13 @@ struct Versicap::Impl : public AudioIODeviceCallback,
 
     void handleIncomingMidiMessage (MidiInput*, const MidiMessage& message) override
     {
-        messageCollector.addMessageToQueue (message);
+        
     }
 
     void handlePartialSysexMessage (MidiInput* source, const uint8* messageData,
                                     int numBytesSoFar, double timestamp) override
     {
-        ignoreUnused (source, messageData, numBytesSoFar, timestamp);
+        
     }
 
     void updateLockedStatus()
@@ -148,7 +126,8 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     //=========================================================================
     File projectFile;
     Project project;
-
+    Atomic<int> shouldProcess { 0 };
+    
     OwnedArray<Controller> controllers;
 
     std::unique_ptr<AudioEngine> engine;
@@ -163,56 +142,24 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     MidiKeyboardState keyboardState;
 
     //=========================================================================
-    std::unique_ptr<AudioProcessor> processor;
     std::unique_ptr<PluginWindow> window;
-    
-    Atomic<int> shouldProcess { 0 };
-    Atomic<int> sourceType { SourceType::MidiDevice };
-
-    int pluginLatency = 0;
-    int pluginChannels = 0;
-    int pluginNumIns = 0;
-    int pluginNumOuts = 0;
-
-    //=========================================================================
-    std::unique_ptr<Render> render;
-    RenderContext context;
-    AudioSampleBuffer renderBuffer;
-
-    //=========================================================================
-    int inputLatency  = 0;
-    int outputLatency = 0;
-    int extraLatency  = 0;
-    double sampleRate { 0.0 };
-    int bufferSize = 0;
-    int numInputChans = 0;
-    int numOutputChans = 0;
-
-    //=========================================================================
-    HeapBlock<float*> channels;
-    AudioSampleBuffer tempBuffer;
-    AudioSampleBuffer pluginBuffer;
-    
-    //=========================================================================
-    MidiBuffer incomingMidi;
-    MidiBuffer renderMidi;
-    MidiMessageCollector messageCollector;
 };
 
 Versicap::Versicap()
 {
     impl.reset (new Impl());
-    impl->engine.reset (new AudioEngine());
+    
     impl->devices.setOwned (new AudioDeviceManager());
     impl->formats.setOwned (new AudioFormatManager());
     impl->plugins.setOwned (new PluginManager());
     impl->unlock.reset (new UnlockStatus (impl->settings));
-    impl->render.reset (new Render (*impl->formats));
-    
+    impl->engine.reset (new AudioEngine (*impl->formats, impl->plugins->getAudioPluginFormats()));
+
     auto& controllers = impl->controllers;
     controllers.add (new GuiController (*this));
     controllers.add (new ProjectsController (*this));
 
+   #if 0
     impl->render->onStarted = [this]()
     {
         listeners.call ([](Listener& l) { l.renderStarted(); });
@@ -231,12 +178,12 @@ Versicap::Versicap()
         listeners.call ([](Listener& l) { l.renderWillStop(); });
         listeners.call ([](Listener& l) { l.renderStopped(); });
     };
+   #endif
 }
 
 Versicap::~Versicap()
 {
     impl->engine.reset();
-    impl->render.reset();
     impl->formats->clearFormats();
     impl->controllers.clear (true);
     impl.reset();
@@ -330,7 +277,6 @@ void Versicap::initialize()
     initializeAudioDevice();
     initializeUnlockStatus();
 
-    impl->keyboardState.addListener (&impl->messageCollector);
     impl->commands.registerAllCommandsForTarget (impl.get());
     impl->commands.setFirstCommandTarget (impl.get());
 
@@ -343,13 +289,13 @@ void Versicap::initialize()
 
 void Versicap::shutdown()
 {
+    closePluginWindow();
+
     for (auto* const controller : impl->controllers)
     {
         DBG("[VCP] shutting down " << controller->getName());
         controller->shutdown();
     }
-
-    impl->keyboardState.removeListener (&impl->messageCollector);
 
     auto& unlock = getUnlockStatus();
     unlock.removeChangeListener (impl.get());
@@ -359,15 +305,6 @@ void Versicap::shutdown()
     devices.removeAudioCallback (impl.get());
     devices.removeMidiInputCallback (String(), impl.get());
     devices.closeAudioDevice();
-
-    closePluginWindow();
-    if (impl->processor != nullptr)
-    {
-        impl->processor->releaseResources();
-        impl->processor.reset();
-    }
-
-    impl->render.reset();
 }
 
 void Versicap::saveSettings()
@@ -404,12 +341,6 @@ void Versicap::saveRenderContext()
     saveProject (contextFile);
 }
 
-void Versicap::setRenderContext (const RenderContext& context)
-{ 
-    impl->context = context; 
-    impl->sourceType.set (impl->context.source);
-}
-
 AudioThumbnail* Versicap::createAudioThumbnail (const File& file)
 {
     auto* thumb = new AudioThumbnail (1, *impl->formats, impl->peaks);
@@ -422,7 +353,6 @@ AudioThumbnail* Versicap::createAudioThumbnail (const File& file)
 AudioEngine& Versicap::getAudioEngine()                     { return *impl->engine; }
 AudioThumbnailCache& Versicap::getAudioThumbnailCache()     { return impl->peaks; }
 ApplicationCommandManager& Versicap::getCommandManager()    { return impl->commands; }
-const RenderContext& Versicap::getRenderContext() const     { return impl->context; }
 const OwnedArray<Exporter>& Versicap::getExporters() const  { return impl->exporters; }
 Settings& Versicap::getSettings()                           { return impl->settings; }
 AudioDeviceManager& Versicap::getDeviceManager()            { return *impl->devices; }
@@ -433,6 +363,7 @@ UnlockStatus& Versicap::getUnlockStatus()                   { return *impl->unlo
 
 void Versicap::loadPlugin (const PluginDescription& type, bool clearProjectPlugin)
 {
+   #if 0
     auto& plugins = getPluginManager();
     String errorMessage;
     std::unique_ptr<AudioProcessor> processor (plugins.createAudioPlugin (type, errorMessage));
@@ -470,10 +401,12 @@ void Versicap::loadPlugin (const PluginDescription& type, bool clearProjectPlugi
         processor->releaseResources();
         processor.reset();
     }
+   #endif
 }
 
 void Versicap::closePlugin (bool clearProjectPlugin)
 {
+   #if 0
     closePluginWindow();
     std::unique_ptr<AudioProcessor> oldProc;
 
@@ -494,6 +427,7 @@ void Versicap::closePlugin (bool clearProjectPlugin)
         oldProc->releaseResources();
         oldProc.reset();
     }
+   #endif
 }
 
 void Versicap::closePluginWindow()
@@ -503,6 +437,7 @@ void Versicap::closePluginWindow()
 
 void Versicap::showPluginWindow()
 {
+   #if 0
     if (impl->processor == nullptr)
         return;
 
@@ -525,39 +460,23 @@ void Versicap::showPluginWindow()
 
     if (window)
         window->toFront (false);
+   #endif
 }
 
 Result Versicap::startRendering()
 {
+    auto& engine = getAudioEngine();
+    if (engine.isRendering())
+        return Result::fail ("Versicap is already rendering");
+       
     const auto project = getProject();
     RenderContext context;
     project.getRenderContext (context);
-    setRenderContext (context);
-    if (impl->render->isRendering())
-        return Result::fail ("Versicap is already rendering");
-    
-    int latency = 0;
-    context = getRenderContext();
-    if (context.source == SourceType::AudioPlugin)
-    {
-        if (impl->processor == nullptr)
-            return Result::fail ("No plugin selected to render");
-        if (nullptr == getDeviceManager().getCurrentAudioDevice())
-            return Result::fail ("Audio engine is not running");
-        latency = impl->pluginLatency = impl->processor->getLatencySamples();
-    }
-    else
-    {
-        if (nullptr == getDeviceManager().getDefaultMidiOutput())
-            return Result::fail ("No MIDI output device slected for rendering");
-        if (nullptr == getDeviceManager().getCurrentAudioDevice())
-            return Result::fail ("Audio engine is not running");
-        latency = impl->inputLatency + roundToInt (0.001 * impl->sampleRate);
-    }
 
-    impl->render->start (context, jmax (0, latency));
-    listeners.call ([](Listener& listener) { listener.renderWillStart(); });
-    return Result::ok();
+    const auto result = engine.startRendering (context);
+    if (result.wasOk())
+        listeners.call ([](Listener& listener) { listener.renderWillStart(); });
+    return result;
 }
 
 Result Versicap::startRendering (const RenderContext&)
@@ -568,7 +487,8 @@ Result Versicap::startRendering (const RenderContext&)
 
 void Versicap::stopRendering()
 {
-    impl->render->cancel();
+    auto& engine = getAudioEngine();
+    engine.cancelRendering();
     listeners.call ([](Listener& listener) { listener.renderWillStop(); });
 }
 
@@ -580,8 +500,10 @@ bool Versicap::saveProject (const File& file)
     if (! project.getValueTree().isValid())
         return false;
 
+   #if 0
     if (auto* processor = impl->processor.get())
         project.updatePluginState (*processor);
+   #endif
 
     return project.writeToFile (file);
 }
@@ -606,16 +528,14 @@ bool Versicap::setProject (const Project& newProject)
     impl->project = newProject;
     auto& project = impl->project;
 
-    RenderContext context;
-    project.getRenderContext (context);
-    setRenderContext (context);
-
     PluginDescription desc;
     if (impl->project.getPluginDescription (getPluginManager(), desc))
     {
         loadPlugin (desc, false);
+       #if 0
         if (auto* proc = impl->processor.get())
             impl->project.applyPluginState (*proc);
+       #endif
     }
 
     listeners.call ([](Listener& listener) { listener.projectChanged(); });

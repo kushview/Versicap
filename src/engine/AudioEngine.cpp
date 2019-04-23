@@ -5,14 +5,17 @@
 
 namespace vcp {
 
-AudioEngine::AudioEngine()
+AudioEngine::AudioEngine (AudioFormatManager& formatManager, 
+                          AudioPluginFormatManager& pluginManager)
+    : formats (formatManager),
+      plugins (pluginManager)
 {
-
+    render.reset (new Render (formatManager));
 }
 
 AudioEngine::~AudioEngine()
 {
-    
+    render.reset();
 }
 
 void AudioEngine::setSourceType (SourceType type)
@@ -20,6 +23,33 @@ void AudioEngine::setSourceType (SourceType type)
     if (type == sourceType.get())
         return;
     sourceType.set (type);
+}
+
+bool AudioEngine::isRendering() const { return render && render->isRendering(); }
+void AudioEngine::cancelRendering() { render->cancel(); }
+Result AudioEngine::startRendering (const RenderContext& context)
+{
+    int latency = 0;
+    sourceType.set (context.source);
+
+    if (context.source == SourceType::AudioPlugin)
+    {
+        if (processor == nullptr)
+            return Result::fail ("No plugin selected to render");
+        latency = processor->getLatencySamples();
+    }
+    else if (context.source == SourceType::MidiDevice)
+    {
+        latency = inputLatency + roundToInt (0.001 * sampleRate);
+    }
+    else
+    {
+        jassertfalse;
+        return Result::fail (String("Invalid source specified: ") + String (context.source));
+    }
+
+    render->start (context, latency);
+    return Result::ok();
 }
 
 void AudioEngine::updatePluginProperties()
