@@ -152,26 +152,42 @@ public:
     {
         sample = newSample;
     
-        if (sample.getFile().existsAsFile())
+        if (sample.isValid() && sample.getFile().existsAsFile())
         {
             wave.setAudioThumbnail (owner.getVersicap().createAudioThumbnail (sample.getFile()));
             inPoint.setSecondsPerPixel (wave.getSecondsPerPixel());
             outPoint.setSecondsPerPixel (wave.getSecondsPerPixel());
-            setSize (owner.getWidth(), owner.getHeight());
+        }
+        else
+        {
+            wave.setAudioThumbnail (nullptr);
         }
 
         timeIn.removeListener (this);
-        timeIn = sample.getPropertyAsValue (Tags::timeIn);
-        inPoint.getPositionValue().referTo (timeIn);
-        inPoint.setMaxPosition (sample.getTotalTime() - 0.01);
-        timeIn.addListener (this);
-
         timeOut.removeListener (this);
-        timeOut = sample.getPropertyAsValue (Tags::timeOut);
-        outPoint.getPositionValue().referTo (timeOut);
-        outPoint.setMinPosition (0.01);
-        outPoint.setMaxPosition (sample.getTotalTime());
+        if (sample.isValid())
+        {
+            timeIn = sample.getPropertyAsValue (Tags::timeIn);
+            inPoint.getPositionValue().referTo (timeIn);
+            inPoint.setMaxPosition (sample.getTotalTime() - 0.01);
+            
+            timeOut = sample.getPropertyAsValue (Tags::timeOut);
+            outPoint.getPositionValue().referTo (timeOut);
+            outPoint.setMinPosition (0.01);
+            outPoint.setMaxPosition (sample.getTotalTime());
+        }
+        else
+        {
+            timeIn = Value();
+            inPoint.getPositionValue().referTo (timeIn);
+            timeOut = Value();
+            outPoint.getPositionValue().referTo (timeOut);
+        }
+
+        timeIn.addListener (this);
         timeOut.addListener (this);
+
+        setSize (owner.getWidth(), owner.getHeight());
     }
 
     void resized() override

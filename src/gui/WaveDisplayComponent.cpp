@@ -13,11 +13,21 @@ WaveDisplayComponent::~WaveDisplayComponent()
 void WaveDisplayComponent::setAudioThumbnail (AudioThumbnail* newThumb)
 {
     thumb.reset (newThumb);
-    range.setStart (0.0);
-    range.setLength (newThumb->getTotalLength());
+    if (thumb != nullptr)
+    {
+        range.setStart (0.0);
+        range.setLength (newThumb->getTotalLength());
+        startTimer (100);
+    }
+    else
+    {
+        range.setStart (0.0);
+        range.setLength (1.0);
+    }
+    
     secondsPerPixel = range.getLength() / static_cast<double> (getWidth());
     pixelsPerSecond = static_cast<double> (getWidth()) / range.getLength();
-    startTimer (100);
+
     resized();
     repaint();
 }

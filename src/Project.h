@@ -46,6 +46,8 @@ public:
     Sample (const Sample& o) { operator= (o); }
     ~Sample() { }
 
+    bool isValid() const { return objectData.isValid() && objectData.hasType (Tags::sample); }
+    
     Uuid getUuid() const;
     String getUuidString() const;
     bool isForLayer (const Layer& layer) const;
