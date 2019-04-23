@@ -36,6 +36,7 @@ public:
     Project getProject() const { return project; }
 
     std::function<void()> onChanged;
+    std::function<void()> onSourceChanged;
     std::function<void()> onLayerAdded;
     std::function<void()> onLayerRemoved;
     std::function<void()> onActiveLayerChanged;
@@ -59,9 +60,15 @@ private:
 
     void valueTreePropertyChanged (ValueTree& tree, const Identifier& property) override
     {
-        if (blocked) return;
+        if (blocked)
+            return;
 
-        if (tree.hasType (Tags::layers) && property == Tags::active)
+        if (tree.hasType (Tags::project) && property == Tags::source)
+        {
+            if (onSourceChanged)
+                onSourceChanged();
+        }
+        else if (tree.hasType (Tags::layers) && property == Tags::active)
         {
             if (onActiveLayerChanged)
                 onActiveLayerChanged();
