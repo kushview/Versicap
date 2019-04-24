@@ -469,7 +469,13 @@ bool Versicap::saveProject (const File& file)
     if (! project.getValueTree().isValid())
         return false;
 
-    project.setProperty (Tags::midiOutput, impl->engine->getDefaultMidiOutputName());
+    auto setup = impl->devices->getAudioDeviceSetup();
+
+    project.setProperty (Tags::audioInput, setup.inputDeviceName)
+           .setProperty (Tags::audioOutput, setup.outputDeviceName)
+           .setProperty (Tags::sampleRate, setup.sampleRate)
+           .setProperty (Tags::bufferSize, setup.bufferSize)
+           .setProperty (Tags::midiOutput, impl->engine->getDefaultMidiOutputName());
     // TODO: set midi input(s) here
 
     if (auto* processor = impl->engine->getAudioProcessor())

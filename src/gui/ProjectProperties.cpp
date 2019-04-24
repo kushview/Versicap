@@ -207,6 +207,12 @@ public:
         devices.removeChangeListener (this);
     }
 
+    static void channelChosen (int result, AudioDevicePropertyComponent* comp)
+    {
+        if (result > 0 && comp)
+            comp->channelChosen (result);
+    }
+
     void channelChosen (int result)
     {
         auto& devices = versicap.getDeviceManager();
@@ -272,21 +278,15 @@ public:
         }
     }
 
-    static void channelChosen (int result, AudioDevicePropertyComponent* comp)
-    {
-        if (result > 0 && comp)
-            comp->channelChosen (result);
-    }
-
     void refresh() override
     {
         auto& combo = device.device;
-        const auto last = setup;
-        const auto name = inputDevice ? setup.inputDeviceName : setup.outputDeviceName;
         devices.getAudioDeviceSetup (setup);
+        const auto name = inputDevice ? setup.inputDeviceName : setup.outputDeviceName;
         
         if (deviceNames.isEmpty() || deviceNames.size() != combo.getNumItems())
         {
+            deviceNames.clearQuick();
             if (auto* const type = devices.getCurrentDeviceTypeObject())
                 deviceNames = type->getDeviceNames (inputDevice);
             combo.clear (dontSendNotification);
