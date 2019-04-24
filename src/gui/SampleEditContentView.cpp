@@ -1,4 +1,5 @@
 
+#include "gui/LookAndFeel.h"
 #include "gui/SampleEditContentView.h"
 #include "gui/WaveDisplayComponent.h"
 
@@ -10,12 +11,153 @@ namespace vcp {
 class WaveZoomBar : public Component
 {
 public:
-    WaveZoomBar() { }
+    WaveZoomBar()
+    { 
+        visibleRange.setStart (0.25);
+        visibleRange.setLength (0.5);
+    }
+    
     ~WaveZoomBar() { }
 
-    void resized() override { }
-    void paint (Graphics&) override { }
-    void mouseMove (const MouseEvent&) override { }
+    void setTotalLength (double length)
+    {
+        if (length == totalLength)
+            return;
+        jassert (length >= 0.0);
+        totalLength = length;
+        if (visibleRange.getLength() > totalLength)
+            visibleRange.setLength (totalLength);
+        updateBarRectangle();
+        repaint();
+    }
+
+    void setRange (double start, double end)
+    {
+        visibleRange.setStart (start);
+        visibleRange.setEnd (end);
+        if (end > totalLength)
+            totalLength = end;
+        updateBarRectangle();
+        repaint();
+    }
+
+    void setRange (double start, double end, double total)
+    {
+        totalLength = total;
+        visibleRange.setStart (start);
+        visibleRange.setEnd (end);
+        if (visibleRange.getLength() > totalLength)
+            visibleRange.setLength (totalLength);
+        updateBarRectangle();
+        repaint();
+    }
+
+    void setRange (Range<double> range, double total)
+    {
+        totalLength = total;
+        visibleRange = range;
+        if (visibleRange.getLength() > totalLength)
+            visibleRange.setLength (totalLength);
+        updateBarRectangle();
+        repaint();
+    }
+
+    Range<double> getVisibleRange() const { return visibleRange; }
+
+    void resized() override
+    { 
+        updateBarRectangle();
+    }
+    
+    void paint (Graphics& g) override
+    {
+        g.fillAll (LookAndFeel::widgetBackgroundColor.darker());
+        g.setColour (LookAndFeel::widgetBackgroundColor);
+        g.fillRect (rect);
+    }
+
+    void mouseDown (const MouseEvent& ev) override
+    {
+        dragging  = rect.contains (ev.position);
+        trimStart = ev.position.x >= rect.getX() && ev.position.x < rect.getX() + 4.0;
+        trimEnd   = ev.position.x >= rect.getRight() - 4.0 && ev.position.x < rect.getRight();
+        if (dragging)
+        {
+            dragStartPos    = ev.position;
+            dragStart       = visibleRange.getStart();
+            dragEnd         = visibleRange.getEnd();
+        }
+    }
+
+    void mouseUp (const MouseEvent& ev) override
+    {
+        dragging = false;
+    }
+
+    void mouseDrag (const MouseEvent& ev) override
+    {
+        if (! dragging)
+            return;
+        
+        const auto oldRange = visibleRange;
+        double delta = ev.position.x - dragStartPos.x;
+        delta = totalLength * (delta / (double) getWidth());
+
+        if (trimStart)
+        {
+            const double start = dragStart + delta;
+            const double maxStartEnd = totalLength - minLength;
+            visibleRange.setStart (jlimit (0.0, maxStartEnd, start));
+        }
+        else if (trimEnd)
+        {
+            const double end = dragEnd + delta;
+            visibleRange.setEnd (jlimit (0.0, totalLength, end));
+        }
+        else
+        {
+            const double start = dragStart + delta;
+            const double maxStartEnd = totalLength - visibleRange.getLength();
+            visibleRange = visibleRange.movedToStartAt (jlimit (0.0, maxStartEnd, start));
+        }
+        
+        if (visibleRange != oldRange)
+        {
+            updateBarRectangle();
+            repaint();
+            if (onMoved)
+                onMoved();
+        }
+    }
+
+    std::function<void()> onMoved;
+
+private:
+    bool dragging = false;
+    bool trimStart = false;
+    bool trimEnd = false;
+
+    Point<float> dragStartPos;
+    double dragStart = 0.0;
+    double dragEnd = 0.0;
+    
+    double minLength;
+    double totalLength = 1.0;
+    Range<double> visibleRange;
+    
+    Rectangle<float> rect;
+
+    void updateBarRectangle()
+    {
+        rect = {
+            static_cast<float> ((visibleRange.getStart() / totalLength) * (double) getWidth()),
+            0.f,
+            static_cast<float> ((visibleRange.getLength() / totalLength) * (double) getWidth()),
+            (float) getHeight()
+        };
+
+        DBG("recg: " << rect.toString());
+    }
 };
 
 class WaveCursor : public Component,
@@ -61,9 +203,10 @@ public:
         update();
     }
 
+    void setPositionOffset (double newOffset) { offset = newOffset; update(); }
     void update()
     {
-        setBounds (getBoundsInParent().withX (roundToInt (getPosition() * pixelsPerSecond)));
+        setBounds (getBoundsInParent().withX (roundToInt ((getPosition() - offset) * pixelsPerSecond)));
     }
 
     void mouseUp (const MouseEvent& ev) override
@@ -108,6 +251,7 @@ private:
     double minPos = 0.0;
     double maxPos = 0.0;
     Value position;
+    double offset = 0.0;
     float opacity = 0.85;
     Colour color;
     double pixelsPerSecond = 0.0;
@@ -124,6 +268,15 @@ public:
         addAndMakeVisible (wave);
         addAndMakeVisible (inPoint);
         addAndMakeVisible (outPoint);
+        addAndMakeVisible (zoomBar);
+
+        zoomBar.onMoved = [this]()
+        {
+            wave.setRange (zoomBar.getVisibleRange());
+            inPoint.setPositionOffset (zoomBar.getVisibleRange().getStart());
+            outPoint.setPositionOffset (zoomBar.getVisibleRange().getStart());
+            // updateMarkerBounds();
+        };
 
         timeIn.addListener (this);
         timeOut.addListener (this);
@@ -135,6 +288,7 @@ public:
         if (value.refersToSameSourceAs (timeIn))
         {
             double ti = timeIn.getValue();
+            DBG("in: " << ti);
             double to = timeOut.getValue();
             if (ti > to - spread)
                 timeOut.setValue (ti + spread);
@@ -165,8 +319,14 @@ public:
 
         timeIn.removeListener (this);
         timeOut.removeListener (this);
+        
         if (sample.isValid())
         {
+            DBG("total time: " << sample.getTotalTime());
+            DBG("start: " << wave.getStartTime());
+            DBG("end: " << wave.getEndTime());
+
+            zoomBar.setRange (wave.getStartTime(), wave.getEndTime(), sample.getTotalTime());
             timeIn = sample.getPropertyAsValue (Tags::timeIn);
             inPoint.getPositionValue().referTo (timeIn);
             inPoint.setMaxPosition (sample.getTotalTime() - 0.01);
@@ -193,8 +353,17 @@ public:
     void resized() override
     {
         wave.setBounds (getLocalBounds());
-        inPoint.setBounds (roundToInt (wave.getPixelsPerSecond() * inPoint.getPosition()), 0, 1, getHeight());
-        outPoint.setBounds (roundToInt (wave.getPixelsPerSecond() * outPoint.getPosition()), 0, 1, getHeight());
+        zoomBar.setRange (wave.getStartTime(), wave.getEndTime());
+        
+        updateMarkerBounds();
+        zoomBar.setBounds (getLocalBounds().removeFromBottom (22));
+    }
+
+    void updateMarkerBounds()
+    {
+        auto visible = zoomBar.getVisibleRange();
+        inPoint.setBounds (roundToInt (wave.getPixelsPerSecond() * (inPoint.getPosition() - visible.getStart())), 0, 1, getHeight());
+        outPoint.setBounds (roundToInt (wave.getPixelsPerSecond() * (outPoint.getPosition() - visible.getStart())), 0, 1, getHeight());        
     }
 
     void zoomIn() 
@@ -224,6 +393,7 @@ private:
     Sample sample;
     Value timeIn, timeOut;
     WaveDisplayComponent wave;
+    WaveZoomBar zoomBar;
     WaveCursor inPoint, outPoint;
 };
 

@@ -17,6 +17,7 @@ public:
 
     void setVerticalZoom (float zoom);
 
+    void setRange (Range<double> range);
     void setStartTime (double);
     void setEndTime (double);
 

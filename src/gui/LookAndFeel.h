@@ -1,4 +1,6 @@
 
+#pragma once
+
 #include "JuceHeader.h"
 
 namespace vcp {

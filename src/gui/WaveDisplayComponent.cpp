@@ -63,6 +63,13 @@ void WaveDisplayComponent::paint (Graphics& g)
     }
 }
 
+void WaveDisplayComponent::setRange (Range<double> r)
+{
+    range = r;
+    setSecondsPerPixel (range.getLength() / static_cast<double> (getWidth()));
+    repaint();
+}
+
 void WaveDisplayComponent::setStartTime (double t)
 {
     range.setStart (t);
