@@ -284,6 +284,9 @@ public:
         devices.getAudioDeviceSetup (setup);
         const auto name = inputDevice ? setup.inputDeviceName : setup.outputDeviceName;
         
+        DBG("in: " << setup.inputDeviceName);
+        DBG("out: " << setup.outputDeviceName);
+        
         if (deviceNames.isEmpty() || deviceNames.size() != combo.getNumItems())
         {
             deviceNames.clearQuick();

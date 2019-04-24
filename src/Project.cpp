@@ -233,10 +233,20 @@ void Project::getAudioDeviceSetup (AudioDeviceManager::AudioDeviceSetup& setup) 
     setup.outputDeviceName  = getProperty (Tags::audioOutput);
     setup.bufferSize        = getProperty (Tags::bufferSize);
     setup.sampleRate        = getProperty (Tags::sampleRate);
-    setup.useDefaultInputChannels   = false;
-    setup.useDefaultOutputChannels  = false;
-    setup.inputChannels.setRange (0, 32, true);
-    setup.outputChannels.setRange (0, 32, true);
+
+    setup.useDefaultInputChannels   = true;
+    if (auto* const data = objectData.getProperty (Tags::audioInputChannels).getBinaryData())
+    {
+        setup.useDefaultInputChannels = false;
+        setup.inputChannels.loadFromMemoryBlock (*data);
+    }
+
+    setup.useDefaultOutputChannels  = true;
+    if (auto* const data = objectData.getProperty (Tags::audioOutputChannels).getBinaryData())
+    {
+        setup.useDefaultOutputChannels = false;
+        setup.outputChannels.loadFromMemoryBlock (*data);
+    }
 }
 
 //=========================================================================

@@ -470,9 +470,10 @@ bool Versicap::saveProject (const File& file)
         return false;
 
     auto setup = impl->devices->getAudioDeviceSetup();
-
     project.setProperty (Tags::audioInput, setup.inputDeviceName)
            .setProperty (Tags::audioOutput, setup.outputDeviceName)
+           .setProperty (Tags::audioInputChannels, setup.inputChannels.toMemoryBlock())
+           .setProperty (Tags::audioOutputChannels, setup.outputChannels.toMemoryBlock())
            .setProperty (Tags::sampleRate, setup.sampleRate)
            .setProperty (Tags::bufferSize, setup.bufferSize)
            .setProperty (Tags::midiOutput, impl->engine->getDefaultMidiOutputName());
@@ -524,6 +525,8 @@ bool Versicap::setProject (const Project& newProject)
     AudioDeviceManager::AudioDeviceSetup setup;
     project.getAudioDeviceSetup (setup);
     devices.setAudioDeviceSetup (setup, true);
+
+    DBG(project.getValueTree().toXmlString());
 
     auto midiOut = project.getProperty (Tags::midiOutput).toString();
     engine.setDefaultMidiOutput (midiOut);
