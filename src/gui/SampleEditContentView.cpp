@@ -19,6 +19,8 @@ public:
     
     ~WaveZoomBar() { }
 
+    double getTotalLength() const { return totalLength; }
+
     void setTotalLength (double length)
     {
         if (length == totalLength)
@@ -31,7 +33,7 @@ public:
         repaint();
     }
 
-    void setRange (double start, double end)
+    void setRange (double start, double end, bool notify = false)
     {
         visibleRange.setStart (start);
         visibleRange.setEnd (end);
@@ -39,6 +41,9 @@ public:
             totalLength = end;
         updateBarRectangle();
         repaint();
+
+        if (onMoved && notify)
+            onMoved();
     }
 
     void setRange (double start, double end, double total)
@@ -366,6 +371,9 @@ public:
     void mouseWheelMove (const MouseEvent& event,
                          const MouseWheelDetails& wheel) override
     {
+        if (! displayBounds.contains (event.position.toInt()))
+            return;
+
         if (wheel.deltaY > 0.f)
         {
             // zoomIn();
@@ -375,13 +383,23 @@ public:
             // zoomOut();
         }
 
-        if (wheel.deltaX > 0.f)
+        const float scrollScale = -1.4f;
+        
+        if (wheel.deltaX < 0.f)
         {
-            
+            auto delta = wheel.deltaX * scrollScale;
+            auto range = zoomBar.getVisibleRange();
+            auto end = range.getEnd() + delta;
+            range = range.movedToEndAt (jmin (zoomBar.getTotalLength(), end));
+            zoomBar.setRange (range.getStart(), range.getEnd(), true);
         }
-        else if (wheel.deltaX < 0.f)
+        else if (wheel.deltaX > 0.f)
         {
-
+            auto delta = wheel.deltaX * scrollScale;
+            auto range = zoomBar.getVisibleRange();
+            auto start = range.getStart() + delta;
+            range = range.movedToStartAt (jmax (0.0, start));
+            zoomBar.setRange (range.getStart(), range.getEnd(), true);
         }
     }
 
