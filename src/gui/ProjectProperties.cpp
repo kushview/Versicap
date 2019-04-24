@@ -1,5 +1,6 @@
 
 #include "engine/AudioEngine.h"
+#include "gui/AudioDeviceSelect.h"
 #include "gui/PluginPicker.h"
 #include "PluginManager.h"
 #include "Project.h"
@@ -150,11 +151,14 @@ public:
         : ProjectPropertyComponent (p, isInput ? "Audio In" : "Audio Out"),
           versicap (vc), devices (vc.getDeviceManager()), inputDevice (isInput)
     {
-        addAndMakeVisible (combo);
+        addAndMakeVisible (device);
         refresh();
         devices.addChangeListener (this);
+
+        auto& combo = device.device;
         combo.onChange = [this]()
         {
+            auto& combo = device.device;
             devices.getAudioDeviceSetup (setup);
             if (inputDevice)
             {
@@ -166,7 +170,35 @@ public:
                 if (setup.outputDeviceName != combo.getText())
                     setup.outputDeviceName = combo.getText();
             }
+
             devices.setAudioDeviceSetup (setup, true);
+        };
+
+        device.channels.onClick = [this]()
+        {
+            auto* object = versicap.getDeviceManager().getCurrentAudioDevice();
+            if (! object) return;
+            PopupMenu menu, stereo, mono;
+            auto chans = inputDevice ? object->getInputChannelNames()
+                                     : object->getOutputChannelNames();
+            
+            for (int i = 0; i < chans.size(); ++i)
+            {
+                String name = String (i + 1);
+                mono.addItem (i + 100, name);
+            }
+
+            for (int i = 0; i < chans.size(); i += 2)
+            {
+                String name = String (i + 1);
+                name << " - " << int (i + 2);
+                stereo.addItem (i + 200, name);
+            }
+
+            menu.addSubMenu ("Mono", mono);
+            menu.addSubMenu ("Stereo", stereo);
+            menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&device.channels),
+                                ModalCallbackFunction::forComponent (AudioDevicePropertyComponent::channelChosen, this));
         };
     }
 
@@ -175,8 +207,80 @@ public:
         devices.removeChangeListener (this);
     }
 
+    void channelChosen (int result)
+    {
+        auto& devices = versicap.getDeviceManager();
+        setup = devices.getAudioDeviceSetup();
+        
+        if (inputDevice)
+        {
+            if (result >= 100 && result < 200)
+            {
+                int channel = result - 100;
+                setup.useDefaultInputChannels = false;
+                setup.inputChannels.setRange (0, 32, false);
+                setup.inputChannels.setBit (channel, true);
+            }
+            else if (result >= 200 && result < 300)
+            {
+                int channel = result - 200;
+                setup.useDefaultInputChannels = false;
+                setup.inputChannels.setRange (0, 32, false);
+                setup.inputChannels.setBit (channel, true);
+                setup.inputChannels.setBit (channel + 1, true);
+            }
+        }
+        else
+        {
+            if (result >= 100 && result < 200)
+            {
+                int channel = result - 100;
+                setup.useDefaultOutputChannels = false;
+                setup.outputChannels.setRange (0, 32, false);
+                setup.outputChannels.setBit (channel, true);
+            }
+            else if (result >= 200 && result < 300)
+            {
+                int channel = result - 200;
+                setup.useDefaultOutputChannels = false;
+                setup.outputChannels.setRange (0, 32, false);
+                setup.outputChannels.setBit (channel, true);
+                setup.outputChannels.setBit (channel + 1, true);
+            }
+        }
+        
+        devices.setAudioDeviceSetup (setup, true);
+    }
+
+    void ensureCorrectChannels()
+    {
+        auto& devices = versicap.getDeviceManager();
+        setup = devices.getAudioDeviceSetup();
+        // DBG("ins  : " << setup.inputChannels.toString(2));
+        // DBG("outs : " << setup.outputChannels.toString(2));
+        BigInteger& channels = inputDevice ? setup.inputChannels : setup.outputChannels;
+        for (int i = 0; i < 32; ++i)
+        {
+            if (channels [i])
+            {
+                String name = String (i + 1);
+                if (channels [i + 1])
+                    name << " - " << int (i + 2);
+                device.channels.setButtonText (name);
+                break;
+            }
+        }
+    }
+
+    static void channelChosen (int result, AudioDevicePropertyComponent* comp)
+    {
+        if (result > 0 && comp)
+            comp->channelChosen (result);
+    }
+
     void refresh() override
     {
+        auto& combo = device.device;
         const auto last = setup;
         const auto name = inputDevice ? setup.inputDeviceName : setup.outputDeviceName;
         devices.getAudioDeviceSetup (setup);
@@ -194,6 +298,8 @@ public:
         const int index = deviceNames.indexOf (name);
         if (isPositiveAndBelow (index, combo.getNumItems()))
             combo.setSelectedItemIndex (index, dontSendNotification);
+
+        ensureCorrectChannels();
     }
 
     void changeListenerCallback (ChangeBroadcaster*) override
@@ -202,7 +308,8 @@ public:
     }
 
 private:
-    ComboBox combo;
+    AudioDeviceSelect device;
+    // ComboBox combo;
     StringArray deviceNames;
     AudioDeviceManager::AudioDeviceSetup setup;
     Versicap& versicap;

@@ -264,7 +264,7 @@ void AudioEngine::process (const float** input, int numInputs,
                 if (c < numInputs)
                     renderBuffer.copyFrom (c, 0, input[c], nframes);
                 else
-                    renderBuffer.clear (c, nframes);
+                    renderBuffer.clear (c, 0, nframes);
             }
         }
     }
