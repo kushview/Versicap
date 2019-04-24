@@ -21,14 +21,11 @@ struct Versicap::Impl : public AudioIODeviceCallback,
 {
     Impl()
         : peaks (32)
-    { 
+    {
     }
 
-    ~Impl() { }
-
-    void updatePluginProperties()
-    {
-        
+    ~Impl()
+    { 
     }
 
     void audioDeviceAboutToStart (AudioIODevice* device) override   { engine->prepare (device); }
@@ -127,8 +124,8 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     //=========================================================================
     File projectFile;
     Project project;
-    Atomic<int> shouldProcess { 0 };
 
+    Atomic<int> shouldProcess { 0 };
     OwnedArray<Controller> controllers;
 
     std::unique_ptr<AudioEngine> engine;
@@ -509,6 +506,10 @@ bool Versicap::setProject (const Project& newProject)
     impl->project = newProject;
     auto& project = impl->project;
 
+    AudioDeviceManager::AudioDeviceSetup setup;
+    project.getAudioDeviceSetup (setup);
+    devices.setAudioDeviceSetup (setup, true);
+
     PluginDescription desc;
     if (project.getPluginDescription (getPluginManager(), desc))
     {
@@ -516,12 +517,6 @@ bool Versicap::setProject (const Project& newProject)
         if (auto* const proc = engine.getAudioProcessor())
             project.applyPluginState (*proc);
     }
-
-    AudioDeviceManager::AudioDeviceSetup setup;
-    project.getAudioDeviceSetup (setup);
-    devices.setAudioDeviceSetup (setup, true);
-
-    DBG(project.getValueTree().toXmlString());
 
     auto midiOut = project.getProperty (Tags::midiOutput).toString();
     engine.setDefaultMidiOutput (midiOut);

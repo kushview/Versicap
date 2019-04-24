@@ -276,6 +276,14 @@ void Render::handleAsyncUpdate()
     shouldCancel.set (0);
 }
 
+void Render::setContext (const RenderContext& newContext)
+{
+    if (rendering.get() != 0 || renderingRequest.get() != 0)
+        return;
+    ScopedLock rsl (lock);
+    context = newContext;
+}
+
 void Render::start (const RenderContext& newContext, int latencySamples)
 {
     if (isRendering())

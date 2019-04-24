@@ -28,10 +28,14 @@ public:
 private:
     std::unique_ptr<ProjectDocument> document;
     ProjectWatcher watcher;
+
     void save();
     void saveAs();
     void open();
     void create();
+
+    void updateEngineContext();
+    
     void changeListenerCallback (ChangeBroadcaster*) override;
 };
 

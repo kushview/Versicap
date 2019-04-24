@@ -1,6 +1,7 @@
 
 #include "controllers/ProjectsController.h"
 #include "engine/AudioEngine.h"
+#include "RenderContext.h"
 #include "Commands.h"
 #include "Project.h"
 #include "ProjectWatcher.h"
@@ -67,11 +68,13 @@ void ProjectsController::initialize()
     versicap.getDeviceManager().addChangeListener (this);
     watcher.setProject (versicap.getProject());
     watcher.onProjectModified = std::bind (&ProjectDocument::changed, document.get());
+    watcher.onSourceChanged = std::bind (&ProjectsController::updateEngineContext, this);
 }
 
 void ProjectsController::shutdown()
 {
     watcher.onProjectModified = nullptr;
+    watcher.onSourceChanged = nullptr;
     versicap.getDeviceManager().removeChangeListener (this);
     document.reset();
 }
@@ -79,8 +82,26 @@ void ProjectsController::shutdown()
 void ProjectsController::projectChanged()
 {
     watcher.setProject (versicap.getProject());
-    document->setFile (versicap.getProjectFile());
+    if (document->getFile() != versicap.getProjectFile())
+        document->setFile (versicap.getProjectFile());
     document->setChangedFlag (false);
+    updateEngineContext();
+}
+
+void ProjectsController::updateEngineContext()
+{
+    auto& engine = versicap.getAudioEngine();
+    if (engine.isRendering())
+    {
+        jassertfalse;
+        return; // maybe need to delay the context update
+                // in a render finished hook
+    }
+    
+    auto project = watcher.getProject();
+    RenderContext context;
+    project.getRenderContext (context);
+    engine.setRenderContext (context);
 }
 
 void ProjectsController::save()

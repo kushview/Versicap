@@ -16,7 +16,6 @@ public:
     ~AudioEngine();
 
     //=========================================================================
-    void setSourceType (SourceType type);
     void setEnabled (bool enabled) { shouldProcess.set (enabled ? 1 : 0); }
 
     //=========================================================================
@@ -27,6 +26,7 @@ public:
     //=========================================================================
     bool isRendering() const;
     void cancelRendering();
+    void setRenderContext (const RenderContext&);
     Result startRendering (const RenderContext& ctx);
     ValueTree getRenderedSamples() const;
 
@@ -55,7 +55,6 @@ private:
     //=========================================================================
     bool prepared = false;
     Atomic<int> shouldProcess { 0 };
-    Atomic<int> sourceType { SourceType::MidiDevice };
 
     //=========================================================================
     std::unique_ptr<AudioProcessor> processor;

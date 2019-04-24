@@ -22,13 +22,6 @@ AudioEngine::~AudioEngine()
     render.reset();
 }
 
-void AudioEngine::setSourceType (SourceType type)
-{
-    if (type == sourceType.get())
-        return;
-    sourceType.set (type);
-}
-
 void AudioEngine::setAudioProcessor (AudioProcessor* newProcessor)
 {
     jassert(newProcessor != nullptr);
@@ -65,10 +58,10 @@ void AudioEngine::clearAudioProcessor()
 
 bool AudioEngine::isRendering() const { return render && render->isRendering(); }
 void AudioEngine::cancelRendering() { if (render) render->cancel(); }
+void AudioEngine::setRenderContext (const RenderContext& context) { if (render) render->setContext (context); }
 Result AudioEngine::startRendering (const RenderContext& context)
 {
     int latency = 0;
-    sourceType.set (context.source);
 
     if (context.source == SourceType::AudioPlugin)
     {
@@ -186,19 +179,19 @@ void AudioEngine::process (const float** input, int numInputs,
 
     messageCollector.removeNextBlockOfMessages (incomingMidi, nframes);
     ScopedLock slr (render->getCallbackLock());
+    render->renderCycleBegin();
 
-    const bool rendering = render->isRendering();
-    const auto& context = render->getContext();
-    const int source = sourceType.get();
+    const bool rendering    = render->isRendering();
+    const auto& context     = render->getContext();
+    const int source        = render->getSourceType();
     renderBuffer.setSize (context.channels, nframes, false, false, true);
     pluginBuffer.setSize (pluginChannels, nframes, false, false, true);
-
-    render->renderCycleBegin();
+    
     render->getNextMidiBlock (renderMidi, nframes);
     
     if (! rendering)
         renderMidi.addEvents (incomingMidi, 0, nframes, 0);
-    
+
     if (auto* const proc = processor.get())
     {
         // plugin will clear the buffer so make a copy;
@@ -207,6 +200,12 @@ void AudioEngine::process (const float** input, int numInputs,
         proc->processBlock (pluginBuffer, pluginMidi);
     }
 
+    if (auto* const out = midiOut.get())
+    {
+        out->sendBlockOfMessages (renderMidi, Time::getMillisecondCounterHiRes() + 1.0,
+                                  sampleRate);
+    }
+    
     if (source == SourceType::AudioPlugin)
     {
         if (pluginChannels == 0 || pluginNumOuts == 0)
@@ -238,13 +237,6 @@ void AudioEngine::process (const float** input, int numInputs,
     }
     else if (source == SourceType::MidiDevice)
     {
-        if (auto* const out = midiOut.get())
-        {
-            out->sendBlockOfMessages (renderMidi,
-                Time::getMillisecondCounterHiRes() + 1.0,
-                sampleRate);
-        }
-
         if (numInputs == context.channels)
         {
             // one-to-one channel match
