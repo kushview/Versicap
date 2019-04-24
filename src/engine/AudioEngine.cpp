@@ -196,13 +196,15 @@ void AudioEngine::process (const float** input, int numInputs,
     render->renderCycleBegin();
     render->getNextMidiBlock (renderMidi, nframes);
     
-    if (! render->isRendering())
+    if (! rendering)
         renderMidi.addEvents (incomingMidi, 0, nframes, 0);
-
+    
     if (auto* const proc = processor.get())
     {
+        // plugin will clear the buffer so make a copy;
+        pluginMidi.addEvents (renderMidi, 0, nframes, 0);
         ScopedLock slp (proc->getCallbackLock());
-        proc->processBlock (pluginBuffer, renderMidi);
+        proc->processBlock (pluginBuffer, pluginMidi);
     }
 
     if (source == SourceType::AudioPlugin)
@@ -293,6 +295,7 @@ void AudioEngine::process (const float** input, int numInputs,
     
     renderMidi.clear();
     incomingMidi.clear();
+    pluginMidi.clear();
 }
 
 void AudioEngine::prepare (double expectedSampleRate, int maxBufferSize,

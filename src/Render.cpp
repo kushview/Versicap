@@ -124,7 +124,7 @@ void Render::getNextMidiBlock (MidiBuffer& buffer, int nframes)
         if (msg.isNoteOn())
         {
             DBG("[VCP] note on: " << MidiMessage::getMidiNoteName (msg.getNoteNumber(), true, true, 4) << " - "
-                << static_cast<int64> (msg.getTimeStamp()));
+                << static_cast<int64> (msg.getTimeStamp()) << " velocity: " << (int) msg.getVelocity());
         }
         else if (msg.isNoteOff())
         {
