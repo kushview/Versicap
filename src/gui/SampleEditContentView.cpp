@@ -155,8 +155,6 @@ private:
             static_cast<float> ((visibleRange.getLength() / totalLength) * (double) getWidth()),
             (float) getHeight()
         };
-
-        DBG("recg: " << rect.toString());
     }
 };
 
@@ -203,10 +201,10 @@ public:
         update();
     }
 
-    void setPositionOffset (double newOffset) { offset = newOffset; update(); }
+    void setPositionOffset (double newOffset) { offset = newOffset; }
     void update()
     {
-        setBounds (getBoundsInParent().withX (roundToInt ((getPosition() - offset) * pixelsPerSecond)));
+        setBounds (getBoundsInParent().withX (roundToInt (pixelsPerSecond * (getPosition() - offset))));
     }
 
     void mouseUp (const MouseEvent& ev) override
@@ -273,9 +271,11 @@ public:
         zoomBar.onMoved = [this]()
         {
             wave.setRange (zoomBar.getVisibleRange());
+            inPoint.setSecondsPerPixel (wave.getSecondsPerPixel());
             inPoint.setPositionOffset (zoomBar.getVisibleRange().getStart());
+            outPoint.setSecondsPerPixel (wave.getSecondsPerPixel());
             outPoint.setPositionOffset (zoomBar.getVisibleRange().getStart());
-            // updateMarkerBounds();
+            updateMarkerBounds();
         };
 
         timeIn.addListener (this);
@@ -288,7 +288,6 @@ public:
         if (value.refersToSameSourceAs (timeIn))
         {
             double ti = timeIn.getValue();
-            DBG("in: " << ti);
             double to = timeOut.getValue();
             if (ti > to - spread)
                 timeOut.setValue (ti + spread);
@@ -322,10 +321,6 @@ public:
         
         if (sample.isValid())
         {
-            DBG("total time: " << sample.getTotalTime());
-            DBG("start: " << wave.getStartTime());
-            DBG("end: " << wave.getEndTime());
-
             zoomBar.setRange (wave.getStartTime(), wave.getEndTime(), sample.getTotalTime());
             timeIn = sample.getPropertyAsValue (Tags::timeIn);
             inPoint.getPositionValue().referTo (timeIn);
@@ -354,7 +349,6 @@ public:
     {
         wave.setBounds (getLocalBounds());
         zoomBar.setRange (wave.getStartTime(), wave.getEndTime());
-        
         updateMarkerBounds();
         zoomBar.setBounds (getLocalBounds().removeFromBottom (22));
     }
@@ -370,6 +364,7 @@ public:
     {
         auto step = static_cast<double> (wave.getWidth() / 4) * wave.getSecondsPerPixel();
         wave.setEndTime (wave.getEndTime() - step);
+        zoomBar.setRange (wave.getStartTime(), wave.getEndTime());
         updateMarkers();
     }
 
@@ -377,6 +372,7 @@ public:
     {
         auto step = static_cast<double> (wave.getWidth() / 4) * wave.getSecondsPerPixel();
         wave.setEndTime (wave.getEndTime() + step);
+        zoomBar.setRange (wave.getStartTime(), wave.getEndTime());
         updateMarkers();
     }
 
