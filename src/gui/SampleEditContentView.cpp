@@ -399,11 +399,8 @@ public:
     Content (SampleEditContentView& o)
         : owner (o)
     {
-        // addAndMakeVisible (view);
         panel.reset (new SampleDisplayPanel (o));
         addAndMakeVisible (panel.get());
-        // view.setViewedComponent (panel.get(), false);
-        // view.setScrollBarsShown (false, true, false, false);
 
         addAndMakeVisible (zoomIn);
         zoomIn.setButtonText ("+");
@@ -424,7 +421,6 @@ public:
 
     ~Content()
     {
-        view.setViewedComponent (nullptr, false);
         panel.reset();
     }
 
@@ -453,12 +449,9 @@ public:
         panel->setBounds (r1.reduced (1, 1));
     }
 
-    Viewport& getViewPort() { return view; }
-
 private:
     SampleEditContentView& owner;
     ProjectWatcher watcher;
-    Viewport view;
     std::unique_ptr<SampleDisplayPanel> panel;
     TextButton zoomIn, zoomOut;
 };
