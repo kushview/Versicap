@@ -470,13 +470,8 @@ bool Versicap::saveProject (const File& file)
         return false;
 
     auto setup = impl->devices->getAudioDeviceSetup();
-    project.setProperty (Tags::audioInput, setup.inputDeviceName)
-           .setProperty (Tags::audioOutput, setup.outputDeviceName)
-           .setProperty (Tags::audioInputChannels, setup.inputChannels.toMemoryBlock())
-           .setProperty (Tags::audioOutputChannels, setup.outputChannels.toMemoryBlock())
-           .setProperty (Tags::sampleRate, setup.sampleRate)
-           .setProperty (Tags::bufferSize, setup.bufferSize)
-           .setProperty (Tags::midiOutput, impl->engine->getDefaultMidiOutputName());
+    project.setAudioDeviceSetup (setup);
+    project.setProperty (Tags::midiOutput, impl->engine->getDefaultMidiOutputName());
     // TODO: set midi input(s) here
 
     if (auto* processor = impl->engine->getAudioProcessor())

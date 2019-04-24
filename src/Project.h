@@ -155,7 +155,8 @@ public:
 
     //=========================================================================
     void getAudioDeviceSetup (AudioDeviceManager::AudioDeviceSetup& setup) const;
-
+    void setAudioDeviceSetup (const AudioDeviceManager::AudioDeviceSetup& setup);
+    
     //=========================================================================
     inline Project& operator= (const Project& o)
     {

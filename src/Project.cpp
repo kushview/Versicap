@@ -249,6 +249,17 @@ void Project::getAudioDeviceSetup (AudioDeviceManager::AudioDeviceSetup& setup) 
     }
 }
 
+void Project::setAudioDeviceSetup (const AudioDeviceManager::AudioDeviceSetup& setup)
+{
+    auto& project = *this;
+    project.setProperty (Tags::audioInput, setup.inputDeviceName)
+           .setProperty (Tags::audioOutput, setup.outputDeviceName)
+           .setProperty (Tags::audioInputChannels, setup.inputChannels.toMemoryBlock())
+           .setProperty (Tags::audioOutputChannels, setup.outputChannels.toMemoryBlock())
+           .setProperty (Tags::sampleRate, setup.sampleRate)
+           .setProperty (Tags::bufferSize, setup.bufferSize);
+}
+
 //=========================================================================
 void Project::setSamples (const ValueTree& newSamples)
 {

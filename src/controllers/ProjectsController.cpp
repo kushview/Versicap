@@ -1,5 +1,6 @@
 
 #include "controllers/ProjectsController.h"
+#include "engine/AudioEngine.h"
 #include "Commands.h"
 #include "Project.h"
 #include "ProjectWatcher.h"
@@ -156,12 +157,9 @@ void ProjectsController::create()
 void ProjectsController::changeListenerCallback (ChangeBroadcaster*)
 {
     auto project = versicap.getProject();
-    AudioDeviceManager::AudioDeviceSetup setup;
-    versicap.getDeviceManager().getAudioDeviceSetup (setup);
-    project.setProperty (Tags::sampleRate, setup.sampleRate)
-           .setProperty (Tags::bufferSize, setup.bufferSize)
-           .setProperty (Tags::audioInput, setup.inputDeviceName)
-           .setProperty (Tags::audioOutput, setup.outputDeviceName);
+    auto setup = versicap.getDeviceManager().getAudioDeviceSetup();
+    project.setAudioDeviceSetup (setup);
+    project.setProperty (Tags::midiOutput, versicap.getAudioEngine().getDefaultMidiOutputName());
 }
 
 void ProjectsController::getCommandInfo (CommandID commandID, ApplicationCommandInfo& result)
