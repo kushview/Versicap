@@ -541,4 +541,10 @@ bool Versicap::hasProjectChanged() const
     return false;
 }
 
+void Versicap::launched()
+{
+    for (auto* const controller : impl->controllers)
+        controller->launched();
+}
+
 }

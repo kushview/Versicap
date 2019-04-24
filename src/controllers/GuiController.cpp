@@ -1,5 +1,6 @@
 
 #include "controllers/GuiController.h"
+#include "gui/LookAndFeel.h"
 #include "gui/MainWindow.h"
 #include "Commands.h"
 
@@ -11,12 +12,28 @@ GuiController::~GuiController() { }
 
 void GuiController::initialize()
 {
-
+    look.reset (new LookAndFeel());
+    look->setColour (Slider::backgroundColourId, LookAndFeel::widgetBackgroundColor.darker());
+    LookAndFeel::setDefaultLookAndFeel (look.get());
 }
 
 void GuiController::shutdown()
 {
+    if (window != nullptr)
+    {
+        window->savePersistentData();
+        window = nullptr;
+    }
 
+    LookAndFeel::setDefaultLookAndFeel (nullptr);
+    look.reset();
+}
+
+void GuiController::launched()
+{
+    if (window)
+        return;
+    window.reset (new MainWindow ("Versicap", versicap));
 }
 
 void GuiController::getCommandInfo (CommandID commandID, ApplicationCommandInfo& result)

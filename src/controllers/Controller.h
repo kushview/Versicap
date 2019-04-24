@@ -23,6 +23,9 @@ public:
 
     virtual void initialize() { }
     virtual void shutdown() { }
+    
+    virtual void launched() {}
+
     virtual void getCommandInfo (CommandID commandID, ApplicationCommandInfo&) { }
     virtual bool perform (const ApplicationCommandTarget::InvocationInfo&) { return false; }
 

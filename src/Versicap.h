@@ -102,6 +102,9 @@ private:
     void initializeAudioDevice();
     void initializePlugins();
     void initializeUnlockStatus();
+
+    friend class Application;
+    void launched();
 };
 
 }

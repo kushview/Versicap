@@ -36,12 +36,8 @@ public:
         }
 
         setupGlobals();
-
-        look.setColour (Slider::backgroundColourId, kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
-        LookAndFeel::setDefaultLookAndFeel (&look);
-        mainWindow.reset (new MainWindow (getApplicationName(), *versicap));
-
         triggerAsyncUpdate();
+        versicap->launched();
     }
 
     void shutdown() override
@@ -65,8 +61,6 @@ public:
     void anotherInstanceStarted (const String& commandLine) override
     {
         ignoreUnused (commandLine);
-        if (mainWindow)
-            mainWindow->toFront (true);
     }
 
     void handleAsyncUpdate() override
@@ -80,8 +74,6 @@ public:
     }
 
 private:
-    std::unique_ptr<MainWindow> mainWindow;
-    vcp::LookAndFeel look;
     std::unique_ptr<Versicap> versicap;
     OwnedArray<kv::ChildProcessSlave>   slaves;
 
@@ -94,15 +86,7 @@ private:
 
     void shutdownGui()
     {
-        versicap->closePluginWindow();
-        
-        if (mainWindow != nullptr)
-        {
-            mainWindow->savePersistentData();
-            mainWindow = nullptr;
-        }
-
-        LookAndFeel::setDefaultLookAndFeel (nullptr);
+        versicap->closePluginWindow();        
     }
 
     bool maybeLaunchSlave (const String& commandLine)
