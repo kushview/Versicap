@@ -168,6 +168,7 @@ Versicap::Versicap()
     impl->engine->onRenderStopped = [this]()
     {
         listeners.call ([](Listener& l) { l.renderWillStop(); });
+        impl->peaks.clear();
         auto project = getProject();
         project.setSamples (impl->engine->getRenderedSamples());
         listeners.call ([](Listener& l) { l.renderStopped(); });
@@ -501,6 +502,8 @@ bool Versicap::loadProject (const File& file)
 bool Versicap::setProject (const Project& newProject)
 {
     auto& engine = getAudioEngine();
+    auto& devices = getDeviceManager();
+
     impl->project = newProject;
     auto& project = impl->project;
 
@@ -511,7 +514,14 @@ bool Versicap::setProject (const Project& newProject)
         if (auto* const proc = engine.getAudioProcessor())
             project.applyPluginState (*proc);
     }
-    
+
+    AudioDeviceManager::AudioDeviceSetup setup;
+    project.getAudioDeviceSetup (setup);
+    devices.setAudioDeviceSetup (setup, true);
+
+    auto midiOut = project.getProperty (Tags::midiOutput).toString();
+    engine.setDefaultMidiOutput (midiOut);
+
     listeners.call ([](Listener& listener) { listener.projectChanged(); });
 
     return true;

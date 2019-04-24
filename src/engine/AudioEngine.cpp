@@ -259,10 +259,13 @@ void AudioEngine::process (const float** input, int numInputs,
         else
         {
             // fall back - copy the lesser of the channels
-            for (int c = jmin (numInputs, context.channels); --c >= 0;)
-                renderBuffer.copyFrom (c, 0, input[c], nframes);
-            for (int c = context.channels; c < numInputs; ++c)
-                renderBuffer.clear (c, 0, nframes);
+            for (int c = 0; c < context.channels; ++c)
+            {
+                if (c < numInputs)
+                    renderBuffer.copyFrom (c, 0, input[c], nframes);
+                else
+                    renderBuffer.clear (c, nframes);
+            }
         }
     }
     else
