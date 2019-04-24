@@ -379,7 +379,7 @@ public:
         {
             
         }
-        else (wheel.deltaX < 0.f)
+        else if (wheel.deltaX < 0.f)
         {
 
         }
