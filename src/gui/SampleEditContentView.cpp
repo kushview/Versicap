@@ -94,6 +94,16 @@ public:
         dragging = false;
     }
 
+    void mouseMove (const MouseEvent& ev) override
+    {
+        if (ev.position.x >= rect.getX() && ev.position.x < rect.getX() + 4.0)
+            setMouseCursor (MouseCursor::LeftRightResizeCursor);
+        else if (ev.position.x >= rect.getRight() - 4.0 && ev.position.x < rect.getRight())
+            setMouseCursor (MouseCursor::LeftRightResizeCursor);
+        else
+            setMouseCursor (MouseCursor::NormalCursor);
+    }
+
     void mouseDrag (const MouseEvent& ev) override
     {
         if (! dragging)
@@ -278,6 +288,14 @@ public:
             updateMarkerBounds();
         };
 
+        addAndMakeVisible (zoomInButton);
+        zoomInButton.setButtonText ("+");
+        zoomInButton.onClick = [this]() { zoomIn(); };
+
+        addAndMakeVisible (zoomOutButton);
+        zoomOutButton.setButtonText ("-");
+        zoomOutButton.onClick = [this]() { zoomOut(); };
+
         timeIn.addListener (this);
         timeOut.addListener (this);
     }
@@ -345,22 +363,45 @@ public:
         setSize (owner.getWidth(), owner.getHeight());
     }
 
+    void mouseWheelMove (const MouseEvent& event,
+                         const MouseWheelDetails& wheel) override
+    {
+        if (wheel.deltaY > 0.f)
+        {
+            // zoomIn();
+        }
+        else if (wheel.deltaY < 0.f)
+        {
+            // zoomOut();
+        }
+
+        if (wheel.deltaX > 0.f)
+        {
+            
+        }
+        else (wheel.deltaX < 0.f)
+        {
+
+        }
+    }
+
     void resized() override
     {
-        wave.setBounds (getLocalBounds());
+        auto r1 = getLocalBounds();
+        auto r2 = r1.removeFromBottom (22);
+        wave.setBounds (r1);
+        displayBounds = r1;
+
         zoomBar.setRange (wave.getStartTime(), wave.getEndTime());
+        zoomInButton.setBounds (r2.removeFromRight (24));
+        zoomOutButton.setBounds (r2.removeFromRight (24));
+        r2.removeFromRight (2);
+
+        zoomBar.setBounds (r2);
         updateMarkerBounds();
-        zoomBar.setBounds (getLocalBounds().removeFromBottom (22));
     }
 
-    void updateMarkerBounds()
-    {
-        auto visible = zoomBar.getVisibleRange();
-        inPoint.setBounds (roundToInt (wave.getPixelsPerSecond() * (inPoint.getPosition() - visible.getStart())), 0, 1, getHeight());
-        outPoint.setBounds (roundToInt (wave.getPixelsPerSecond() * (outPoint.getPosition() - visible.getStart())), 0, 1, getHeight());        
-    }
-
-    void zoomIn() 
+    void zoomIn()
     {
         auto step = static_cast<double> (wave.getWidth() / 4) * wave.getSecondsPerPixel();
         wave.setEndTime (wave.getEndTime() - step);
@@ -376,6 +417,30 @@ public:
         updateMarkers();
     }
 
+private:
+    SampleEditContentView& owner;
+    Sample sample;
+    Value timeIn, timeOut;
+    WaveDisplayComponent wave;
+    WaveZoomBar zoomBar;
+    TextButton zoomInButton, zoomOutButton;
+    WaveCursor inPoint, outPoint;
+
+    Rectangle<int> displayBounds;
+
+    void updateMarkerBounds()
+    {
+        auto visible = zoomBar.getVisibleRange();
+        inPoint.setBounds (roundToInt (wave.getPixelsPerSecond() * (inPoint.getPosition() - visible.getStart())),
+                           displayBounds.getY(), 
+                           1, 
+                           displayBounds.getHeight());
+        outPoint.setBounds (roundToInt (wave.getPixelsPerSecond() * (outPoint.getPosition() - visible.getStart())), 
+                            displayBounds.getY(), 
+                            1, 
+                            displayBounds.getHeight());
+    }
+
     void updateMarkers()
     {
         inPoint.setSecondsPerPixel (wave.getSecondsPerPixel());
@@ -383,14 +448,6 @@ public:
         inPoint.update();
         outPoint.update();
     }
-
-private:
-    SampleEditContentView& owner;
-    Sample sample;
-    Value timeIn, timeOut;
-    WaveDisplayComponent wave;
-    WaveZoomBar zoomBar;
-    WaveCursor inPoint, outPoint;
 };
 
 class SampleEditContentView::Content : public Component
@@ -401,18 +458,6 @@ public:
     {
         panel.reset (new SampleDisplayPanel (o));
         addAndMakeVisible (panel.get());
-
-        addAndMakeVisible (zoomIn);
-        zoomIn.setButtonText ("+");
-        zoomIn.onClick = [this]() {
-            panel->zoomIn();
-        };
-
-        addAndMakeVisible (zoomOut);
-        zoomOut.setButtonText ("-");
-        zoomOut.onClick = [this]() {
-            panel->zoomOut();
-        };
 
         watcher.onActiveSampleChanged = [this]() {
             refreshWithActiveSample();
@@ -442,10 +487,6 @@ public:
     void resized() override
     {
         auto r1 = getLocalBounds();
-        auto r2 = getLocalBounds().removeFromTop (22);
-        auto r3 = getLocalBounds().removeFromBottom (22);
-        zoomOut.setBounds (r3.removeFromRight (24));
-        zoomIn.setBounds (r3.removeFromRight (24));
         panel->setBounds (r1.reduced (1, 1));
     }
 
@@ -453,7 +494,6 @@ private:
     SampleEditContentView& owner;
     ProjectWatcher watcher;
     std::unique_ptr<SampleDisplayPanel> panel;
-    TextButton zoomIn, zoomOut;
 };
 
 SampleEditContentView::SampleEditContentView (Versicap& vc)
