@@ -1,10 +1,10 @@
 
-#include "gui/LayerPropertiesContentView.h"
+#include "gui/MainPropertiesContentView.h"
 #include "Versicap.h"
 
 namespace vcp {
 
-LayerPropertiesContentView::LayerPropertiesContentView (Versicap& vc)
+MainPropertiesContentView::MainPropertiesContentView (Versicap& vc)
     : ContentView (vc)
 {
     setName ("Properties");
@@ -12,13 +12,13 @@ LayerPropertiesContentView::LayerPropertiesContentView (Versicap& vc)
     watcher.setProject (vc.getProject());
     addComponentListener (this);
     watcher.onChanged = watcher.onActiveLayerChanged = watcher.onActiveSampleChanged = 
-        std::bind (&LayerPropertiesContentView::refreshCompletePanel, this);
+        std::bind (&MainPropertiesContentView::refreshCompletePanel, this);
     refreshCompletePanel();
 }
 
-LayerPropertiesContentView::~LayerPropertiesContentView() { }
+MainPropertiesContentView::~MainPropertiesContentView() { }
 
-void LayerPropertiesContentView::refreshCompletePanel()
+void MainPropertiesContentView::refreshCompletePanel()
 {
     auto project = watcher.getProject();
     Array<PropertyComponent*> props;
@@ -29,9 +29,8 @@ void LayerPropertiesContentView::refreshCompletePanel()
     panel.clear();
     project.getProperties (versicap, props);
     project.getRecordingProperties (versicap, props);
-    project.getDevicesProperties (versicap, props);
     panel.addSection ("Project", props);
-    
+
     props.clearQuick();
     auto layer = project.getActiveLayer();
     layer.getProperties (props);
@@ -42,11 +41,15 @@ void LayerPropertiesContentView::refreshCompletePanel()
     sample.getProperties (props);
     panel.addSection ("Sample", props);
 
+    props.clearQuick();
+    project.getDevicesProperties (versicap, props);
+    panel.addSection ("Devices", props);
+
     if (xml)
         panel.restoreOpennessState (*xml);
 }
 
-void LayerPropertiesContentView::resized()
+void MainPropertiesContentView::resized()
 {
     panel.setBounds (getLocalBounds());
 }

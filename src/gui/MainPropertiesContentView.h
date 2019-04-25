@@ -5,12 +5,12 @@
 
 namespace vcp {
 
-class LayerPropertiesContentView : public ContentView,
+class MainPropertiesContentView : public ContentView,
                                    private ComponentListener
 {
 public:
-    LayerPropertiesContentView (Versicap&);
-    virtual ~LayerPropertiesContentView();
+    MainPropertiesContentView (Versicap&);
+    virtual ~MainPropertiesContentView();
     void resized() override;
 
     void setProject (const Project& project) { watcher.setProject (project); }

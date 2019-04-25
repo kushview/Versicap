@@ -1,7 +1,8 @@
 
 #include "engine/AudioEngine.h"
 
-#include "gui/LayerPropertiesContentView.h"
+#include "gui/MainPropertiesContentView.h"
+
 #include "gui/LayersTableContentView.h"
 #include "gui/NoteParams.h"
 #include "gui/ProjectPropertiesContentView.h"
@@ -140,8 +141,8 @@ public:
         view.reset (new SampleEditContentView (versicap));
         addAndMakeVisible (view.get());
 
-        layer.reset (new LayerPropertiesContentView (versicap));
-        addAndMakeVisible (layer.get());
+        props.reset (new MainPropertiesContentView (versicap));
+        addAndMakeVisible (props.get());
 
         addAndMakeVisible (projectPanel);
         projectPanel.createPanels (versicap);
@@ -218,7 +219,7 @@ public:
 
         auto r3 = r.removeFromRight (240);
         r3.removeFromTop (4);
-        layer->setBounds (r3);
+        props->setBounds (r3);
 
         r.removeFromLeft (2);        
         view->setBounds (r);
@@ -290,7 +291,7 @@ public:
         project = newProject;
         projectName.referTo (project.getPropertyAsValue (Tags::name));
         notes.setProject (project);
-        layer->setProject (project);
+        props->setProject (project);
         repaint();
     }
 
@@ -306,7 +307,7 @@ public:
             projectPanelData.appendChild (panelData, nullptr);
         }
 
-        if (auto xml = std::unique_ptr<XmlElement> (layer->getOpennessState()))
+        if (auto xml = std::unique_ptr<XmlElement> (props->getOpennessState()))
         {
             MemoryOutputStream mo;
             xml->writeToStream (mo, String());
@@ -330,7 +331,7 @@ public:
         MemoryBlock mb;
         if (mb.fromBase64Encoding (data.getProperty ("propsOpenness").toString()))
             if (auto xml = std::unique_ptr<XmlElement> (XmlDocument::parse (mb.toString())))
-                layer->restoreOpennessState (*xml);
+                props->restoreOpennessState (*xml);
     }
 
 private:
@@ -345,7 +346,7 @@ private:
     kv::DigitalMeter meterRight;
 
     std::unique_ptr<ContentView> view;
-    std::unique_ptr<LayerPropertiesContentView> layer;
+    std::unique_ptr<MainPropertiesContentView> props;
 
     TextButton importButton;
     TextButton exportButton;

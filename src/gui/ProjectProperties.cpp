@@ -517,16 +517,16 @@ void Project::getProperties (Versicap& versicap, Array<PropertyComponent*>& prop
 
 void Project::getDevicesProperties (Versicap& versicap, Array<PropertyComponent*>& props)
 {
-    props.add (new SampleRatePropertyComponent (versicap,  *this));
-    props.add (new BufferSizePropertyComponent (versicap,  *this));
     props.add (new AudioDevicePropertyComponent (versicap, *this, true));
     props.add (new AudioDevicePropertyComponent (versicap, *this, false));    
     props.add (new MidiDevicePropertyComponent (versicap,  *this, true));
     props.add (new MidiDevicePropertyComponent (versicap,  *this, false));
+    props.add (new BufferSizePropertyComponent (versicap,  *this));
 }
 
-void Project::getRecordingProperties (Versicap&, Array<PropertyComponent*>& props)
+void Project::getRecordingProperties (Versicap& versicap, Array<PropertyComponent*>& props)
 {
+    props.add (new SampleRatePropertyComponent (versicap,  *this));
     props.add (new ChoicePropertyComponent (getPropertyAsValue (Tags::format),
         "Format", FormatType::getChoices(), FormatType::getValues()));
     props.add (new ChoicePropertyComponent (getPropertyAsValue (Tags::channels),
