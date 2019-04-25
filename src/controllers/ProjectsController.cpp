@@ -175,6 +175,13 @@ void ProjectsController::create()
     versicap.loadProject (filename);
 }
 
+void ProjectsController::record()
+{
+    const auto result = versicap.startRendering();
+    if (! result.wasOk())
+        AlertWindow::showNativeDialogBox ("Versicap", result.getErrorMessage(), false);
+}
+
 void ProjectsController::changeListenerCallback (ChangeBroadcaster*)
 {
     auto project = versicap.getProject();
@@ -185,23 +192,30 @@ void ProjectsController::changeListenerCallback (ChangeBroadcaster*)
 
 void ProjectsController::getCommandInfo (CommandID commandID, ApplicationCommandInfo& result)
 {
+    int flags = versicap.getAudioEngine().isRendering() ?
+       ApplicationCommandInfo::isDisabled : 0;
+    
     switch (commandID)
     {
         case Commands::projectSave:
             result.addDefaultKeypress ('s', ModifierKeys::commandModifier);
-            result.setInfo ("Save Project", "Save the current project", "Project", 0);
+            result.setInfo ("Save Project", "Save the current project", "Project", flags);
             break;
         case Commands::projectSaveAs:
             result.addDefaultKeypress ('s', ModifierKeys::commandModifier | ModifierKeys::shiftModifier);
-            result.setInfo ("Save Project As", "Save the current project", "Project", 0);
+            result.setInfo ("Save Project As", "Save the current project", "Project", flags);
             break;
         case Commands::projectOpen:
             result.addDefaultKeypress ('o', ModifierKeys::commandModifier);
-            result.setInfo ("Open Project", "Open an existing project", "Project", 0);
+            result.setInfo ("Open Project", "Open an existing project", "Project", flags);
             break;
         case Commands::projectNew:
             result.addDefaultKeypress ('n', ModifierKeys::commandModifier);
-            result.setInfo ("New Project", "Create a new project", "Project", 0);
+            result.setInfo ("New Project", "Create a new project", "Project", flags);
+            break;
+        case Commands::projectRecord:
+            result.addDefaultKeypress ('r', ModifierKeys::commandModifier);
+            result.setInfo ("Record Project", "Record the entire project", "Project", flags);
             break;
     }
 }
@@ -216,6 +230,7 @@ bool ProjectsController::perform (const ApplicationCommandTarget::InvocationInfo
         case Commands::projectSaveAs:   saveAs();   break;
         case Commands::projectNew:      create();   break;
         case Commands::projectOpen:     open();     break;
+        case Commands::projectRecord:   record();   break;
         default: handled = false;
             break;
     }

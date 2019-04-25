@@ -33,7 +33,8 @@ private:
     void saveAs();
     void open();
     void create();
-
+    void record();
+    
     void updateEngineContext();
     
     void changeListenerCallback (ChangeBroadcaster*) override;

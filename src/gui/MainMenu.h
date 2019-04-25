@@ -11,6 +11,7 @@ public:
     enum RootMenuItems
     {
         File,
+        Project,
        #if JUCE_DEBUG
         Debug,
        #endif
@@ -35,6 +36,7 @@ private:
     std::unique_ptr<PopupMenu> macMenu;
 
     void buildFileMenu (PopupMenu&);
+    void buildProjectMenu (PopupMenu&);
     void buildDebugMenu (PopupMenu&);
     void buildHelpMenu (PopupMenu&);
 };

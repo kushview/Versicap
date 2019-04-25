@@ -461,7 +461,7 @@ public:
     }
 
     void refresh() override
-    { 
+    {
         PluginDescription desc;
         project.getPluginDescription (versicap.getPluginManager(), desc);
         if (desc.name.isEmpty())

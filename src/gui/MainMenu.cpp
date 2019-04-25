@@ -8,9 +8,7 @@ namespace vcp {
 MainMenu::MainMenu (DocumentWindow& window, ApplicationCommandManager& cmd)
     : owner (window),
       commands (cmd)
-{
-
-}
+{ }
 
 MainMenu::~MainMenu()
 {
@@ -39,7 +37,8 @@ void MainMenu::setupMenu()
 StringArray MainMenu::getMenuBarNames()
 {
     const char* const names[] = {
-        "File", 
+        "File",
+        "Project",
        #if JUCE_DEBUG
         "Debug",
        #endif
@@ -56,6 +55,8 @@ PopupMenu MainMenu::getMenuForIndex (int, const String& name)
 
     if (name == "File")
         buildFileMenu (menu);
+    else if (name == "Project")
+        buildProjectMenu (menu);
     else if (name == "Debug")
         buildDebugMenu (menu);
     else if (name == "Help")
@@ -81,6 +82,11 @@ void MainMenu::buildFileMenu (PopupMenu& menu)
    #if ! JUCE_MAC
     menu.addItem (2000, "Quit");
    #endif
+}
+
+void MainMenu::buildProjectMenu (PopupMenu& menu)
+{
+    menu.addCommandItem (&commands, Commands::projectRecord, "Record...");
 }
 
 void MainMenu::buildDebugMenu (PopupMenu& menu)
