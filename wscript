@@ -57,6 +57,9 @@ def configure (conf):
     else: conf.check_linux()
 
     conf.env.DEBUG = conf.options.debug
+    if conf.env.DEBUG:
+        conf.define ('JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING', 1)
+
     conf.env.VERSION_STRING = VERSION
 
     configure_product (conf)
