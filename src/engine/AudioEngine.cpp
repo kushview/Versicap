@@ -13,15 +13,34 @@ AudioEngine::AudioEngine (AudioFormatManager& formatManager,
     monitor = new Monitor();
 
     render.reset (new Render (formatManager));
-    render->onCancelled = [this]() { if (onRenderCancelled) onRenderCancelled(); };
+    render->onCancelled = [this]()
+    {
+        if (onRenderCancelled)
+            onRenderCancelled();
+        panic();
+    };
+
     render->onStarted   = [this]() { if (onRenderStarted)   onRenderStarted(); };
-    render->onStopped   = [this]() { if (onRenderStopped)   onRenderStopped(); };
+    render->onStopped   = [this]()
+    { 
+        if (onRenderStopped)
+            onRenderStopped();
+        panic();
+    };
 }
 
 AudioEngine::~AudioEngine()
 {
     render->onCancelled = render->onStarted = render->onStopped = nullptr;
     render.reset();
+}
+
+void AudioEngine::panic()
+{
+    if (shouldPanic.compareAndSetBool (1, 0))
+    {
+        DBG("[VCP] panic requested");
+    }
 }
 
 void AudioEngine::setAudioProcessor (AudioProcessor* newProcessor)
@@ -194,7 +213,13 @@ void AudioEngine::process (const float** input, int numInputs,
     render->getNextMidiBlock (renderMidi, nframes);
     
     if (! rendering)
+    {
         renderMidi.addEvents (incomingMidi, 0, nframes, 0);
+        if (shouldPanic.compareAndSetBool (0, 1))
+        {
+            addPanicMessages (renderMidi);
+        }
+    }
 
     if (auto* const proc = processor.get())
     {
@@ -206,8 +231,9 @@ void AudioEngine::process (const float** input, int numInputs,
 
     if (auto* const out = midiOut.get())
     {
-        out->sendBlockOfMessages (renderMidi, Time::getMillisecondCounterHiRes() + 1.0,
-                                  sampleRate);
+        if (! rendering || (rendering && source == SourceType::MidiDevice))
+            out->sendBlockOfMessages (renderMidi, Time::getMillisecondCounterHiRes() + 1.0,
+                                      sampleRate);
     }
     
     if (source == SourceType::AudioPlugin)

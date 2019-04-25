@@ -23,7 +23,11 @@ public:
 
     typedef ReferenceCountedObjectPtr<Monitor> MonitorPtr;
 
+    //=========================================================================
     MonitorPtr getMonitor() const { return monitor; }
+
+    //=========================================================================
+    void panic();
 
     //=========================================================================
     void setEnabled (bool enabled) { shouldProcess.set (enabled ? 1 : 0); }
@@ -67,7 +71,7 @@ private:
     //=========================================================================
     bool prepared = false;
     Atomic<int> shouldProcess { 0 };
-    Atomic<int> panic { 0 };
+    Atomic<int> shouldPanic { 0 };
     
     //=========================================================================
     std::unique_ptr<AudioProcessor> processor;

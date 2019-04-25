@@ -103,6 +103,10 @@ public:
 
         setOpaque (true);
 
+        addAndMakeVisible (panicButton);
+        panicButton.setButtonText ("Panic");
+        panicButton.onClick = [this]() { versicap.getAudioEngine().panic(); };
+
         addAndMakeVisible (importButton);
         importButton.setButtonText ("Open");
         importButton.onClick = [this]()
@@ -130,27 +134,6 @@ public:
         addAndMakeVisible (recordButton);
         recordButton.setButtonText ("Record");
         recordButton.onClick = [this]() { owner.startRendering(); };
-
-//        addAndMakeVisible (projectConfigButton);
-        projectConfigButton.setButtonText ("Project");
-        projectConfigButton.setColour (TextButton::buttonOnColourId, Colours::orange);
-        projectConfigButton.setColour (TextButton::textColourOnId, Colours::white);
-        projectConfigButton.onClick = [this]()
-        {
-            if (nullptr == dynamic_cast<ProjectPropertiesContentView*> (view.get()))
-            {
-                view.reset (new ProjectPropertiesContentView (versicap));
-                projectConfigButton.setToggleState (true, dontSendNotification);
-            }
-            else
-            {
-                view.reset (new SampleEditContentView (versicap));
-                projectConfigButton.setToggleState (false, dontSendNotification);
-            }
-
-            addAndMakeVisible (view.get());
-            resized();
-        };
 
         addAndMakeVisible (notes);
 
@@ -209,34 +192,20 @@ public:
     void resized() override
     {
         auto r = getLocalBounds();
-       #if VCP_DO_LOGO
         auto r2 = r.removeFromTop (40).reduced (0, 11);
-       #else
-        auto r2 = r.removeFromTop (18);
-       #endif
 
-       #if 0
-        Component* buttons [3] = { &importButton, &exportButton, &recordButton };
-
-        r2.removeFromRight (14);
-        for (int i = 0; i < 3; ++i)
-        {
-            buttons[i]->setBounds (r2.removeFromRight (60));
-            r2.removeFromRight (1);
-        }
-       #else
         auto r4 = getLocalBounds().removeFromTop(40).removeFromRight (244);
         r4.removeFromTop (8);
         r4.removeFromRight (5);
         meterLeft.setBounds (r4.removeFromTop (10));
         r4.removeFromTop (1);
         meterRight.setBounds (r4.removeFromTop (10));
-       #endif
 
         notes.setBounds ((getWidth() / 2) - (notes.getRequiredWidth() / 2), 
                          r2.getY(), notes.getRequiredWidth(), r2.getHeight());
 
-        projectConfigButton.setBounds (224, r2.getY(), 40, r2.getHeight());
+        panicButton.changeWidthToFitText (r2.getHeight());
+        panicButton.setBounds (228, r2.getY(), 40, r2.getHeight());
 
         r.removeFromTop (1);
         r.removeFromLeft (6);
@@ -342,7 +311,8 @@ private:
     TextButton importButton;
     TextButton exportButton;
     TextButton recordButton;
-    TextButton projectConfigButton;
+    TextButton panicButton;
+
     ProjectConcertinaPanel projectPanel;
 
     RenderProgress progress;
