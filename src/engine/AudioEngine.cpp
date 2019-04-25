@@ -10,6 +10,8 @@ AudioEngine::AudioEngine (AudioFormatManager& formatManager,
     : formats (formatManager),
       plugins (pluginManager)
 {
+    monitor = new Monitor();
+
     render.reset (new Render (formatManager));
     render->onCancelled = [this]() { if (onRenderCancelled) onRenderCancelled(); };
     render->onStarted   = [this]() { if (onRenderStarted)   onRenderStarted(); };
@@ -160,6 +162,8 @@ void AudioEngine::prepare (AudioProcessor& plugin)
 
 void AudioEngine::release (AudioProcessor& plugin)
 {
+    monitor->levelLeft.set (0.f);
+    monitor->levelRight.set (0.f);
     plugin.releaseResources();
 }
 
@@ -283,6 +287,18 @@ void AudioEngine::process (const float** input, int numInputs,
     {
         for (int c = jmin(numOutputs, context.channels); --c >= 0;)
             memcpy (output[c], renderBuffer.getReadPointer (c), nbytes);
+    }
+    
+    const AudioSampleBuffer rmsBuf (output, numOutputs, nframes);
+    if (numOutputs == 1)
+    {
+        monitor->levelLeft.set (rmsBuf.getRMSLevel (0, 0, nframes));
+        monitor->levelRight.set (monitor->levelLeft.get());
+    }
+    else if (numOutputs > 1)
+    {
+        monitor->levelLeft.set (rmsBuf.getRMSLevel (0, 0, nframes));
+        monitor->levelRight.set (rmsBuf.getRMSLevel (1, 0, nframes));
     }
     
     renderMidi.clear();

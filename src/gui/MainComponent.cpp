@@ -1,4 +1,6 @@
 
+#include "engine/AudioEngine.h"
+
 #include "gui/LayerPropertiesContentView.h"
 #include "gui/LayersTableContentView.h"
 #include "gui/NoteParams.h"
@@ -87,12 +89,15 @@ private:
 };
 
 class MainComponent::Content : public Component,
-                               public Value::Listener
+                               public Value::Listener,
+                               private Timer
 {
 public:
     Content (MainComponent& o, Versicap& vc)
         : owner (o),
-          versicap (vc)
+          versicap (vc),
+          meterLeft (1, true),
+          meterRight (1, true)
     {
         project = versicap.getProject();
 
@@ -158,6 +163,9 @@ public:
         addAndMakeVisible (projectPanel);
         projectPanel.createPanels (versicap);
 
+        addAndMakeVisible (meterLeft);
+        addAndMakeVisible (meterRight);
+
         logo = ImageCache::getFromMemory (BinaryData::versicap_v1_png,
                                           BinaryData::versicap_v1_pngSize);
 
@@ -166,6 +174,8 @@ public:
 
         projectName.addListener (this);
         setProject (versicap.getProject());
+
+        startTimerHz (30);
     }
 
     ~Content()
@@ -204,6 +214,8 @@ public:
        #else
         auto r2 = r.removeFromTop (18);
        #endif
+
+       #if 0
         Component* buttons [3] = { &importButton, &exportButton, &recordButton };
 
         r2.removeFromRight (14);
@@ -212,6 +224,14 @@ public:
             buttons[i]->setBounds (r2.removeFromRight (60));
             r2.removeFromRight (1);
         }
+       #else
+        auto r4 = getLocalBounds().removeFromTop(40).removeFromRight (244);
+        r4.removeFromTop (8);
+        r4.removeFromRight (5);
+        meterLeft.setBounds (r4.removeFromTop (10));
+        r4.removeFromTop (1);
+        meterRight.setBounds (r4.removeFromTop (10));
+       #endif
 
         notes.setBounds ((getWidth() / 2) - (notes.getRequiredWidth() / 2), 
                          r2.getY(), notes.getRequiredWidth(), r2.getHeight());
@@ -312,6 +332,10 @@ private:
     Project project;
     Value projectName;
 
+    AudioEngine::MonitorPtr monitor;
+    kv::DigitalMeter meterLeft;
+    kv::DigitalMeter meterRight;
+
     std::unique_ptr<ContentView> view;
     std::unique_ptr<LayerPropertiesContentView> layer;
 
@@ -351,6 +375,19 @@ private:
         }
 
     } overlay;
+
+    void timerCallback() override
+    {
+        if (! monitor)
+            monitor = versicap.getAudioEngine().getMonitor();
+        if (monitor)
+        {
+            meterLeft.setValue (0, monitor->levelLeft.get());
+            meterLeft.refresh();
+            meterRight.setValue (0, monitor->levelRight.get());
+            meterRight.refresh();
+        }
+    }
 };
 
 MainComponent::MainComponent (Versicap& vc)

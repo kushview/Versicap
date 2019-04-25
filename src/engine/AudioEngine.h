@@ -15,6 +15,16 @@ public:
                  AudioPluginFormatManager& pluginManager);
     ~AudioEngine();
 
+    struct Monitor : public ReferenceCountedObject
+    {
+        Atomic<float> levelLeft;
+        Atomic<float> levelRight;
+    };
+
+    typedef ReferenceCountedObjectPtr<Monitor> MonitorPtr;
+
+    MonitorPtr getMonitor() const { return monitor; }
+
     //=========================================================================
     void setEnabled (bool enabled) { shouldProcess.set (enabled ? 1 : 0); }
 
@@ -48,6 +58,8 @@ public:
     std::function<void()> onRenderCancelled;
 
 private:
+    MonitorPtr monitor;
+
     //=========================================================================
     AudioFormatManager& formats;
     AudioPluginFormatManager& plugins;
