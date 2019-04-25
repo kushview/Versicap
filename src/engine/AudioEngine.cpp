@@ -375,4 +375,19 @@ void AudioEngine::release()
     channels.free();
 }
 
+void AudioEngine::addPanicMessages (MidiBuffer& buffer)
+{
+    for (int c = 1; c <= 16; ++c)
+    {
+        buffer.addEvent (MidiMessage::allNotesOff (c), 0);
+        buffer.addEvent (MidiMessage::allSoundOff (c), 0);
+        // sustain pedal off
+        buffer.addEvent (MidiMessage::controllerEvent (c, 64, 0), 0);
+        // Sostenuto off
+        buffer.addEvent (MidiMessage::controllerEvent (c, 66, 0), 0);
+        // Hold off
+        buffer.addEvent (MidiMessage::controllerEvent (c, 69, 0), 0);
+    }
+}
+
 }

@@ -67,7 +67,8 @@ private:
     //=========================================================================
     bool prepared = false;
     Atomic<int> shouldProcess { 0 };
-
+    Atomic<int> panic { 0 };
+    
     //=========================================================================
     std::unique_ptr<AudioProcessor> processor;
     int pluginLatency = 0;
@@ -107,6 +108,8 @@ private:
     void updatePluginProperties();
     void prepare (AudioProcessor& plugin);
     void release (AudioProcessor& plugin);
+
+    void addPanicMessages (MidiBuffer&);
 };
 
 }
