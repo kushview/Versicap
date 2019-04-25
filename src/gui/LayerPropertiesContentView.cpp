@@ -10,10 +10,10 @@ LayerPropertiesContentView::LayerPropertiesContentView (Versicap& vc)
     setName ("Properties");
     addAndMakeVisible (panel);
     watcher.setProject (vc.getProject());
-
     addComponentListener (this);
     watcher.onChanged = watcher.onActiveLayerChanged = watcher.onActiveSampleChanged = 
         std::bind (&LayerPropertiesContentView::refreshCompletePanel, this);
+    refreshCompletePanel();
 }
 
 LayerPropertiesContentView::~LayerPropertiesContentView() { }

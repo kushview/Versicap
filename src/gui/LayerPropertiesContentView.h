@@ -14,6 +14,8 @@ public:
     void resized() override;
 
     void setProject (const Project& project) { watcher.setProject (project); }
+    XmlElement* getOpennessState() const { return panel.getOpennessState(); }
+    void restoreOpennessState (const XmlElement& xml) { panel.restoreOpennessState (xml); }
 
 private:
     ProjectWatcher watcher;

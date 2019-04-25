@@ -24,7 +24,8 @@ public:
 
         addKeyListener (versicap.getCommandManager().getKeyMappings());
 
-        setContentOwned (new MainComponent (vc), true);
+        auto* const cc = new MainComponent (vc);
+        setContentOwned (cc, true);
 
         setResizable (true, false);
         constrain.setMinimumSize (870, 460);
@@ -37,6 +38,9 @@ public:
             const auto state = props->getValue ("windowPosition", String());
             if (state.isNotEmpty())
                 restoreWindowStateFromString (state);
+            String contentState = props->getValue ("contentState");
+            if (contentState.isNotEmpty())
+                cc->applyState (contentState);
         }
         
         setVisible (true);
@@ -53,10 +57,17 @@ public:
 
     void savePersistentData()
     {
-        if (auto* props = versicap.getSettings().getUserSettings())
-            props->setValue ("windowPosition", getWindowStateAsString());
+        auto* props = versicap.getSettings().getUserSettings();
+        if (! props) return;
+
+        props->setValue ("windowPosition", getWindowStateAsString());
+
         if (auto* const comp = dynamic_cast<MainComponent*> (getContentComponent()))
-            comp->saveSettings();
+        {
+            String state;
+            comp->getState (state);
+            props->setValue ("contentState", state);
+        }
     }
 
     void closeButtonPressed() override

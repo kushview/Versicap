@@ -24,6 +24,9 @@ public:
     void startRendering();
     void stopRendering();
 
+    void getState (String&) override;
+    void applyState (const String& state) override;
+
     void paint (Graphics&) override;
     void resized() override;
     

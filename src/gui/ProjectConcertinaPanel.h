@@ -12,6 +12,7 @@ public:
     ProjectConcertinaPanel();
     ~ProjectConcertinaPanel();
     void createPanels (Versicap&);
+    
 };
 
 }

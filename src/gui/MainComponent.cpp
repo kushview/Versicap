@@ -294,6 +294,45 @@ public:
         repaint();
     }
 
+    ValueTree createState()
+    {
+        ValueTree data ("state");
+        ValueTree projectPanelData = data.getOrCreateChildWithName ("project", nullptr);
+        for (int i = 0; i < projectPanel.getNumPanels(); ++i)
+        {
+            ValueTree panelData ("panel");
+            auto* const panel = projectPanel.getPanel (i);
+            panelData.setProperty ("height", panel->getHeight(), nullptr);
+            projectPanelData.appendChild (panelData, nullptr);
+        }
+
+        if (auto xml = std::unique_ptr<XmlElement> (layer->getOpennessState()))
+        {
+            MemoryOutputStream mo;
+            xml->writeToStream (mo, String());
+            data.setProperty ("propsOpenness", mo.getMemoryBlock().toBase64Encoding(), nullptr);
+        }
+
+        return data;
+    }
+
+    void applyState (const ValueTree& data)
+    {
+        auto projectPanelData = data.getChildWithName ("project");
+        for (int i = 0; i < projectPanelData.getNumChildren(); ++i)
+        {
+            auto child = projectPanelData.getChild (i);
+            int height = child.getProperty ("height");
+            if (auto* const panel = projectPanel.getPanel (i))
+                projectPanel.setPanelSize (panel, height, false);
+        }
+
+        MemoryBlock mb;
+        if (mb.fromBase64Encoding (data.getProperty ("propsOpenness").toString()))
+            if (auto xml = std::unique_ptr<XmlElement> (XmlDocument::parse (mb.toString())))
+                layer->restoreOpennessState (*xml);
+    }
+
 private:
     friend class MainComponent;
     MainComponent& owner;
@@ -380,6 +419,29 @@ MainComponent::~MainComponent()
     versicap.removeListener (this);
     versicap.getUnlockStatus().removeChangeListener (this);
     content.reset();
+}
+
+void MainComponent::getState (String& state)
+{
+    ValueTree data (content->createState());
+    MemoryOutputStream mo;
+    {
+        GZIPCompressorOutputStream gz (mo);
+        data.writeToStream (gz);
+    }
+    state = mo.getMemoryBlock().toBase64Encoding();
+}
+
+void MainComponent::applyState (const String& state)
+{
+    MemoryBlock mb;
+    mb.fromBase64Encoding (state);
+    const ValueTree data = (mb.getSize() > 0)
+        ? ValueTree::readFromGZIPData (mb.getData(), mb.getSize())
+        : ValueTree();
+    if (! data.isValid())
+        return;
+    content->applyState (data);
 }
 
 void MainComponent::changeListenerCallback (ChangeBroadcaster* bcaster)
