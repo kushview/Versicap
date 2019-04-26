@@ -2,15 +2,15 @@
 #include "controllers/GuiController.h"
 #include "controllers/ProjectsController.h"
 #include "engine/AudioEngine.h"
+#include "exporters/Exporter.h"
 #include "gui/PluginWindow.h"
 
 #include "Commands.h"
-#include "Exporter.h"
 #include "PluginManager.h"
 #include "Project.h"
 #include "Render.h"
-#include "Versicap.h"
 #include "UnlockStatus.h"
+#include "Versicap.h"
 
 namespace vcp {
 
@@ -133,7 +133,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     Settings settings;
     AudioThumbnailCache peaks;
     ApplicationCommandManager commands;
-    OwnedArray<Exporter> exporters;
+    OwnedArray<ExporterType> exporters;
     OptionalScopedPointer<AudioDeviceManager> devices;
     OptionalScopedPointer<AudioFormatManager> formats;
     OptionalScopedPointer<PluginManager> plugins;
@@ -224,7 +224,7 @@ void Versicap::initializeDataPath()
 
 void Versicap::initializeExporters()
 {
-    Exporter::createExporters (impl->exporters);
+    ExporterType::createAllTypes (impl->exporters);
     getAudioFormats().registerBasicFormats();
 }
 
@@ -351,7 +351,7 @@ AudioThumbnail* Versicap::createAudioThumbnail (const File& file)
 AudioEngine& Versicap::getAudioEngine()                     { return *impl->engine; }
 AudioThumbnailCache& Versicap::getAudioThumbnailCache()     { return impl->peaks; }
 ApplicationCommandManager& Versicap::getCommandManager()    { return impl->commands; }
-const OwnedArray<Exporter>& Versicap::getExporters() const  { return impl->exporters; }
+const OwnedArray<ExporterType>& Versicap::getExporterTypes() const  { return impl->exporters; }
 Settings& Versicap::getSettings()                           { return impl->settings; }
 AudioDeviceManager& Versicap::getDeviceManager()            { return *impl->devices; }
 AudioFormatManager& Versicap::getAudioFormats()             { return *impl->formats; }

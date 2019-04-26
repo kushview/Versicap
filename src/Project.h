@@ -4,6 +4,7 @@
 
 namespace vcp {
 
+class ExporterType;
 class PluginManager;
 class Project;
 class Versicap;
@@ -117,6 +118,13 @@ public:
     //=========================================================================
     int indexOf (const Layer& layer) const;
 
+    //=========================================================================
+    void addExporter (ExporterType& type, const String& name = String());
+    ValueTree getExportersTree() const              { return objectData.getChildWithName (Tags::exporters); }
+    int getNumExporters() const                     { return getExportersTree().getNumChildren(); }
+    ValueTree getExporterData (int index) const     { return getExportersTree().getChild (index); }
+    void setActiveExporter (int index);
+    
     //=========================================================================
     int getNumLayers() const;
     Layer getLayer (int index) const;

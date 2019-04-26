@@ -17,6 +17,7 @@ namespace Tags {
     static const Identifier bufferSize      = "bufferSize";
     static const Identifier channels        = "channels";
     static const Identifier dataPath        = "dataPath";
+    static const Identifier exporters       = "exporters";
     static const Identifier file            = "file";
     static const Identifier fileOrId        = "fileOrId";
     static const Identifier format          = "format";
@@ -55,6 +56,7 @@ namespace Tags {
 
     static const Identifier timeIn          = "timeIn";
     static const Identifier timeOut         = "timeOut";
+    static const Identifier type            = "type";
 
     static const Identifier value           = "value";
     static const Identifier velocity        = "velocity";

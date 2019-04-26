@@ -45,6 +45,9 @@ public:
     std::function<void()> onSamplesAdded;
     std::function<void()> onActiveSampleChanged;
 
+    std::function<void()> onExportersChanged;
+    std::function<void()> onActiveExporterChanged;
+
     std::function<void()> onProjectModified;
 
 private:
@@ -73,6 +76,11 @@ private:
             if (onActiveLayerChanged)
                 onActiveLayerChanged();
         }
+        else if (tree.hasType (Tags::exporters) && property == Tags::active)
+        {
+            if (onActiveExporterChanged)
+                onActiveExporterChanged();
+        }
         else if (tree.hasType (Tags::samples) && property == Tags::active)
         {
             if (onActiveSampleChanged)
@@ -96,6 +104,11 @@ private:
         {
             if (onSamplesAdded)
                 onSamplesAdded();
+        }
+        else if (child.hasType ("exporter") && parent.hasType (Tags::exporters))
+        {
+            if (onExportersChanged)
+                onExportersChanged();
         }
 
         notifyModified();

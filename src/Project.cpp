@@ -1,4 +1,5 @@
 
+#include "exporters/Exporter.h"
 #include "PluginManager.h"
 #include "Project.h"
 #include "RenderContext.h"
@@ -301,9 +302,6 @@ void Project::getSamples (int layerIdx, OwnedArray<Sample>& out) const
             out.add (new Sample (samples [i]));
 }
 
-
-
-
 //=========================================================================
 void Project::clearPlugin()
 {
@@ -422,6 +420,7 @@ void Project::setMissingProperties()
     stabilizePropertyPOD (Tags::channels,       context.channels);
     stabilizePropertyPOD (Tags::bitDepth,       context.bitDepth);
 
+    objectData.getOrCreateChildWithName (Tags::exporters,  nullptr);
     objectData.getOrCreateChildWithName (Tags::layers,  nullptr);
     objectData.getOrCreateChildWithName (Tags::samples, nullptr);
     objectData.getOrCreateChildWithName (Tags::plugin,  nullptr);
@@ -433,6 +432,22 @@ ValueTree Project::find (const Identifier& listType,
 {
     const auto parent = objectData.getChildWithName (listType);
     return parent.getChildWithProperty (property, value);
+}
+
+void Project::addExporter (ExporterType& type, const String& name)
+{
+    auto exporters = objectData.getChildWithName (Tags::exporters);
+    ValueTree data ("exporter");
+    data.setProperty (Tags::name, name.isNotEmpty() ? name : type.getName(), nullptr)
+        .setProperty (Tags::type, type.getSlug(), nullptr);
+    exporters.appendChild (data, nullptr);
+}
+
+void Project::setActiveExporter (int index)
+{
+    auto tree = getExportersTree();
+    if (isPositiveAndBelow (index, tree.getNumChildren()))
+        tree.setProperty (Tags::active, index, nullptr);
 }
 
 }

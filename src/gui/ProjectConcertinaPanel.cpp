@@ -1,6 +1,7 @@
 
-#include "gui/ProjectConcertinaPanel.h"
+#include "gui/ExportersListContentView.h"
 #include "gui/LayersTableContentView.h"
+#include "gui/ProjectConcertinaPanel.h"
 #include "gui/SamplesTableContentView.h"
 
 namespace vcp {
@@ -18,11 +19,11 @@ void ProjectConcertinaPanel::createPanels (Versicap& versicap)
         return;
     addPanel (-1, new LayersTableContentView (versicap), true);
     addPanel (-1, new SamplesTableContentView (versicap), true);
-    // addPanel (-1, new Component ("Exporters"), true);
+    addPanel (-1, new ExportersListContentView (versicap), true);
     for (int i = 0; i < getNumPanels(); ++i)
         setPanelHeaderSize (getPanel (i), 23);
     setPanelSize (getPanel (0), 140, false);
-    // setPanelSize (getPanel (2), 0, false);
+    setPanelSize (getPanel (2), 0, false);
 }
 
 }

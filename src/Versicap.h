@@ -7,7 +7,7 @@
 namespace vcp {
 
 class AudioEngine;
-class Exporter;
+class ExporterType;
 class PluginManager;
 class Render;
 class RenderContext;
@@ -59,7 +59,7 @@ public:
     UnlockStatus& getUnlockStatus();
     
     //=========================================================================
-    const OwnedArray<Exporter>& getExporters() const;
+    const OwnedArray<ExporterType>& getExporterTypes() const;
 
     //=========================================================================
     AudioEngine& getAudioEngine();

@@ -107,6 +107,7 @@ public:
         addAndMakeVisible (panicButton);
         panicButton.setButtonText ("Panic");
         panicButton.onClick = [this]() { versicap.getAudioEngine().panic(); };
+        panicButton.setConnectedEdges (Button::ConnectedOnLeft);
 
         addAndMakeVisible (importButton);
         importButton.setButtonText ("Open");
@@ -133,6 +134,7 @@ public:
         };
 
         addAndMakeVisible (recordButton);
+        recordButton.setConnectedEdges (Button::ConnectedOnRight);
         recordButton.setButtonText ("Record");
         recordButton.onClick = [this]() { owner.startRendering(); };
 
@@ -205,8 +207,11 @@ public:
         notes.setBounds ((getWidth() / 2) - (notes.getRequiredWidth() / 2), 
                          r2.getY(), notes.getRequiredWidth(), r2.getHeight());
 
+        recordButton.changeWidthToFitText (r2.getHeight());
+        recordButton.setBounds (228, r2.getY(), recordButton.getWidth() - 1, r2.getHeight());
+
         panicButton.changeWidthToFitText (r2.getHeight());
-        panicButton.setBounds (228, r2.getY(), 40, r2.getHeight());
+        panicButton.setBounds (recordButton.getRight(), r2.getY(), panicButton.getWidth() - 1, r2.getHeight());
 
         r.removeFromTop (1);
         r.removeFromLeft (6);
