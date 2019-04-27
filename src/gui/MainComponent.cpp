@@ -1,9 +1,9 @@
 
 #include "engine/AudioEngine.h"
 
-#include "gui/MainPropertiesContentView.h"
-
+#include "gui/ExporterContentView.h"
 #include "gui/LayersTableContentView.h"
+#include "gui/MainPropertiesContentView.h"
 #include "gui/NoteParams.h"
 #include "gui/ProjectPropertiesContentView.h"
 #include "gui/ProjectConcertinaPanel.h"
@@ -293,7 +293,8 @@ public:
 
     void setProject (const Project& newProject)
     {
-        project = newProject;
+        watcher.setProject (newProject);
+        project = watcher.getProject();
         projectName.referTo (project.getPropertyAsValue (Tags::name));
         notes.setProject (project);
         props->setProject (project);
@@ -339,10 +340,48 @@ public:
                 props->restoreOpennessState (*xml);
     }
 
+    void displayObject (const ValueTree& object)
+    {
+        bool callDisplay = true;
+        if (object.hasType (Tags::exporter))
+        {
+            if (nullptr == dynamic_cast<ExporterContentView*> (view.get()))
+            {
+                view.reset (new ExporterContentView (versicap));
+                addAndMakeVisible (view.get());
+            }
+        }
+        else if (object.hasType (Tags::layer))
+        {
+            if (nullptr == dynamic_cast<SampleEditContentView*> (view.get()))
+            {
+                view.reset (new SampleEditContentView (versicap));
+                addAndMakeVisible (view.get());
+            }
+            callDisplay = false;
+        }
+        else if (object.hasType (Tags::sample))
+        {
+            if (nullptr == dynamic_cast<SampleEditContentView*> (view.get()))
+            {
+                view.reset (new SampleEditContentView (versicap));
+                addAndMakeVisible (view.get());
+            }
+        }
+
+        resized();
+
+        if (callDisplay && view)
+            view->displayObject (object);
+
+        repaint();
+    }
+
 private:
     friend class MainComponent;
     MainComponent& owner;
     Versicap& versicap;
+    ProjectWatcher watcher;
     Project project;
     Value projectName;
 
@@ -517,6 +556,12 @@ void MainComponent::paint (Graphics& g)
 void MainComponent::resized()
 {
     content->setBounds (getLocalBounds());
+}
+
+void MainComponent::displayObject (const ValueTree& object)
+{
+    if (content)
+        content->displayObject (object);
 }
 
 }

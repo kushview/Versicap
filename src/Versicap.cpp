@@ -17,10 +17,10 @@ namespace vcp {
 struct Versicap::Impl : public AudioIODeviceCallback,
                         public MidiInputCallback,
                         public ChangeListener,
-                        public ApplicationCommandTarget
+                        public ApplicationCommandTarget,
+                        public MessageListener
 {
-    Impl()
-        : peaks (32)
+    Impl (Versicap& vc) : owner (vc), peaks (32)
     {
     }
 
@@ -122,7 +122,27 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         return handled;
     }
 
+    void handleMessage (const Message& msg) override
+    {
+        if (const auto* const displayMsg = dynamic_cast<const DisplayObjectMessage*> (&msg))
+        {
+            ValueTree object = displayMsg->object;
+            if (auto* gui = owner.findController<GuiController>())
+            {
+                auto oldObj = gui->getDisplayedObject();
+                gui->displayObject (object);
+                if (oldObj != gui->getDisplayedObject())
+                {
+                    owner.listeners.call ([](Versicap::Listener& listener) {
+                        listener.displayedObjectChanged();
+                    });
+                }
+            }
+        }
+    }
+
     //=========================================================================
+    Versicap& owner;
     File projectFile;
     Project project;
 
@@ -133,7 +153,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     Settings settings;
     AudioThumbnailCache peaks;
     ApplicationCommandManager commands;
-    OwnedArray<ExporterType> exporters;
+    ExporterTypeArray exporters;
     OptionalScopedPointer<AudioDeviceManager> devices;
     OptionalScopedPointer<AudioFormatManager> formats;
     OptionalScopedPointer<PluginManager> plugins;
@@ -146,7 +166,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
 
 Versicap::Versicap()
 {
-    impl.reset (new Impl());
+    impl.reset (new Impl (*this));
     
     impl->devices.setOwned (new AudioDeviceManager());
     impl->formats.setOwned (new AudioFormatManager());
@@ -351,7 +371,7 @@ AudioThumbnail* Versicap::createAudioThumbnail (const File& file)
 AudioEngine& Versicap::getAudioEngine()                     { return *impl->engine; }
 AudioThumbnailCache& Versicap::getAudioThumbnailCache()     { return impl->peaks; }
 ApplicationCommandManager& Versicap::getCommandManager()    { return impl->commands; }
-const OwnedArray<ExporterType>& Versicap::getExporterTypes() const  { return impl->exporters; }
+const ExporterTypeArray& Versicap::getExporterTypes() const { return impl->exporters; }
 Settings& Versicap::getSettings()                           { return impl->settings; }
 AudioDeviceManager& Versicap::getDeviceManager()            { return *impl->devices; }
 AudioFormatManager& Versicap::getAudioFormats()             { return *impl->formats; }
@@ -499,6 +519,14 @@ bool Versicap::loadProject (const File& file)
     return false;
 }
 
+ExporterTypePtr Versicap::getExporterType (const String& slug) const
+{
+    for (auto type : impl->exporters)
+        if (type->getSlug() == slug)
+            return type;
+    return nullptr;
+}
+
 bool Versicap::setProject (const Project& newProject)
 {
     auto& engine = getAudioEngine();
@@ -522,6 +550,17 @@ bool Versicap::setProject (const Project& newProject)
     auto midiOut = project.getProperty (Tags::midiOutput).toString();
     engine.setDefaultMidiOutput (midiOut);
 
+    for (int i = 0; i < project.getNumExporters(); ++i)
+    {
+        auto exporter = project.getExporterData (i);
+        auto type = getExporterType (exporter.getProperty (Tags::type));
+        jassert (type);
+        if (type)
+        {
+            exporter.setProperty (Tags::object, type.get(), nullptr);
+        }
+    }
+    
     listeners.call ([](Listener& listener) { listener.projectChanged(); });
 
     return true;
@@ -541,6 +580,18 @@ void Versicap::launched()
 {
     for (auto* const controller : impl->controllers)
         controller->launched();
+}
+
+void Versicap::post (Message* message)
+{
+    std::unique_ptr<Message> deleter (message);
+    if (impl) 
+        impl->postMessage (deleter.release());
+    
+    if (deleter != nullptr)
+    {
+        DBG("[VCP] unhandled message");
+    }
 }
 
 }

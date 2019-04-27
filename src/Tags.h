@@ -17,11 +17,15 @@ namespace Tags {
     static const Identifier bufferSize      = "bufferSize";
     static const Identifier channels        = "channels";
     static const Identifier dataPath        = "dataPath";
+    
+    static const Identifier enabled         = "enabled";
     static const Identifier exporters       = "exporters";
+    static const Identifier exporter        = "exporter";
+    
     static const Identifier file            = "file";
     static const Identifier fileOrId        = "fileOrId";
     static const Identifier format          = "format";
-    static const Identifier enabled         = "enabled";
+    
     static const Identifier uuid            = "uuid";
     static const Identifier identifier      = "identifier";
     static const Identifier latencyComp     = "latencyComp";
@@ -29,6 +33,7 @@ namespace Tags {
     static const Identifier layer           = "layer";
     static const Identifier layers          = "layers";
     static const Identifier length          = "length";
+    static const Identifier loop            = "loop";
 
     static const Identifier midi            = "midi";
     static const Identifier midiChannel     = "midiChannel";
@@ -43,6 +48,10 @@ namespace Tags {
     static const Identifier noteLength      = "noteLength";
     static const Identifier noteEnd         = "noteEnd";
     static const Identifier noteStep        = "noteStep";
+
+    static const Identifier object          = "object";
+
+    static const Identifier path            = "path";
     static const Identifier plugin          = "plugin";
     static const Identifier project         = "project";
 

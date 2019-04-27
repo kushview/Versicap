@@ -15,6 +15,8 @@ public:
         NameColumn = 3
     };
     
+    std::function<void(const Sample&)> onSelected;
+
     SampleTable()
     {
         setModel (this);
@@ -114,7 +116,11 @@ public:
     {
         auto project = getProject();
         if (auto* sample = filtered [lastRowSelected])
+        {
             project.setActiveSample (*sample);
+            if (onSelected)
+                onSelected (*sample);
+        }
     }
    #if 0
     virtual Component* refreshComponentForCell (int rowNumber, int columnId, bool isRowSelected,
@@ -141,9 +147,15 @@ private:
 class SamplesTableContentView::Content : public Component
 {
 public:
-    Content()
-    { 
+    Content (SamplesTableContentView& v)
+        : owner (v)
+    {
         addAndMakeVisible (table);
+        table.onSelected = [this](const Sample& sample)
+        {
+            owner.getVersicap().post (
+                new DisplayObjectMessage (sample.getValueTree()));
+        };
     }
 
     ~Content() { }
@@ -155,6 +167,7 @@ public:
 
 private:
     friend class SamplesTableContentView;
+    SamplesTableContentView& owner;
     SampleTable table;
 };
 
@@ -162,7 +175,7 @@ SamplesTableContentView::SamplesTableContentView (Versicap& vc)
     : ContentView (vc)
 {
     setName ("Samples");
-    content.reset (new Content());
+    content.reset (new Content (*this));
     addAndMakeVisible (content.get());
     versicap.addListener (this);
     projectChanged();

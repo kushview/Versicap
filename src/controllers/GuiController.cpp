@@ -36,6 +36,20 @@ void GuiController::launched()
     window.reset (new MainWindow ("Versicap", versicap));
 }
 
+ContentComponent* GuiController::getContent()
+{
+    if (auto* main = window.get())
+        return dynamic_cast<ContentComponent*> (main->getContentComponent());
+    return nullptr;
+}
+
+void GuiController::displayObject (const ValueTree& object)
+{
+    displayedObject = object;
+    if (auto* const content = getContent())
+        content->displayObject (object);
+}
+
 void GuiController::getCommandInfo (CommandID commandID, ApplicationCommandInfo& result)
 {
     switch (commandID)

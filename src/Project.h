@@ -1,10 +1,10 @@
 #pragma once
 
+#include "exporters/Exporter.h"
 #include "Tags.h"
 
 namespace vcp {
 
-class ExporterType;
 class PluginManager;
 class Project;
 class Versicap;
@@ -124,6 +124,7 @@ public:
     int getNumExporters() const                     { return getExportersTree().getNumChildren(); }
     ValueTree getExporterData (int index) const     { return getExportersTree().getChild (index); }
     void setActiveExporter (int index);
+    ValueTree getActiveExporterData() const;
     
     //=========================================================================
     int getNumLayers() const;

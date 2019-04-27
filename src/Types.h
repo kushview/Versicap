@@ -98,7 +98,23 @@ struct LoopType
         Begin = 0,
         End = NumTypes
     };
+    
+    inline static StringArray getChoices()
+    {
+        StringArray choices;
+        for (int i = Begin; i < End; ++i)
+            choices.add (getName (i));
+        return choices;
+    }
 
+    inline static Array<var> getValues()
+    {
+        Array<var> values;
+        for (int i = Begin; i < End; ++i)
+            values.add (getSlug (i));
+        return values;
+    }
+    
     inline String getName() const { return getName (type); }
     inline static String getName (int t)
     {
@@ -142,7 +158,7 @@ struct LoopType
     bool operator!= (const ID t)  const { return t != type; }
 
 private:
-    int type = 0;
+    int type = LoopType::None;
 };
 
 struct SourceType

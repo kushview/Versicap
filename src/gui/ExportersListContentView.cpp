@@ -50,10 +50,11 @@ public:
     void listBoxItemClicked (int row, const MouseEvent& ev) override
     {
         project.setActiveExporter (row);
-        auto exporters = project.getExportersTree();
+        versicap.post (new DisplayObjectMessage (project.getExporterData (row)));
 
         if (ev.mods.isPopupMenu())
         {
+            auto exporters = project.getExportersTree();
             PopupMenu menu;
             menu.addItem (1, "Remove Exporter");
             const auto result = menu.show();
@@ -144,7 +145,7 @@ private:
     void handleMenuResult (int result)
     {
         auto project = versicap.getProject();
-        if (auto* const type = versicap.getExporterTypes()[result - 1])
+        if (auto type = versicap.getExporterTypes()[result - 1])
         {
             project.addExporter (*type);
             exporters->selectRow (project.getNumExporters() - 1);

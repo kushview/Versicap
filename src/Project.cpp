@@ -437,17 +437,30 @@ ValueTree Project::find (const Identifier& listType,
 void Project::addExporter (ExporterType& type, const String& name)
 {
     auto exporters = objectData.getChildWithName (Tags::exporters);
-    ValueTree data ("exporter");
-    data.setProperty (Tags::name, name.isNotEmpty() ? name : type.getName(), nullptr)
-        .setProperty (Tags::type, type.getSlug(), nullptr);
+    ValueTree data (Tags::exporter);
+    data.setProperty (Tags::uuid,    Uuid().toString(), nullptr)
+        .setProperty (Tags::object,  &type, nullptr)
+        .setProperty (Tags::name,    name.isNotEmpty() ? name : type.getName(), nullptr)
+        .setProperty (Tags::type,    type.getSlug(), nullptr)
+        .setProperty (Tags::path,    "", nullptr);
     exporters.appendChild (data, nullptr);
 }
 
 void Project::setActiveExporter (int index)
 {
     auto tree = getExportersTree();
-    if (isPositiveAndBelow (index, tree.getNumChildren()))
-        tree.setProperty (Tags::active, index, nullptr);
+    auto exporter = tree.getChild (index);
+    if (exporter.hasType (Tags::exporter))
+        tree.setProperty (Tags::active, exporter.getProperty (Tags::uuid), nullptr);
+}
+
+ValueTree Project::getActiveExporterData() const
+{
+    const auto tree = getExportersTree();
+    const auto& uuid = tree.getProperty (Tags::active);
+    if (uuid.toString().isEmpty())
+        return ValueTree();
+    return tree.getChildWithProperty (Tags::uuid, uuid);
 }
 
 }

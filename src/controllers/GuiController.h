@@ -4,6 +4,7 @@
 
 namespace vcp {
 
+class ContentComponent;
 class LookAndFeel;
 class MainWindow;
 
@@ -14,6 +15,10 @@ public:
     ~GuiController();
 
     String getName() const override { return "GUI"; }
+
+    void displayObject (const ValueTree& object);
+    ValueTree getDisplayedObject() const { return displayedObject; }
+    
     void initialize() override;
     void shutdown() override;
     void launched() override;
@@ -24,6 +29,8 @@ public:
 private:
     std::unique_ptr<LookAndFeel> look;
     std::unique_ptr<MainWindow> window;
+    ValueTree displayedObject;
+    ContentComponent* getContent();
 };
 
 }

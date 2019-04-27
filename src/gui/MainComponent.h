@@ -24,6 +24,7 @@ public:
     void startRendering();
     void stopRendering();
 
+    void displayObject (const ValueTree&) override;
     void getState (String&) override;
     void applyState (const String& state) override;
 

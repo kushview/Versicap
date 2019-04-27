@@ -1,5 +1,6 @@
 #pragma once
 
+#include "exporters/Exporter.h"
 #include "Settings.h"
 #include "Project.h"
 #include "Tags.h"
@@ -7,11 +8,16 @@
 namespace vcp {
 
 class AudioEngine;
-class ExporterType;
 class PluginManager;
 class Render;
 class RenderContext;
 class UnlockStatus;
+
+struct DisplayObjectMessage : public Message
+{
+    DisplayObjectMessage (const ValueTree& o) : object (o) { }
+    const ValueTree object;
+};
 
 class Versicap final
 {
@@ -24,7 +30,9 @@ public:
         Listener() = default;
         virtual ~Listener() = default;
 
-        virtual void projectChanged() { }
+        virtual void displayedObjectChanged() {}
+
+        virtual void projectChanged() {}
 
         virtual void renderWillStart() { }
         virtual void renderStarted() { }
@@ -59,8 +67,9 @@ public:
     UnlockStatus& getUnlockStatus();
     
     //=========================================================================
-    const OwnedArray<ExporterType>& getExporterTypes() const;
-
+    const ExporterTypeArray& getExporterTypes() const;
+    ExporterTypePtr getExporterType (const String& slug) const;
+    
     //=========================================================================
     AudioEngine& getAudioEngine();
     AudioThumbnailCache& getAudioThumbnailCache();
@@ -92,7 +101,13 @@ public:
     void addListener (Listener* listener)       { listeners.add (listener); }
     void removeListener (Listener* listener)    { listeners.remove (listener); }
 
+    //=========================================================================
+    void post (Message*);
+
 private:
+    friend class Application;
+    friend struct Impl;
+
     struct Impl; std::unique_ptr<Impl> impl;
     ListenerList<Listener> listeners;
 
@@ -103,7 +118,6 @@ private:
     void initializePlugins();
     void initializeUnlockStatus();
 
-    friend class Application;
     void launched();
 };
 

@@ -3,7 +3,7 @@
 
 namespace vcp {
 
-void ExporterType::createAllTypes (OwnedArray<ExporterType>& types)
+void ExporterType::createAllTypes (ExporterTypeArray& types)
 {
     types.add (createWavExporterType());
 }

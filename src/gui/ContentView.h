@@ -16,7 +16,7 @@ public:
     virtual ~ContentView() { }
 
     Versicap& getVersicap() { return versicap; }
-    
+    virtual void displayObject (const ValueTree&) { }
 protected:
     Versicap& versicap;
 };
