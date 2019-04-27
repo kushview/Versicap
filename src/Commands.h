@@ -3,12 +3,13 @@
 namespace vcp {
 namespace Commands {
 enum ID {
-
     projectOpen         = 0x00001000,
     projectSave,
     projectSaveAs,
     projectNew,
     projectRecord,
+    projectShowDataPath,
+    projectExport,
 
     layerRecord         = 0x00002000,
     

@@ -41,6 +41,9 @@ public:
     };
     
     //=========================================================================
+    void testExport();
+    
+    //=========================================================================
     static File getApplicationDataPath();
     static File getUserDataPath();
     static File getSamplesPath();

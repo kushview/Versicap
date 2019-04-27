@@ -161,7 +161,7 @@ private:
 ExportersListContentView::ExportersListContentView (Versicap& vc)
     : ContentView (vc)
 {
-    setName ("Exporters");
+    setName ("Targets");
     content.reset (new Content (*this, vc));
     addAndMakeVisible (content.get());
 }

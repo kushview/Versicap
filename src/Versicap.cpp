@@ -3,6 +3,7 @@
 #include "controllers/ProjectsController.h"
 #include "engine/AudioEngine.h"
 #include "exporters/Exporter.h"
+#include "exporters/ExportThread.h"
 #include "gui/PluginWindow.h"
 
 #include "Commands.h"
@@ -70,11 +71,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     }
 
     //=========================================================================
-    ApplicationCommandTarget* getNextCommandTarget() override
-    {
-        return nullptr;
-    }
-
+    ApplicationCommandTarget* getNextCommandTarget() override { return nullptr; }
     void getAllCommands (Array<CommandID>& commands) override
     {
         commands.addArray ({
@@ -83,7 +80,8 @@ struct Versicap::Impl : public AudioIODeviceCallback,
             Commands::projectNew,
             Commands::projectOpen,
             Commands::projectRecord,
-            
+            Commands::projectShowDataPath,
+            Commands::projectExport,
             Commands::showAbout,
            #if 0
             Commands::checkForUpdates
@@ -154,6 +152,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     AudioThumbnailCache peaks;
     ApplicationCommandManager commands;
     ExporterTypeArray exporters;
+    std::unique_ptr<ExportThread> exporter;
     OptionalScopedPointer<AudioDeviceManager> devices;
     OptionalScopedPointer<AudioFormatManager> formats;
     OptionalScopedPointer<PluginManager> plugins;
@@ -173,6 +172,7 @@ Versicap::Versicap()
     impl->plugins.setOwned (new PluginManager());
     impl->unlock.reset (new UnlockStatus (impl->settings));
     impl->engine.reset (new AudioEngine (*impl->formats, impl->plugins->getAudioPluginFormats()));
+    impl->exporter.reset (new ExportThread());
 
     auto& controllers = impl->controllers;
     controllers.add (new GuiController (*this));
@@ -494,7 +494,7 @@ bool Versicap::saveProject (const File& file)
 
     if (auto* processor = impl->engine->getAudioProcessor())
         project.updatePluginState (*processor);
-
+    
     return project.writeToFile (file);
 }
 
@@ -592,6 +592,11 @@ void Versicap::post (Message* message)
     {
         DBG("[VCP] unhandled message");
     }
+}
+
+void Versicap::testExport()
+{
+    impl->exporter->start (getProject());
 }
 
 }

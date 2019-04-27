@@ -109,7 +109,7 @@ public:
     Project (const ValueTree& data) : kv::ObjectModel (data) {}
     Project();
     ~Project();
-    
+
     //=========================================================================
     int getFormatType() const;
     String getFormatTypeSlug() const;
@@ -123,8 +123,10 @@ public:
     ValueTree getExportersTree() const              { return objectData.getChildWithName (Tags::exporters); }
     int getNumExporters() const                     { return getExportersTree().getNumChildren(); }
     ValueTree getExporterData (int index) const     { return getExportersTree().getChild (index); }
+    Exporter getExporter (int index) const          { return Exporter (getExporterData (index)); }
     void setActiveExporter (int index);
     ValueTree getActiveExporterData() const;
+    void getExportTasks (OwnedArray<ExportTask>&) const;
     
     //=========================================================================
     int getNumLayers() const;

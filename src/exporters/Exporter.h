@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Tags.h"
 #include "Types.h"
 
 namespace vcp {
@@ -35,8 +36,21 @@ protected:
 
 public:
     virtual ~ExportTask() = default;
-    virtual String getName() const = 0;
-    virtual String getDescription() const = 0;
+    virtual void prepare() { }
+};
+
+class Exporter : public kv::ObjectModel
+{
+public:
+    Exporter() : kv::ObjectModel (ValueTree()) {}
+    Exporter (const ValueTree& data) : kv::ObjectModel (data) {}
+    ~Exporter() noexcept = default;
+    bool isValid() const { return objectData.isValid() && objectData.hasType (Tags::exporter); }
+    
+    ExporterTypePtr getTypeObject() const
+    { 
+        return dynamic_cast<ExporterType*> (objectData.getProperty (Tags::type).getObject());
+    }
 };
 
 }

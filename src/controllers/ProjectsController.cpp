@@ -217,6 +217,13 @@ void ProjectsController::getCommandInfo (CommandID commandID, ApplicationCommand
             result.addDefaultKeypress ('r', ModifierKeys::commandModifier);
             result.setInfo ("Record Project", "Record the entire project", "Project", flags);
             break;
+        case Commands::projectShowDataPath:
+            result.setInfo ("Show Data Path", "Show the datapath", "Project", 0);
+            break;
+        case Commands::projectExport:
+            result.addDefaultKeypress ('e', ModifierKeys::commandModifier);
+            result.setInfo ("Eport Project", "Export all targets", "Project", 0);
+            break;
     }
 }
 
@@ -231,6 +238,24 @@ bool ProjectsController::perform (const ApplicationCommandTarget::InvocationInfo
         case Commands::projectNew:      create();   break;
         case Commands::projectOpen:     open();     break;
         case Commands::projectRecord:   record();   break;
+        case Commands::projectShowDataPath:
+        {
+            auto project = versicap.getProject();
+            auto path = project.getProperty(Tags::dataPath).toString();
+            
+            if (File::isAbsolutePath (path))
+            {
+                File file (path);
+                file.revealToUser();
+            }
+
+        } break;
+
+        case Commands::projectExport:
+        {
+            versicap.testExport();
+        } break;
+
         default: handled = false;
             break;
     }

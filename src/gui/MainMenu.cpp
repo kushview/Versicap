@@ -78,6 +78,8 @@ void MainMenu::buildFileMenu (PopupMenu& menu)
     menu.addSeparator();
     menu.addCommandItem (&commands, Commands::projectSave, "Save");
     menu.addCommandItem (&commands, Commands::projectSaveAs, "Save As...");
+    menu.addSeparator();
+    menu.addCommandItem (&commands, Commands::projectExport, "Export...");
     
    #if ! JUCE_MAC
     menu.addItem (2000, "Quit");
@@ -87,6 +89,7 @@ void MainMenu::buildFileMenu (PopupMenu& menu)
 void MainMenu::buildProjectMenu (PopupMenu& menu)
 {
     menu.addCommandItem (&commands, Commands::projectRecord, "Record...");
+    menu.addCommandItem (&commands, Commands::projectShowDataPath, "Show data path");
 }
 
 void MainMenu::buildDebugMenu (PopupMenu& menu)

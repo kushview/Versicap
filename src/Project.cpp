@@ -370,12 +370,16 @@ void Project::applyPluginState (AudioProcessor& processor) const
 bool Project::writeToFile (const File& file) const
 {
     TemporaryFile tempFile (file);
+    auto dataCopy = objectData.createCopy();
+    auto expCopy = dataCopy.getChildWithName(Tags::exporters);
+    for (int i = 0; i < expCopy.getNumChildren(); ++i)
+        expCopy.getChild(i).removeProperty (Tags::object, nullptr);
 
     {
         FileOutputStream fo (tempFile.getFile());
         {
             GZIPCompressorOutputStream go (fo);
-            objectData.writeToStream (go);
+            dataCopy.writeToStream (go);
         }
     }
 
@@ -461,6 +465,11 @@ ValueTree Project::getActiveExporterData() const
     if (uuid.toString().isEmpty())
         return ValueTree();
     return tree.getChildWithProperty (Tags::uuid, uuid);
+}
+
+void Project::getExportTasks (OwnedArray<ExportTask>& tasks) const
+{
+
 }
 
 }
