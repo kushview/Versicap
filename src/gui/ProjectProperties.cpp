@@ -528,7 +528,7 @@ void Project::getRecordingProperties (Versicap& versicap, Array<PropertyComponen
 {
     props.add (new SampleRatePropertyComponent (versicap,  *this));
     props.add (new ChoicePropertyComponent (getPropertyAsValue (Tags::format),
-        "Format", FormatType::getChoices(), FormatType::getValues()));
+        "Format", FormatType::getChoices (true), FormatType::getValues (true)));
     props.add (new ChoicePropertyComponent (getPropertyAsValue (Tags::channels),
         "Channels", { "Mono", "Stereo" }, { 1, 2 }));
     props.add (new ChoicePropertyComponent (getPropertyAsValue (Tags::bitDepth),

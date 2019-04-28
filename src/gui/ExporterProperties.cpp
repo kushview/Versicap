@@ -54,18 +54,19 @@ void Exporter::getProperties (Array<PropertyComponent*>& props)
     {
         Array<LoopType> loops;
         type->getLoopTypes (loops);
-        if (loops.isEmpty())
-            loops.add (LoopType::None);
-            
-        StringArray choices; Array<var> values;
-        for (const auto& loop : loops)
+        const bool onlyNoneType = loops.size() == 1 && loops.getFirst() == LoopType::None;
+        if (loops.size() > 0 && ! onlyNoneType)
         {
-            choices.add (loop.getName());
-            values.add (loop.getSlug());
-        }
+            StringArray choices; Array<var> values;
+            for (const auto& loop : loops)
+            {
+                choices.add (loop.getName());
+                values.add (loop.getSlug());
+            }
 
-        props.add (new ChoicePropertyComponent (getPropertyAsValue (Tags::loop),
-            "Loop Mode", choices, values));
+            props.add (new ChoicePropertyComponent (getPropertyAsValue (Tags::loop),
+                "Loop Mode", choices, values));
+        }
 
         type->getProperties (*this, props);
     }

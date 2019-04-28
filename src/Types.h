@@ -9,50 +9,80 @@ struct FormatType
     enum ID
     {
         WAVE,
-        AIFF
+        AIFF,
+        FLAC,
+        OGG
     };
 
     enum
     {
-        NumTypes = 2,
+        NumTypes = 4,
         Begin = 0,
         End = NumTypes
     };
 
-    static StringArray getChoices()
+    static StringArray getChoices (bool recording = false)
     {
         StringArray choices;
         for (int i = Begin; i < End; ++i)
-            choices.add (getName (i));
+            if ((recording && isForRecording (i)) || !recording)
+                choices.add (getName (i));
         return choices;
     }
 
-    static Array<var> getValues()
+    static Array<var> getValues (bool recording = false)
     {
         Array<var> values;
         for (int i = Begin; i < End; ++i)
-            values.add (getSlug (i));
+            if ((recording && isForRecording (i)) || !recording)
+               values.add (getSlug (i));
         return values;
     }
 
+    ID getType() const { return static_cast<ID> (type); }
+
+    /** Returns true if the format can be used for recording samples */
+    bool isForRecording() const { return isForRecording (type); }
+    static bool isForRecording (int t)
+    {
+        bool result = false;
+        
+        switch (t)
+        {
+            case FormatType::WAVE:
+            case FormatType::AIFF:
+                result = true;
+                break;
+            default: break;
+        }
+
+        return result;
+    }
+
+    String getName() const { return getName (type); }
     static String getName (int t)
     {
         switch (t)
         {
             case WAVE: return "WAVE"; break;
             case AIFF: return "AIFF"; break;
+            case FLAC: return "FLAC"; break;
+            case OGG:  return "Ogg Vorbis"; break;
         }
 
         jassertfalse;
         return "None";
     }
 
+    String getSlug() const { return getSlug (type); }
     static String getSlug (int t)
     {
         switch (t)
         {
             case WAVE: return "wave"; break;
             case AIFF: return "aiff"; break;
+            case FLAC: return "flac"; break;
+            case OGG:  return "ogg"; break;
         }
 
         jassertfalse;
@@ -63,22 +93,48 @@ struct FormatType
     {
         if (t == "wave" || t == "wav")  return WAVE;
         if (t == "aiff" || t == "aif")  return AIFF;
-        
+        if (t == "flac")                return FLAC;
+        if (t == "ogg")                 return OGG;
         jassertfalse;
         return -1;
     }
 
+    String getFileExtension() const { return getFileExtension (type); }
     static String getFileExtension (int t)
     {
         switch (t)
         {
             case WAVE: return "wav"; break;
             case AIFF: return "aiff"; break;
+            case FLAC: return "flac"; break;
+            case OGG:  return "ogg"; break;
         }
 
         jassertfalse;
         return {};
     }
+
+    FormatType() = default;
+    FormatType (const FormatType& o) : type (o.type) {}
+    FormatType (const ID& t) : type (t) {}
+    FormatType (const int t) : type (jlimit ((int)Begin, (int)End - 1, t)) {}
+
+    FormatType& operator= (const FormatType& o) { type = o.type; return *this; }
+    FormatType& operator= (const ID t) { type = static_cast<int> (t); return *this; }
+    FormatType& operator= (const int t)
+    { 
+        jassert (isPositiveAndBelow (t, NumTypes)); 
+        type = jlimit ((int)Begin, (int)End - 1, t);
+        return *this; 
+    }
+
+    bool operator== (const int t) const { return t == type; }
+    bool operator!= (const int t) const { return t != type; }
+    bool operator== (const ID t)  const { return t == type; }
+    bool operator!= (const ID t)  const { return t != type; }
+
+private:
+    int type = WAVE;
 };
 
 struct LoopType

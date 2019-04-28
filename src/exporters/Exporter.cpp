@@ -4,6 +4,19 @@
 
 namespace vcp {
 
+ValueTree ExporterType::createModelData() const
+{
+    ValueTree data (Tags::exporter);
+    data.setProperty (Tags::uuid,    Uuid().toString(), nullptr)
+        .setProperty (Tags::object,  const_cast<ExporterType*> (this), nullptr)
+        .setProperty (Tags::name,    getName(), nullptr)
+        .setProperty (Tags::type,    getSlug(), nullptr)
+        .setProperty (Tags::path,    "", nullptr)
+        .setProperty (Tags::layers,  "all", nullptr);
+    setMissingProperties (data);
+    return data;
+}
+
 void ExporterType::createAllTypes (Versicap& versicap, ExporterTypeArray& types)
 {
     types.add (createWavExporterType (versicap.getAudioFormats()));

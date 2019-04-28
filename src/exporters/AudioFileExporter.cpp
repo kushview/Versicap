@@ -8,54 +8,30 @@ namespace vcp {
 class AudioFileExporterType : public ExporterType
 {
 public:
-    AudioFileExporterType (AudioFormatManager& fmts, const String& ext)
-        : formats (fmts), extension (ext)
+    AudioFileExporterType (AudioFormatManager& fmts, FormatType t)
+        : formats (fmts), type (t)
     {
-        jassert (extension.isNotEmpty());
         jassert (getFormat() != nullptr);
     }
 
     virtual ~AudioFileExporterType() = default;
 
-    String getSlug() const override
-    {
-        if (extension.contains ("wav"))
-            return "wave";
-        else if (extension.contains ("aif"))
-            return "aiff";
-        else if (extension.contains ("ogg"))
-            return "ogg";
-        else if (extension.contains ("flac"))
-            return "flac";
-
-        jassertfalse;
-        return "undefined";
-    }
+    String getSlug() const override { return type.getSlug(); }
 
     String getName() const override
     {
-        if (extension.contains ("wav"))
-            return "Wav Audio";
-        else if (extension.contains ("aif"))
-            return "AIFF";
-        else if (extension.contains ("ogg"))
-            return "Ogg Vorbis";
-        else if (extension.contains ("flac"))
-            return "FLAC";
+        switch (type.getType())
+        {
+            case FormatType::WAVE: return "Wav Audio"; break;
+            case FormatType::AIFF: return "AIFF"; break;
+            case FormatType::FLAC: return "FLAC"; break;
+            case FormatType::OGG:  return "Ogg Vorbis"; break;
+        }
 
         jassertfalse;
         return "Undefined Format";
     }
 
-    String getFileExtension() const
-    {
-        if (extension.startsWith ("."))
-            return extension;
-        return String(".") + extension;
-    }
-
-    AudioFormat* getFormat() const { return formats.findFormatForFileExtension (extension); }
-    
     void getProperties (const Exporter& exporter, Array<PropertyComponent*>& props) const override
     {
         Exporter expref = exporter;
@@ -87,14 +63,10 @@ public:
                 choices.add (qualityOpts [i]);
                 values.add (i);
             }
+
+            props.add (new ChoicePropertyComponent (expref.getPropertyAsValue (Tags::quality),
+                "Quality", choices, values));
         }
-        else
-        {
-            choices.add ("Lossless");
-            values.add (0);
-        }
-        props.add (new ChoicePropertyComponent (expref.getPropertyAsValue (Tags::quality),
-            "Quality", choices, values));
 
         //=====================================================================
         choices.clearQuick(); values.clearQuick();
@@ -151,30 +123,97 @@ public:
         types.add (LoopType::None);
     }
 
+    void setMissingProperties (ValueTree data) const override
+    {
+        if (! data.hasProperty (Tags::sampleRate))
+            data.setProperty (Tags::sampleRate, 44100, nullptr);
+        if (! data.hasProperty (Tags::channels))
+            data.setProperty (Tags::channels, 2, nullptr);
+        if (! data.hasProperty (Tags::quality))
+            data.setProperty (Tags::quality, getDefaultQuality(), nullptr);
+        if (! data.hasProperty (Tags::bitDepth))
+            data.setProperty (Tags::bitDepth, getDefaultBitDepth(), nullptr);
+    }
+
+    String getFileExtension() const
+    {
+        String extension = type.getFileExtension();
+        if (extension.startsWith ("."))
+            return extension;
+        return String(".") + extension;
+    }
+
+    AudioFormat* getFormat() const
+    {
+        return formats.findFormatForFileExtension (
+            getFileExtension());
+    }
+
 private:
     AudioFormatManager& formats;
-    const String extension;
-};
+    FormatType type;
 
+    int getDefaultQuality() const
+    {
+        int quality = 0;
+        switch (type.getType())
+        {
+            case FormatType::FLAC:
+                quality = 5;
+                break;
+            case FormatType::OGG:
+                quality = 6;
+                break;
+            case FormatType::WAVE:
+            case FormatType::AIFF:
+            default:
+                quality = 0;
+                break;
+        }
+
+        jassert (quality >= 0);
+        return quality;
+    }
+
+    int getDefaultBitDepth() const
+    {
+        int depth = 0;
+        switch (type.getType())
+        {
+            case FormatType::OGG:
+                depth = 32;
+                break;
+            case FormatType::FLAC:
+            case FormatType::WAVE:
+            case FormatType::AIFF:
+            default:
+                depth = 16;
+                break;
+        }
+
+        jassert (depth > 0);
+        return depth;
+    }
+};
 
 ExporterType* ExporterType::createWavExporterType (AudioFormatManager& formats)
 {
-    return new AudioFileExporterType (formats, ".wav");
+    return new AudioFileExporterType (formats, FormatType::WAVE);
 }
 
 ExporterType* ExporterType::createAiffExporterType (AudioFormatManager& formats)
 { 
-    return new AudioFileExporterType (formats, ".aiff");
+    return new AudioFileExporterType (formats, FormatType::AIFF);
 }
 
 ExporterType* ExporterType::createFlacExporterType (AudioFormatManager& formats)
 { 
-    return new AudioFileExporterType (formats, ".flac");
+    return new AudioFileExporterType (formats, FormatType::FLAC);
 }
 
 ExporterType* ExporterType::createOggExporterType (AudioFormatManager& formats)
 {
-    return new AudioFileExporterType (formats, ".ogg");
+    return new AudioFileExporterType (formats, FormatType::OGG);
 }
 
 }

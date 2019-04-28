@@ -401,12 +401,9 @@ ValueTree Project::find (const Identifier& listType,
 void Project::addExporter (ExporterType& type, const String& name)
 {
     auto exporters = objectData.getChildWithName (Tags::exporters);
-    ValueTree data (Tags::exporter);
-    data.setProperty (Tags::uuid,    Uuid().toString(), nullptr)
-        .setProperty (Tags::object,  &type, nullptr)
-        .setProperty (Tags::name,    name.isNotEmpty() ? name : type.getName(), nullptr)
-        .setProperty (Tags::type,    type.getSlug(), nullptr)
-        .setProperty (Tags::path,    "", nullptr);
+    ValueTree data = type.createModelData();
+    if (name.isNotEmpty())
+        data.setProperty (Tags::name, name, nullptr);
     exporters.appendChild (data, nullptr);
 }
 
