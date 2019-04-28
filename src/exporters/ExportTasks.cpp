@@ -56,7 +56,6 @@ Result AudioFileWriterTask::perform()
     resample.prepareToPlay (blockSize, reader->sampleRate);
     resample.setResamplingRatio (reader->sampleRate / writer->getSampleRate());
     auto ratio = resample.getResamplingRatio();
-    DBG("hitting ratio: " << ratio);
     int totalSamples = endFrame - startFrame;
     jassert (totalSamples > 0);
     totalSamples = roundToIntAccurate ((double) totalSamples / ratio);

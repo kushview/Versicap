@@ -13,18 +13,24 @@ public:
     CreatePathTask (const File& file)
         : path (file.getFullPathName()) { }
 
-    void prepare (Versicap&) override {}
+    void prepare (Versicap&) override
+    {
+        DBG("[VCP] creating: " << path);
+        if (! File::isAbsolutePath (path))
+            return;
+        const File directory (path);
+        if (! directory.exists())
+            directory.createDirectory();
+    }
     
     Result perform() override
     {
-        DBG("[VCP] creating: " << path);
-
         if (! File::isAbsolutePath (path))
             return Result::fail ("Invalid path for exporting");
         const File directory (path);
         if (directory.existsAsFile())
             return Result::fail ("Export path exists as file");
-        return directory.exists() ? Result::ok() : directory.createDirectory();
+        return directory.exists() ? Result::ok() : Result::fail("Directory does not exist");
     }
 
 private:

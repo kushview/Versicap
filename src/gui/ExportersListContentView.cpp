@@ -102,7 +102,7 @@ public:
             PopupMenu menu;
             int i = 0;
             for (auto* const type : versicap.getExporterTypes())
-                menu.addItem (i + 1, type->getName());
+                menu.addItem (++i, type->getName());
             menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&addButton),
                                 ModalCallbackFunction::forComponent (&Content::handleMenuResult, this));
         };

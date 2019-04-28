@@ -244,8 +244,8 @@ void Versicap::initializeDataPath()
 
 void Versicap::initializeExporters()
 {
-    ExporterType::createAllTypes (impl->exporters);
     getAudioFormats().registerBasicFormats();
+    ExporterType::createAllTypes (*this, impl->exporters);
 }
 
 void Versicap::initializeAudioDevice()

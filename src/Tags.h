@@ -55,6 +55,8 @@ namespace Tags {
     static const Identifier plugin          = "plugin";
     static const Identifier project         = "project";
 
+    static const Identifier quality         = "quality";
+
     static const Identifier sample          = "sample";
     static const Identifier samples         = "samples";
     static const Identifier sampleRate      = "sampleRate";

@@ -27,12 +27,16 @@ public:
     virtual String getName() const = 0;
 
     virtual void getLoopTypes (Array<LoopType>&) const =0;
+    virtual void getProperties (const Exporter&, Array<PropertyComponent*>&) const =0;
     virtual void getTasks (const Project&, const Exporter&, OwnedArray<ExportTask>&) const =0;
 
-    static void createAllTypes (ExporterTypeArray&);
+    static void createAllTypes (Versicap&, ExporterTypeArray&);
 
 private:
-    static ExporterType* createWavExporterType();
+    static ExporterType* createWavExporterType (AudioFormatManager&);
+    static ExporterType* createAiffExporterType (AudioFormatManager&);
+    static ExporterType* createFlacExporterType (AudioFormatManager&);
+    static ExporterType* createOggExporterType (AudioFormatManager&);
 };
 
 class ExportTask

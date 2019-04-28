@@ -64,15 +64,10 @@ void Exporter::getProperties (Array<PropertyComponent*>& props)
             values.add (loop.getSlug());
         }
 
-        props.add (new ChoicePropertyComponent (getPropertyAsValue (Tags::sampleRate),
-            "Sample Rate", { "22050", "44100", "48000" }, { 22050, 44100, 48000 }));
-        props.add (new ChoicePropertyComponent (getPropertyAsValue (Tags::bitDepth),
-            "Bit Depth", { "16 bit", "24 bit" }, { 16, 24 }));
-        props.add (new ChoicePropertyComponent (getPropertyAsValue (Tags::channels),
-            "Bit Depth", { "Mono", "Stereo" }, { 1, 2 }));
-
         props.add (new ChoicePropertyComponent (getPropertyAsValue (Tags::loop),
             "Loop Mode", choices, values));
+
+        type->getProperties (*this, props);
     }
 
     props.add (new ChoicePropertyComponent (getPropertyAsValue (Tags::layers),
