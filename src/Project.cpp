@@ -45,6 +45,12 @@ int Layer::getTailLength() const    { return (int) getProperty (Tags::tailLength
 int Layer::getMidiChannel() const   { return (int) getProperty (Tags::midiChannel); }
 int Layer::getMidiProgram() const   { return (int) getProperty (Tags::midiProgram); }
 
+void Layer::getSamples (OwnedArray<Sample>& results) const
+{
+    const Project project (objectData.getParent().getParent());
+    project.getSamples (project.indexOf (*this), results);
+}
+
 void Layer::setMissingProperties()
 {
     stabilizePropertyString (Tags::uuid, Uuid().toString());
@@ -54,52 +60,6 @@ void Layer::setMissingProperties()
     stabilizePropertyPOD (Tags::midiChannel, 1);
     stabilizePropertyPOD (Tags::midiProgram, -1);
 }
-
-//=========================================================================
-String Sample::getUuidString() const {   return getProperty (Tags::uuid).toString(); }
-
-Uuid Sample::getUuid() const
-{
-    const Uuid uuid (getUuidString());
-    return uuid;
-}
-
-bool Sample::isForLayer (const Layer& layer) const
-{
-    const Uuid sid (getProperty (Tags::layer).toString());
-    const Uuid lid (layer.getUuid());
-    return !sid.isNull() && !lid.isNull() && sid == lid;
-}
-
-File Sample::getFile() const
-{
-    auto filename = getProperty(Tags::file).toString();
-    if (filename.isEmpty())
-        return File();
-    Project project (objectData.getParent().getParent());
-    auto path = project.getProperty (Tags::dataPath).toString();
-    
-    if (File::isAbsolutePath (path))
-    {
-        File file (path);
-        return file.getChildFile ("samples")
-                   .getChildFile (filename);
-    }
-
-    return File();
-}
-
-void Sample::getProperties (Array<PropertyComponent*>& props)
-{
-    props.add (new TextPropertyComponent (getPropertyAsValue (Tags::name), 
-        "Name", 100, false, true));
-}
-
-double Sample::getSampleRate() const    { return getProperty (Tags::sampleRate); }
-double Sample::getTotalTime() const     { return getProperty (Tags::length); }
-double Sample::getStartTime() const     { return getProperty (Tags::timeIn); }
-double Sample::getEndTime() const       { return getProperty (Tags::timeOut); }
-double Sample::getLength() const        { return getEndTime() - getStartTime(); }
 
 //=========================================================================
 Project::Project()
@@ -465,11 +425,6 @@ ValueTree Project::getActiveExporterData() const
     if (uuid.toString().isEmpty())
         return ValueTree();
     return tree.getChildWithProperty (Tags::uuid, uuid);
-}
-
-void Project::getExportTasks (OwnedArray<ExportTask>& tasks) const
-{
-
 }
 
 }

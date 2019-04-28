@@ -6,6 +6,11 @@
 namespace vcp {
 
 class ExporterType;
+class ExportTask;
+class Exporter;
+class Project;
+class Versicap;
+
 typedef ReferenceCountedArray<ExporterType> ExporterTypeArray;
 typedef ReferenceCountedObjectPtr<ExporterType> ExporterTypePtr;
 
@@ -21,7 +26,8 @@ public:
 
     virtual String getName() const = 0;
 
-    virtual void getLoopTypes (Array<LoopType>& types) const =0;
+    virtual void getLoopTypes (Array<LoopType>&) const =0;
+    virtual void getTasks (const Project&, const Exporter&, OwnedArray<ExportTask>&) const =0;
 
     static void createAllTypes (ExporterTypeArray&);
 
@@ -36,7 +42,8 @@ protected:
 
 public:
     virtual ~ExportTask() = default;
-    virtual void prepare() { }
+    virtual void prepare (Versicap&) {}
+    virtual Result perform() { return Result::ok(); }
 };
 
 class Exporter : public kv::ObjectModel
@@ -47,9 +54,17 @@ public:
     ~Exporter() noexcept = default;
     bool isValid() const { return objectData.isValid() && objectData.hasType (Tags::exporter); }
     
+    File getPath() const
+    {
+        auto str = getProperty (Tags::path).toString();
+        return File::isAbsolutePath (str) ? File (str) : File();
+    }
+
+    void getProperties (Array<PropertyComponent*>&);
+
     ExporterTypePtr getTypeObject() const
-    { 
-        return dynamic_cast<ExporterType*> (objectData.getProperty (Tags::type).getObject());
+    {
+        return dynamic_cast<ExporterType*> (objectData.getProperty(Tags::object).getObject());
     }
 };
 

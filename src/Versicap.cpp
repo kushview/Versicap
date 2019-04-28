@@ -596,7 +596,7 @@ void Versicap::post (Message* message)
 
 void Versicap::testExport()
 {
-    impl->exporter->start (getProject());
+    impl->exporter->start (*this, impl->project);
 }
 
 }

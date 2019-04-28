@@ -14,14 +14,15 @@ public:
     ExportThread();
     ~ExportThread();
 
-    Result start (const Project& project);
-    bool isExporting() const { return isThreadRunning(); }
+    Result start (Versicap& versicap, const Project& project);
+    bool isExporting() const { return state.get() != Idle; }
     void cancel();
 
 private:
     enum State
     {
         Idle    = 0,
+        Preparing,
         Running,
         Finished
     };

@@ -167,6 +167,10 @@ void AudioEngine::updatePluginProperties()
     pluginLatency  = processor->getLatencySamples();
     pluginNumIns   = processor->getTotalNumInputChannels();
     pluginNumOuts  = processor->getTotalNumOutputChannels();
+    DBG("[VCP] " << processor->getName() << " properties:");
+    DBG("[VCP] inputs:  " << pluginNumIns);
+    DBG("[VCP] outputs: " << pluginNumOuts);
+    DBG("[VCP] latency: " << pluginLatency);
     pluginChannels = jmax (pluginNumIns, pluginNumOuts);
 }
 

@@ -7,6 +7,7 @@ jucer/JuceLibraryCode/include_*.*
 jucer/JuceLibraryCode/BinaryData*.*
 
 data/*.ai
+data/export*
 
 dst
 .waf-*

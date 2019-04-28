@@ -7,6 +7,7 @@ namespace vcp {
 
 class PluginManager;
 class Project;
+class Sample;
 class Versicap;
 struct RenderContext;
 
@@ -21,6 +22,8 @@ public:
     String getUuidString() const;
 
     bool isValid() const;
+
+    String getName() const { return objectData.getProperty (Tags::name); }
     uint8 getVelocity() const;
     int getNoteLength() const;
     int getTailLength() const;
@@ -28,6 +31,7 @@ public:
     int getMidiProgram() const;
 
     void getProperties (Array<PropertyComponent*>&);
+    void getSamples (OwnedArray<Sample>&) const;
 
     Layer& operator= (const Layer& o)
     {
@@ -49,6 +53,15 @@ public:
 
     bool isValid() const { return objectData.isValid() && objectData.hasType (Tags::sample); }
     
+    String getNoteName() const
+    {
+        return isPositiveAndBelow (getNote(), 128)
+            ? MidiMessage::getMidiNoteName (getNote(), true, true, 4) 
+            : String();
+    }
+
+    String getFileName () const;
+
     Uuid getUuid() const;
     String getUuidString() const;
     bool isForLayer (const Layer& layer) const;

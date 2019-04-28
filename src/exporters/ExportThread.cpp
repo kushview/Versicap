@@ -1,8 +1,8 @@
 
 #include "exporters/ExportThread.h"
+#include "Project.h"
 
-namespace vcp
-{
+namespace vcp {
 
 ExportThread::ExportThread()
     : Thread ("vcpexport")
@@ -15,15 +15,17 @@ ExportThread::~ExportThread()
     cancel();
 }
 
-Result ExportThread::start (const Project& project)
+Result ExportThread::start (Versicap& versicap, const Project& project)
 {
-    if (isExporting())
+    if (! state.compareAndSetBool (Preparing, Idle))
         return Result::fail ("Export already in progress");
     
     OwnedArray<ExportTask> newTasks;
     project.getExportTasks (newTasks);
+    for (auto* task : newTasks)
+        task->prepare (versicap);
 
-    tasks.swapWith (newTasks);    
+    tasks.swapWith (newTasks);
     notify();
     newTasks.clear (true);
 
@@ -39,6 +41,9 @@ void ExportThread::cancel()
 
 void ExportThread::handleAsyncUpdate()
 {
+    static int counter = 0;
+    DBG("count: " << counter++);
+
     switch (state.get())
     {
         case Idle:
@@ -49,6 +54,7 @@ void ExportThread::handleAsyncUpdate()
             break;
         case Finished:
             DBG("[VCP] export is Finished");
+            state.set (Idle);
             break;
     }
 }
@@ -64,17 +70,22 @@ void ExportThread::run()
         if (threadShouldExit())
             break;
 
+        state.set (Running);
+
         for (auto* const task : tasks)
         {
-            
+            const auto result = task->perform();
+            if (! result.wasOk())
+            {
+                DBG("[VCP]" << result.getErrorMessage());
+                // trigger error and cancel
+                break;
+            }
         }
 
-        state.set (Running);
+        state.set (Finished);
         triggerAsyncUpdate();
     }
-
-    state.set (Finished);
-    triggerAsyncUpdate();
 }
 
 }
