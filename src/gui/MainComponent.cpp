@@ -47,8 +47,14 @@ public:
 
     void setProgressText (const String& newText)
     {
-        jassert(newText.isNotEmpty());
-        text.setText (newText, dontSendNotification);
+        if (newText.isNotEmpty())
+            text.setText (newText, dontSendNotification);
+    }
+
+    void setProgressValue (double value)
+    {
+        progress = value;
+        DBG("progress: " << progress);
     }
 
     void paint (Graphics& g) override
@@ -256,11 +262,13 @@ public:
 
         if (showIt)
         {
+            progress.setProgressValue (-1.0);
             addAndMakeVisible (progress, 9999);
         }
         else
         {
             removeChildComponent (&progress);
+            progress.setProgressValue (-1.0);
         }
 
         resized();
@@ -514,6 +522,7 @@ void MainComponent::renderWillStart()
 {
     auto& progress = content->getRenderProgress();
     progress.setProgressText ("Waiting...");
+    progress.onCancel = std::bind (&Versicap::stopRendering, &versicap);
     content->showProgress (true);
 }
 
@@ -526,6 +535,28 @@ void MainComponent::renderStarted()
 void MainComponent::renderWillStop()
 {
     content->showProgress (false);
+}
+
+void MainComponent::exportStarted()
+{
+    auto& progress = content->getRenderProgress();
+    progress.setProgressText ("Exporting...");
+    progress.onCancel = std::bind (&Versicap::stopExporting, &versicap);
+    content->showProgress (true);
+}
+
+void MainComponent::exportFinished()
+{
+    auto& progress = content->getRenderProgress();
+    progress.setProgressText ("Finished...");
+    content->showProgress (false);
+}
+
+void MainComponent::exportProgress (double value, const String& message)
+{
+    auto& progress = content->getRenderProgress();
+    progress.setProgressText (message);
+    progress.setProgressValue (value);
 }
 
 void MainComponent::saveSettings()

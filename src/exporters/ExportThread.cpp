@@ -5,7 +5,9 @@
 namespace vcp {
 
 ExportThread::ExportThread()
-    : Thread ("vcpexport")
+    : Thread ("vcpexport"),
+      started (*this), finished (*this),
+      progressNotify (*this)
 {
     startThread();
 }
@@ -25,7 +27,13 @@ Result ExportThread::start (Versicap& versicap, const Project& project)
     for (auto* task : newTasks)
         task->prepare (versicap);
 
-    tasks.swapWith (newTasks);
+    {
+        ScopedLock sl (lock);
+        progress = 0.0;
+        progressTitle = String();
+        tasks.swapWith (newTasks);
+    }
+
     notify();
     newTasks.clear (true);
 
@@ -41,9 +49,6 @@ void ExportThread::cancel()
 
 void ExportThread::handleAsyncUpdate()
 {
-    static int counter = 0;
-    DBG("count: " << counter++);
-
     switch (state.get())
     {
         case Idle:
@@ -71,20 +76,44 @@ void ExportThread::run()
             break;
 
         state.set (Running);
+        started.triggerAsyncUpdate();
 
-        for (auto* const task : tasks)
+        Thread::sleep (500);
+
+        for (int i = 0; i < tasks.size(); ++i)
         {
+            auto* const task = tasks.getUnchecked (i);
+        
+            {
+                ScopedLock sl (lock);
+                progress = static_cast<double> (i + 1) / static_cast<double> (tasks.size());
+                progressTitle = task->getProgressName();
+                progressNotify.triggerAsyncUpdate();
+            }
+        
             const auto result = task->perform();
+
+            if (threadShouldExit())
+                break;
+
             if (! result.wasOk())
             {
-                DBG("[VCP]" << result.getErrorMessage());
+                DBG("[VCP] " << result.getErrorMessage());
                 // trigger error and cancel
                 break;
             }
+
+            
         }
+
+        Thread::sleep (500);
 
         state.set (Finished);
         triggerAsyncUpdate();
+        finished.triggerAsyncUpdate();
+
+        if (threadShouldExit())
+            break;
     }
 }
 

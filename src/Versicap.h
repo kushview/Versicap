@@ -38,10 +38,15 @@ public:
         virtual void renderStarted() { }
         virtual void renderWillStop() { }
         virtual void renderStopped() { }
+
+        virtual void exportStarted() {}
+        virtual void exportFinished() {}
+        virtual void exportProgress (double, const String&) {}
     };
     
     //=========================================================================
     void testExport();
+    void stopExporting();
     
     //=========================================================================
     static File getApplicationDataPath();

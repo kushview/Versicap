@@ -59,6 +59,7 @@ public:
 
     void prepare (Versicap&) override;
     Result perform() override;
+    String getProgressName() const override { return target.getFileName(); }
 
 private:
     const File source;

@@ -50,6 +50,7 @@ public:
     virtual ~ExportTask() = default;
     virtual void prepare (Versicap&) {}
     virtual Result perform() { return Result::ok(); }
+    virtual String getProgressName() const { return {}; }
 };
 
 class Exporter : public kv::ObjectModel

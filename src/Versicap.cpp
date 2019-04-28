@@ -197,6 +197,24 @@ Versicap::Versicap()
         listeners.call ([](Listener& l) { l.renderWillStop(); });
         listeners.call ([](Listener& l) { l.renderStopped(); });
     };
+
+    impl->exporter->onStarted = [this]()
+    {
+        listeners.call ([](Listener& l) { l.exportStarted(); });
+    };
+
+    impl->exporter->onProgress = [this]()
+    {
+        listeners.call ([this](Listener& l) { 
+            l.exportProgress (impl->exporter->getProgress(), 
+                              impl->exporter->getProgressTitle()); 
+        });
+    };
+
+    impl->exporter->onFinished = [this]()
+    {
+        listeners.call ([](Listener& l) { l.exportFinished(); });
+    };
 }
 
 Versicap::~Versicap()
@@ -597,6 +615,11 @@ void Versicap::post (Message* message)
 void Versicap::testExport()
 {
     impl->exporter->start (*this, impl->project);
+}
+
+void Versicap::stopExporting()
+{
+    impl->exporter->cancel();
 }
 
 }

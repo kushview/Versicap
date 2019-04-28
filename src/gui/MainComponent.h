@@ -36,6 +36,10 @@ public:
     void renderStarted() override;
     void renderWillStop() override;
 
+    void exportStarted() override;
+    void exportFinished() override;
+    void exportProgress (double, const String&) override;
+
     void changeListenerCallback (ChangeBroadcaster*) override;
 
 private:
