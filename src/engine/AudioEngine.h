@@ -43,6 +43,7 @@ public:
     void setRenderContext (const RenderContext&);
     Result startRendering (const RenderContext& ctx);
     ValueTree getRenderedSamples() const;
+    
 
     //=========================================================================
     void addMidiMessage (const MidiMessage& msg);
@@ -60,6 +61,7 @@ public:
     std::function<void()> onRenderStopped;
     std::function<void()> onRenderStarted;
     std::function<void()> onRenderCancelled;
+    std::function<void(double, const String&)> onRenderProgress;
 
 private:
     MonitorPtr monitor;

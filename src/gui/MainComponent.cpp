@@ -56,7 +56,7 @@ public:
         title = newTitle;
         repaint();
     }
-    
+
     void setProgressValue (double value)
     {
         progress = value;
@@ -555,6 +555,13 @@ void MainComponent::renderStarted()
 void MainComponent::renderWillStop()
 {
     content->showProgress (false);
+}
+
+void MainComponent::renderProgress (double value, const String& message)
+{
+    auto& progress = content->getRenderProgress();
+    progress.setProgressText (message);
+    progress.setProgressValue (value);
 }
 
 void MainComponent::exportStarted()

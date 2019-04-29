@@ -35,7 +35,7 @@ public:
     void renderWillStart() override;
     void renderStarted() override;
     void renderWillStop() override;
-
+    void renderProgress (double, const String&) override;
     void exportStarted() override;
     void exportFinished() override;
     void exportProgress (double, const String&) override;

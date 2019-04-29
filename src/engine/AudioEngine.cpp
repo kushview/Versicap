@@ -27,6 +27,16 @@ AudioEngine::AudioEngine (AudioFormatManager& formatManager,
             onRenderStopped();
         panic();
     };
+
+    render->onProgress = [this]()
+    {
+        if (onRenderProgress)
+        {
+            auto title = render->getNextProgressTitle();
+            auto progress = render->getProgress();
+            onRenderProgress (progress, title);
+        }
+    };
 }
 
 AudioEngine::~AudioEngine()

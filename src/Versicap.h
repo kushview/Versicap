@@ -38,6 +38,7 @@ public:
         virtual void renderStarted() { }
         virtual void renderWillStop() { }
         virtual void renderStopped() { }
+        virtual void renderProgress (double, const String&) { }
 
         virtual void exportStarted() {}
         virtual void exportFinished() {}

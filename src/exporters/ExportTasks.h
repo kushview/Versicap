@@ -22,7 +22,7 @@ public:
         if (! directory.exists())
             directory.createDirectory();
     }
-    
+
     Result perform() override
     {
         if (! File::isAbsolutePath (path))

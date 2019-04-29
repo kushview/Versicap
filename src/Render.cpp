@@ -26,10 +26,11 @@ namespace vcp {
 
 Render::Render (AudioFormatManager& f)
     : formats (f), 
-      thread ("vcprt"),
+      thread ("vcprender"),
       started (*this),
       stopped (*this),
-      cancelled (*this)
+      cancelled (*this),
+      progress (*this)
 { }
 
 Render::~Render()
@@ -115,7 +116,7 @@ void Render::getNextMidiBlock (MidiBuffer& buffer, int nframes)
             break;
         
         buffer.addEvent (msg, roundToInt (timestamp - start));
-        
+
        #if 1
         if (msg.isProgramChange())
         {
@@ -165,6 +166,7 @@ void Render::writeAudioFrames (AudioSampleBuffer& audio)
    
         if (render->start >= startFrame && render->start < endFrame)
         {
+            progress.triggerAsyncUpdate();
             const int localFrame = render->start - startFrame;
             for (int c = 0; c < context.channels; ++c)
                 channels[c] = audio.getWritePointer (c, localFrame);
@@ -284,10 +286,10 @@ void Render::setContext (const RenderContext& newContext)
     context = newContext;
 }
 
-void Render::start (const RenderContext& newContext, int latencySamples)
+Result Render::start (const RenderContext& newContext, int latencySamples)
 {
     if (isRendering())
-        return;
+        return Result::fail ("recording already in progress");
 
     jassert (sampleRate > 0.0);
     jassert (blockSize > 0);
@@ -297,7 +299,7 @@ void Render::start (const RenderContext& newContext, int latencySamples)
     if (! audioFormat)
     {
         jassertfalse;
-        return;
+        return Result::fail ("could not create encoder for recording");
     }
 
     OwnedArray<LayerRenderDetails> newDetails;
@@ -305,15 +307,21 @@ void Render::start (const RenderContext& newContext, int latencySamples)
     if (directory.exists())
         directory.deleteRecursively();
     directory.createDirectory();
+    steps.clearQuick();
+    totalSteps = 0;
     for (int i = 0; i < newContext.layers.size(); ++i)
     {
+        String layerName = "Layer "; layerName << int (i + 1);
         auto* details = newDetails.add (newContext.createLayerRenderDetails (
                                         i, sampleRate, formats, thread));
-        
         for (auto* const sample : details->samples)
         {
             const auto file = sample->file;
             std::unique_ptr<FileOutputStream> stream (file.createOutputStream());
+            String step = layerName;
+            step << " - " << MidiMessage::getMidiNoteName (sample->note, true, true, 4);
+            steps.add (step);
+
             if (stream)
             {
                 if (auto* const writer = audioFormat->createWriterFor (
@@ -329,15 +337,22 @@ void Render::start (const RenderContext& newContext, int latencySamples)
                     stream.release();
                     DBG("[VCP] " << file.getFullPathName());
                 }
+                else
+                {
+                    jassertfalse;
+                    return Result::fail ("couldn't create writer for recording");
+                }
             }
             else
             {
-                jassertfalse;
-                return;
+                String message = "could not open ";
+                message << sample->file.getFileName() << " for recording";
+                return Result::fail (message);
             }
         }
     }
 
+    totalSteps = steps.size();
     samples = ValueTree (samplesType);
 
     {
@@ -360,6 +375,7 @@ void Render::start (const RenderContext& newContext, int latencySamples)
     }
 
     newDetails.clear();
+    return Result::ok();
 }
 
 void Render::cancel()

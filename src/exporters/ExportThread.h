@@ -7,8 +7,7 @@ namespace vcp {
 
 class Project;
 
-class ExportThread : private Thread,
-                     private AsyncUpdater
+class ExportThread : private Thread
 {
 public:
     ExportThread();
@@ -50,7 +49,6 @@ private:
 
     OwnedArray<ExportTask> tasks;
     void run() override;
-    void handleAsyncUpdate() override;
 
     struct Started : public AsyncUpdater
     {

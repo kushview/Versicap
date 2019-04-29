@@ -47,36 +47,17 @@ void ExportThread::cancel()
     stopThread (5000);
 }
 
-void ExportThread::handleAsyncUpdate()
-{
-    switch (state.get())
-    {
-        case Idle:
-            DBG("[VCP] export is Idle");
-            break;
-        case Running:
-            DBG("[VCP] export is Running");
-            break;
-        case Finished:
-            DBG("[VCP] export is Finished");
-            state.set (Idle);
-            break;
-    }
-}
-
 void ExportThread::run()
 {
     while (! threadShouldExit())
     {
         state.set (Idle);
-        triggerAsyncUpdate();
         wait (-1);
         
         if (threadShouldExit())
             break;
 
         state.set (Running);
-        started.triggerAsyncUpdate();
 
         Thread::sleep (500);
 
@@ -102,14 +83,11 @@ void ExportThread::run()
                 // trigger error and cancel
                 break;
             }
-
-            
         }
 
         Thread::sleep (500);
 
         state.set (Finished);
-        triggerAsyncUpdate();
         finished.triggerAsyncUpdate();
 
         if (threadShouldExit())

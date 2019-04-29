@@ -20,7 +20,7 @@ public:
     void release();
 
     //=========================================================================
-    void start (const RenderContext& newContext, int latencySamples = 0);
+    Result start (const RenderContext& newContext, int latencySamples = 0);
     void cancel();
 
     //=========================================================================
@@ -44,6 +44,17 @@ public:
     /** Returns sample metadata after rendering has completed */
     ValueTree getSamples() const { return samples; }
 
+    double getProgress() const { return progressValue; }
+    String getNextProgressTitle()
+    {
+        if (steps.isEmpty())
+            return { };
+        progressValue = static_cast<double> (totalSteps - steps.size()) / static_cast<double> (totalSteps);
+        auto result = steps [0];
+        steps.remove (0);
+        return result;
+    }
+
     //=========================================================================
     CriticalSection& getCallbackLock() { return lock; }
 
@@ -54,6 +65,7 @@ public:
     std::function<void()> onStopped;
     std::function<void()> onStarted;
     std::function<void()> onCancelled;
+    std::function<void()> onProgress;
 
 private:
     Identifier samplesType { "samples" };
@@ -81,6 +93,9 @@ private:
     HeapBlock<float*> channels;
     OwnedArray<LayerRenderDetails> details;
 
+    StringArray steps;
+    int totalSteps;
+
     struct Started : public AsyncUpdater
     {
         Started (Render& r) : render (r) { }
@@ -101,6 +116,14 @@ private:
         void handleAsyncUpdate()  { if (render.onCancelled) render.onCancelled(); }
         Render& render;
     } cancelled;
+
+    struct Progress : public AsyncUpdater
+    {
+        Progress (Render& r) : render (r) { }
+        void handleAsyncUpdate()  { if (render.onProgress) render.onProgress(); }
+        Render& render;
+    } progress;
+    double progressValue = 0.0;
 
     void reset();
 };

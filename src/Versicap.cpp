@@ -183,6 +183,12 @@ Versicap::Versicap()
         listeners.call ([](Listener& l) { l.renderStarted(); });
     };
     
+    impl->engine->onRenderProgress = [this] (double progress, const String& title) {
+        listeners.call ([this, progress, title](Listener& l) {
+            l.renderProgress (progress, title);
+        });
+    };
+
     impl->engine->onRenderStopped = [this]()
     {
         listeners.call ([](Listener& l) { l.renderWillStop(); });
