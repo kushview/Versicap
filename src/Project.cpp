@@ -263,6 +263,13 @@ void Project::getSamples (int layerIdx, OwnedArray<Sample>& out) const
 }
 
 //=========================================================================
+File Project::getDataPath() const
+{
+    const auto path = getProperty (Tags::dataPath).toString();
+    return File::isAbsolutePath (path) ? File (path) : File();
+}
+
+//=========================================================================
 void Project::clearPlugin()
 {
     auto plugin = objectData.getChildWithName (Tags::plugin);
@@ -404,6 +411,15 @@ void Project::addExporter (ExporterType& type, const String& name)
     ValueTree data = type.createModelData();
     if (name.isNotEmpty())
         data.setProperty (Tags::name, name, nullptr);
+    auto path = getDataPath();
+    
+    if (path != File())
+    {
+        path = path.getChildFile("export");
+        path = path.getNonexistentChildFile (type.getSlug().toUpperCase(), " ", false);
+        data.setProperty (Tags::path, path.getFullPathName(), nullptr);
+    }
+
     exporters.appendChild (data, nullptr);
 }
 

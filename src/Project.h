@@ -124,6 +124,9 @@ public:
     ~Project();
 
     //=========================================================================
+    File getDataPath() const;
+    
+    //=========================================================================
     int getFormatType() const;
     String getFormatTypeSlug() const;
     int getSourceType() const;
