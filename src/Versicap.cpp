@@ -616,9 +616,11 @@ void Versicap::post (Message* message)
     }
 }
 
-void Versicap::testExport()
+Result Versicap::startExporting()
 {
-    impl->exporter->start (*this, impl->project);
+    if (!impl || !impl->exporter)
+        return Result::fail ("engine not prepared for exporting");
+    return impl->exporter->start (*this, impl->project);
 }
 
 void Versicap::stopExporting()

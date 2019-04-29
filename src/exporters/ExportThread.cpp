@@ -20,7 +20,7 @@ ExportThread::~ExportThread()
 Result ExportThread::start (Versicap& versicap, const Project& project)
 {
     if (! state.compareAndSetBool (Preparing, Idle))
-        return Result::fail ("Export already in progress");
+        return Result::fail ("export already in progress");
     
     OwnedArray<ExportTask> newTasks;
     project.getExportTasks (newTasks);
