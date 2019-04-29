@@ -51,10 +51,15 @@ public:
             text.setText (newText, dontSendNotification);
     }
 
+    void setTitleText (const String& newTitle)
+    {
+        title = newTitle;
+        repaint();
+    }
+    
     void setProgressValue (double value)
     {
         progress = value;
-        DBG("progress: " << progress);
     }
 
     void paint (Graphics& g) override
@@ -62,15 +67,29 @@ public:
         g.fillAll (kv::LookAndFeel_KV1::widgetBackgroundColor);
         g.setColour (kv::LookAndFeel_KV1::widgetBackgroundColor.brighter());
         g.drawRect (getLocalBounds().toFloat(), 1.5);
+
+        if (title.isNotEmpty())
+        {
+            auto r = getRequiredBounds();
+            r = r.removeFromTop (getHeight() / 3);
+            g.setColour (kv::LookAndFeel_KV1::textColor);
+            g.setFont (15.5f);
+            g.drawText (title, r, Justification::centred);
+            DBG(r.toString());
+        }
+    }
+
+    Rectangle<int> getRequiredBounds() const
+    {
+        auto r = getLocalBounds();
+        return r.withWidth (jmax (240, r.getWidth()))
+             .withHeight (jmax (140, r.getHeight()))
+             .reduced (30, 0);
     }
 
     void resized() override
     {
-        auto r = getLocalBounds();
-        r = r.withWidth (jmax (240, r.getWidth()))
-             .withHeight (jmax (140, r.getHeight()))
-             .reduced (30, 0);
-
+        auto r = getRequiredBounds();
         r.removeFromTop (getHeight() / 3);
         bar.setBounds (r.removeFromTop (28));
         r.removeFromTop (8);
@@ -90,6 +109,7 @@ public:
 private:
     double progress;
     ProgressBar bar;
+    String title;
     Label text;
     TextButton cancelButton;
     DropShadowEffect shadow;
