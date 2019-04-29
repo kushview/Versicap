@@ -99,7 +99,6 @@ public:
 
     //=========================================================================
     void saveRenderContext();
-    Result startRendering (const RenderContext& context);
     Result startRendering();
     void stopRendering();
 

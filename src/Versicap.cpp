@@ -478,9 +478,13 @@ Result Versicap::startRendering()
 {
     auto& engine = getAudioEngine();
     if (engine.isRendering())
-        return Result::fail ("Versicap is already rendering");
+        return Result::fail ("Project is already recording");
        
     const auto project = getProject();
+
+    if (project.getNumLayers() <= 0)
+        return Result::fail ("Project has no layers for recording");
+    
     RenderContext context;
     project.getRenderContext (context);
 
@@ -488,12 +492,6 @@ Result Versicap::startRendering()
     if (result.wasOk())
         listeners.call ([](Listener& listener) { listener.renderWillStart(); });
     return result;
-}
-
-Result Versicap::startRendering (const RenderContext&)
-{
-    jassertfalse;
-    return startRendering();
 }
 
 void Versicap::stopRendering()

@@ -14,6 +14,7 @@
 #include "gui/MainComponent.h"
 #include "gui/UnlockForm.h"
 
+#include "Commands.h"
 #include "Versicap.h"
 #include "RenderContext.h"
 #include "UnlockStatus.h"
@@ -135,34 +136,11 @@ public:
         panicButton.onClick = [this]() { versicap.getAudioEngine().panic(); };
         panicButton.setConnectedEdges (Button::ConnectedOnLeft);
 
-        addAndMakeVisible (importButton);
-        importButton.setButtonText ("Open");
-        importButton.onClick = [this]()
-        {
-            FileChooser chooser ("Open Versicap File", Versicap::getProjectsPath(), 
-                "*.versicap", true, false, this);
-            if (chooser.browseForFileToOpen())
-            {
-                versicap.loadProject (chooser.getResult());
-            }
-        };
-
-        addAndMakeVisible (exportButton);
-        exportButton.setButtonText ("Save");
-        exportButton.onClick = [this]()
-        {
-            FileChooser chooser ("Save Versicap File", Versicap::getProjectsPath(), 
-                "*.versicap", true, false, this);
-            if (chooser.browseForFileToSave (true))
-            {
-                versicap.saveProject (chooser.getResult());
-            }
-        };
-
         addAndMakeVisible (recordButton);
         recordButton.setConnectedEdges (Button::ConnectedOnRight);
         recordButton.setButtonText ("Record");
-        recordButton.onClick = [this]() { owner.startRendering(); };
+        recordButton.setCommandToTrigger (&versicap.getCommandManager(), 
+                                          Commands::projectRecord, false);
 
         addAndMakeVisible (notes);
 
@@ -420,8 +398,6 @@ private:
     std::unique_ptr<ContentView> view;
     std::unique_ptr<MainPropertiesContentView> props;
 
-    TextButton importButton;
-    TextButton exportButton;
     TextButton recordButton;
     TextButton panicButton;
 
@@ -589,21 +565,6 @@ void MainComponent::exportProgress (double value, const String& message)
 void MainComponent::saveSettings()
 {
     
-}
-
-void MainComponent::startRendering()
-{
-    auto result = versicap.startRendering();
-    if (result.failed())
-    {
-        AlertWindow::showNativeDialogBox ("Versicap", result.getErrorMessage(), false);
-        return;
-    }
-}
-
-void MainComponent::stopRendering()
-{
-
 }
 
 void MainComponent::paint (Graphics& g)
