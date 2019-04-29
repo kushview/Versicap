@@ -10,8 +10,8 @@ class Versicap;
 class UnlockForm;
 
 class MainComponent   : public ContentComponent,
-                        public Versicap::Listener,
-                        public ChangeListener
+                        private Versicap::Listener,
+                        private ChangeListener
 {
 public:
     MainComponent (Versicap&);
@@ -27,7 +27,12 @@ public:
 
     void paint (Graphics&) override;
     void resized() override;
-    
+
+private:
+    Versicap& versicap;
+    class Content;
+    std::unique_ptr<Content> content;
+
     void projectChanged() override;
     void renderWillStart() override;
     void renderStarted() override;
@@ -39,10 +44,6 @@ public:
 
     void changeListenerCallback (ChangeBroadcaster*) override;
 
-private:
-    Versicap& versicap;
-    class Content;
-    std::unique_ptr<Content> content;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
 
