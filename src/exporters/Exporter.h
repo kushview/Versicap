@@ -48,7 +48,7 @@ protected:
 
 public:
     virtual ~ExportTask() = default;
-    virtual void prepare (Versicap&) {}
+    virtual Result prepare (Versicap&) { return Result::ok(); }
     virtual Result perform() { return Result::ok(); }
     virtual String getProgressName() const { return {}; }
 };

@@ -254,7 +254,7 @@ bool ProjectsController::perform (const ApplicationCommandTarget::InvocationInfo
         case Commands::projectExport:
         {
             auto result = versicap.startExporting();
-            if (! result.wasOk())
+            if (result.failed())
                 AlertWindow::showNativeDialogBox ("Versicap", result.getErrorMessage(), false);
         } break;
 

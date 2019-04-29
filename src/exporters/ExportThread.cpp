@@ -24,8 +24,23 @@ Result ExportThread::start (Versicap& versicap, const Project& project)
     
     OwnedArray<ExportTask> newTasks;
     project.getExportTasks (newTasks);
+    
+    Result result = Result::fail (newTasks.size() > 0
+        ? "unknown export error" : "could not create export tasks");
+    
     for (auto* task : newTasks)
-        task->prepare (versicap);
+    {
+        result = task->prepare (versicap);
+        if (result.failed())
+            break;
+    }
+
+    if (result.failed())
+    {
+        newTasks.clearQuick (true);
+        state.set (Idle);
+        return result;
+    }
 
     {
         ScopedLock sl (lock);
@@ -36,7 +51,6 @@ Result ExportThread::start (Versicap& versicap, const Project& project)
 
     notify();
     newTasks.clear (true);
-
     return Result::ok();
 }
 
@@ -54,12 +68,18 @@ void ExportThread::run()
         state.set (Idle);
         wait (-1);
         
+        state.set (Running);
+        started.triggerAsyncUpdate();
+
+        for (int i = 1500; i > 0; i -= 500)
+        {
+            if (threadShouldExit())
+                break;
+            Thread::sleep (500);
+        }
+
         if (threadShouldExit())
             break;
-
-        state.set (Running);
-
-        Thread::sleep (500);
 
         for (int i = 0; i < tasks.size(); ++i)
         {

@@ -13,23 +13,32 @@ public:
     CreatePathTask (const File& file)
         : path (file.getFullPathName()) { }
 
-    void prepare (Versicap&) override
+    Result prepare (Versicap&) override
     {
-        DBG("[VCP] creating: " << path);
+        if (path.isEmpty())
+            return Result::fail ("export path not specified");
+
         if (! File::isAbsolutePath (path))
-            return;
+        {
+            String message = "invalid path - "; message << path;
+            return Result::fail (message);
+        }
+
         const File directory (path);
+
+        if (directory.existsAsFile())
+            return Result::fail ("export path exists as file");
         if (! directory.exists())
-            directory.createDirectory();
+            return directory.createDirectory();
+        
+        return Result::ok();
     }
 
     Result perform() override
     {
         if (! File::isAbsolutePath (path))
-            return Result::fail ("Invalid path for exporting");
+            return Result::fail ("invalid path for exporting");
         const File directory (path);
-        if (directory.existsAsFile())
-            return Result::fail ("Export path exists as file");
         return directory.exists() ? Result::ok() : Result::fail("Directory does not exist");
     }
 
@@ -57,7 +66,7 @@ public:
 
     ~AudioFileWriterTask() { }
 
-    void prepare (Versicap&) override;
+    Result prepare (Versicap&) override;
     Result perform() override;
     String getProgressName() const override { return target.getFileName(); }
 
