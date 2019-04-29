@@ -40,11 +40,17 @@ public:
 
         setColour (TextEditor::highlightColourId, Colours::whitesmoke);
         setColour (TextEditor::focusedOutlineColourId, Colours::orange.withAlpha (0.6f));
+
+        // popup menu
+        setColour (PopupMenu::highlightedBackgroundColourId, Colours::black.brighter (0.02));
+        setColour (PopupMenu::highlightedTextColourId, Colours::white);
     }
 
     ~LookAndFeel() { }
 
     float getPanelSpacing() const { return 1.4f; }
+
+    Font getPopupMenuFont() override { return Font (13.3f); }
 
     // combobox
     Font getComboBoxFont (ComboBox& box) override
