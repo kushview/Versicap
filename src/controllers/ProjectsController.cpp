@@ -70,7 +70,9 @@ void ProjectsController::initialize()
     document.reset (new ProjectDocument (versicap));
     versicap.getDeviceManager().addChangeListener (this);
     watcher.setProject (versicap.getProject());
-    watcher.onProjectModified = std::bind (&ProjectDocument::changed, document.get());
+    watcher.onProjectModified = [this]() {
+       document->changed();
+    };
     watcher.onSourceChanged = std::bind (&ProjectsController::updateEngineContext, this);
 }
 
@@ -87,8 +89,8 @@ void ProjectsController::projectChanged()
     watcher.setProject (versicap.getProject());
     if (document->getFile() != versicap.getProjectFile())
         document->setFile (versicap.getProjectFile());
-    document->setChangedFlag (false);
     updateEngineContext();
+    document->setChangedFlag (false);
 }
 
 void ProjectsController::updateEngineContext()
@@ -186,9 +188,16 @@ void ProjectsController::create()
         return;
     }
     
-    document->setFile (filename);
-    document->setChangedFlag (false);
-    versicap.loadProject (filename);
+    auto loadResult = document->loadFrom (filename, false);
+    if (loadResult.failed())
+    {
+        NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
+            "Versicap", loadResult.getErrorMessage());
+    }
+    else
+    {
+        DBG("[VCP] project opened ok");
+    }
 }
 
 void ProjectsController::record()

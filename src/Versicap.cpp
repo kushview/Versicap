@@ -562,21 +562,39 @@ bool Versicap::setProject (const Project& newProject)
 
     impl->project = newProject;
     auto& project = impl->project;
-
-    AudioDeviceManager::AudioDeviceSetup setup;
-    project.getAudioDeviceSetup (setup);
-    devices.setAudioDeviceSetup (setup, true);
-
-    PluginDescription desc;
-    if (project.getPluginDescription (getPluginManager(), desc))
+    
     {
-        loadPlugin (desc, false);
-        if (auto* const proc = engine.getAudioProcessor())
-            project.applyPluginState (*proc);
+        AudioDeviceManager::AudioDeviceSetup setup;
+        project.getAudioDeviceSetup (setup);
+
+        String error = devices.setAudioDeviceSetup (setup, true);
+        if (error.isNotEmpty())
+        {
+            devices.closeAudioDevice();
+            error = devices.initialiseWithDefaultDevices (32, 32);
+            if (error.isNotEmpty())
+            {
+                NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
+                    "Versicap", error);
+            }
+        }
+
+        devices.dispatchPendingMessages(); // needed so changed flag stays consistent
+                                           // in project controller
     }
 
-    auto midiOut = project.getProperty (Tags::midiOutput).toString();
-    engine.setDefaultMidiOutput (midiOut);
+    {
+        PluginDescription desc;
+        if (project.getPluginDescription (getPluginManager(), desc))
+        {
+            loadPlugin (desc, false);
+            if (auto* const proc = engine.getAudioProcessor())
+                project.applyPluginState (*proc);
+        }
+
+        auto midiOut = project.getProperty (Tags::midiOutput).toString();
+        engine.setDefaultMidiOutput (midiOut);
+    }
 
     for (int i = 0; i < project.getNumExporters(); ++i)
     {
