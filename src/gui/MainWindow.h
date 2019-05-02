@@ -49,9 +49,9 @@ public:
     ~MainWindow()
     {
         setConstrainer (nullptr);
-        #if ! JUCE_MAC
+       #if ! JUCE_MAC
         setMenuBar (nullptr);
-        #endif
+       #endif
         menu.reset();
     }
 

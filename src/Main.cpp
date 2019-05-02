@@ -41,7 +41,6 @@ public:
 
     void shutdown() override
     {
-        shutdownGui();
         versicap->saveSettings();
         versicap->saveRenderContext();
         versicap->shutdown();
@@ -89,11 +88,6 @@ private:
         versicap->initialize();
         auto& plugins = versicap->getPluginManager();
         plugins.scanAudioPlugins ({ "AudioUnit", "VST", "VST3" });
-    }
-
-    void shutdownGui()
-    {
-        versicap->closePluginWindow();        
     }
 
     bool maybeLaunchSlave (const String& commandLine)

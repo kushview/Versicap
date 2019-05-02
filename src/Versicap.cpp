@@ -381,7 +381,7 @@ void Versicap::saveSettings()
 
 void Versicap::saveRenderContext()
 {
-    File contextFile = getApplicationDataPath().getChildFile("context.versicap");
+    File contextFile = getApplicationDataPath().getChildFile ("context.versicap");
     if (! contextFile.getParentDirectory().exists())
         contextFile.getParentDirectory().createDirectory();
     saveProject (contextFile);

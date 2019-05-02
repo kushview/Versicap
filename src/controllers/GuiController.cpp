@@ -19,6 +19,8 @@ void GuiController::initialize()
 
 void GuiController::shutdown()
 {
+    versicap.closePluginWindow();
+
     if (window != nullptr)
     {
         window->savePersistentData();
