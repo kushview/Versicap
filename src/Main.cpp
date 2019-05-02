@@ -52,9 +52,13 @@ public:
     void systemRequestedQuit() override
     {
         if (versicap->hasProjectChanged())
-            if (AlertWindow::showNativeDialogBox ("Versicap", "This project has changed. Would you like to save?", true))
+        {
+            const auto result = NativeMessageBox::showYesNoBox (AlertWindow::InfoIcon,
+                "Versicap", "This project has changed. Would you like to save?");
+            if (result == 1)
                 versicap->getCommandManager().invokeDirectly (Commands::projectSave, false);
-    
+        }
+        
         quit();
     }
 

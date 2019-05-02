@@ -40,7 +40,8 @@ struct Versicap::Impl : public AudioIODeviceCallback,
 
     void audioDeviceError (const String& errorMessage) override
     {
-        AlertWindow::showNativeDialogBox ("Versicap", errorMessage, false);
+        NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
+            "Versicap", errorMessage);
     }
 
     void handleIncomingMidiMessage (MidiInput*, const MidiMessage& message) override
@@ -411,7 +412,8 @@ void Versicap::loadPlugin (const PluginDescription& type, bool clearProjectPlugi
     
     if (errorMessage.isNotEmpty())
     {
-        AlertWindow::showNativeDialogBox ("Versicap", errorMessage, false);
+        NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
+            "Versicap", errorMessage);
     }
     else
     {
@@ -426,7 +428,8 @@ void Versicap::loadPlugin (const PluginDescription& type, bool clearProjectPlugi
         }
         else
         {
-            AlertWindow::showNativeDialogBox ("Versicap", "Could not instantiate plugin", false);
+            NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
+                "Versicap", "Could not instantiate plugin");
         }
     }
 }

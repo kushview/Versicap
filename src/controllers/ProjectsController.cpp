@@ -129,7 +129,8 @@ void ProjectsController::open()
     auto result = document->loadFrom (chooser.getResult(), false);
     if (! result.wasOk())
     {
-        AlertWindow::showNativeDialogBox ("Versicap", result.getErrorMessage(), false);
+        NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
+            "Versicap", result.getErrorMessage());
     }
     else
     {
@@ -157,7 +158,8 @@ void ProjectsController::create()
     
     if (! dataPath.createDirectory())
     {
-        AlertWindow::showNativeDialogBox ("Versicap", "Could not create project directory", false);
+        NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
+            "Versicap", "Could not create project directory");
         return;
     }
 
@@ -166,7 +168,8 @@ void ProjectsController::create()
 
     if (! newProject.writeToFile (filename))
     {
-        AlertWindow::showNativeDialogBox ("Versicap", "Could not create project file", false);
+        NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon, 
+            "Versicap", "Could not create project file");
         return;
     }
     
@@ -179,7 +182,8 @@ void ProjectsController::record()
 {
     const auto result = versicap.startRendering();
     if (! result.wasOk())
-        AlertWindow::showNativeDialogBox ("Versicap", result.getErrorMessage(), false);
+        NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
+            "Versicap", result.getErrorMessage());
 }
 
 void ProjectsController::changeListenerCallback (ChangeBroadcaster*)
@@ -255,7 +259,8 @@ bool ProjectsController::perform (const ApplicationCommandTarget::InvocationInfo
         {
             auto result = versicap.startExporting();
             if (result.failed())
-                AlertWindow::showNativeDialogBox ("Versicap", result.getErrorMessage(), false);
+                NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
+                    "Versicap", result.getErrorMessage());
         } break;
 
         default: handled = false;
