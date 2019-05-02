@@ -53,7 +53,9 @@ public:
         if (versicap->hasProjectChanged())
         {
             const auto result = NativeMessageBox::showYesNoBox (AlertWindow::InfoIcon,
-                "Versicap", "This project has changed. Would you like to save?");
+                "Versicap", "This project has changed. Would you like to save?",
+                Versicap::getMainWindow());
+
             if (result == 1)
                 versicap->getCommandManager().invokeDirectly (Commands::projectSave, false);
         }

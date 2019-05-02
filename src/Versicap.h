@@ -7,6 +7,7 @@
 
 namespace vcp {
 
+class MainWindow;
 class AudioEngine;
 class PluginManager;
 class Render;
@@ -87,6 +88,9 @@ public:
     PluginManager& getPluginManager();
     AudioFormatManager& getAudioFormats();
     MidiKeyboardState& getMidiKeyboardState();
+
+    //=========================================================================
+    static MainWindow* getMainWindow();
 
     //=========================================================================
     AudioThumbnail* createAudioThumbnail (const File& file);

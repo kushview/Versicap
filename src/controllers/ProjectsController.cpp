@@ -132,10 +132,11 @@ void ProjectsController::open()
     if (! chooser.browseForFileToOpen())
         return;
     auto result = document->loadFrom (chooser.getResult(), false);
-    if (! result.wasOk())
+    if (result.failed())
     {
         NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
-            "Versicap", result.getErrorMessage());
+            "Versicap", result.getErrorMessage(),
+            Versicap::getMainWindow());
     }
     else
     {
@@ -157,9 +158,8 @@ void ProjectsController::create()
     window.addButton ("Ok", 1, KeyPress (KeyPress::returnKey));
     window.addButton ("Cancel", 0, KeyPress (KeyPress::escapeKey));
     
-    for (int i = DocumentWindow::getNumTopLevelWindows(); --i >= 0;)
-        if (auto* const mainWindow = dynamic_cast<MainWindow*> (DocumentWindow::getTopLevelWindow (i)))
-            window.centreAroundComponent (mainWindow, window.getWidth(), window.getHeight());
+    if (auto* const mainWindow = Versicap::getMainWindow())
+        window.centreAroundComponent (mainWindow, window.getWidth(), window.getHeight());
     
     const int result = window.runModalLoop();
 
@@ -174,7 +174,8 @@ void ProjectsController::create()
     if (! dataPath.createDirectory())
     {
         NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
-            "Versicap", "Could not create project directory");
+            "Versicap", "Could not create project directory",
+            Versicap::getMainWindow());
         return;
     }
 
@@ -184,7 +185,8 @@ void ProjectsController::create()
     if (! newProject.writeToFile (filename))
     {
         NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon, 
-            "Versicap", "Could not create project file");
+            "Versicap", "Could not create project file",
+            Versicap::getMainWindow());
         return;
     }
     
@@ -192,7 +194,8 @@ void ProjectsController::create()
     if (loadResult.failed())
     {
         NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
-            "Versicap", loadResult.getErrorMessage());
+            "Versicap", loadResult.getErrorMessage(),
+            Versicap::getMainWindow());
     }
     else
     {
@@ -205,7 +208,8 @@ void ProjectsController::record()
     const auto result = versicap.startRendering();
     if (! result.wasOk())
         NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
-            "Versicap", result.getErrorMessage());
+            "Versicap", result.getErrorMessage(),
+            Versicap::getMainWindow());
 }
 
 void ProjectsController::changeListenerCallback (ChangeBroadcaster*)
@@ -282,7 +286,7 @@ bool ProjectsController::perform (const ApplicationCommandTarget::InvocationInfo
             auto result = versicap.startExporting();
             if (result.failed())
                 NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
-                    "Versicap", result.getErrorMessage());
+                    "Versicap", result.getErrorMessage(), Versicap::getMainWindow());
         } break;
 
         default: handled = false;

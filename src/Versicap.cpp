@@ -1,9 +1,12 @@
 
 #include "controllers/GuiController.h"
 #include "controllers/ProjectsController.h"
+
 #include "engine/AudioEngine.h"
 #include "exporters/Exporter.h"
 #include "exporters/ExportThread.h"
+
+#include "gui/MainWindow.h"
 #include "gui/PluginWindow.h"
 
 #include "Commands.h"
@@ -545,6 +548,14 @@ bool Versicap::loadProject (const File& file)
     }
 
     return false;
+}
+
+MainWindow* Versicap::getMainWindow() 
+{
+    for (int i = DocumentWindow::getNumTopLevelWindows(); --i >= 0;)
+        if (auto* const mainWindow = dynamic_cast<MainWindow*> (DocumentWindow::getTopLevelWindow (i)))
+            return mainWindow;
+    return nullptr;
 }
 
 ExporterTypePtr Versicap::getExporterType (const String& slug) const
