@@ -1,5 +1,8 @@
 
+#include "controllers/GuiController.h"
 #include "controllers/ProjectsController.h"
+#include "gui/MainWindow.h"
+
 #include "engine/AudioEngine.h"
 #include "RenderContext.h"
 #include "Commands.h"
@@ -138,20 +141,30 @@ void ProjectsController::open()
     }
 }
 
+void ProjectsController::createNewProject (const String& alertTitle)
+{
+
+}
+
 void ProjectsController::create()
 {
     document->saveIfNeededAndUserAgrees();
 
-    AlertWindow window ("New Project", "Enter the project's name", AlertWindow::NoIcon);
-    window.addTextEditor ("Name", "");
+    AlertWindow window ("Create Project", "Enter the project's name", AlertWindow::NoIcon);
+    window.addTextEditor ("Name", "New Project");
     window.addButton ("Ok", 1, KeyPress (KeyPress::returnKey));
     window.addButton ("Cancel", 0, KeyPress (KeyPress::escapeKey));
+    
+    for (int i = DocumentWindow::getNumTopLevelWindows(); --i >= 0;)
+        if (auto* const mainWindow = dynamic_cast<MainWindow*> (DocumentWindow::getTopLevelWindow (i)))
+            window.centreAroundComponent (mainWindow, window.getWidth(), window.getHeight());
+    
     const int result = window.runModalLoop();
 
     if (result == 0)
         return;
 
-    Project newProject;
+    Project newProject = Project::create();
     String name = window.getTextEditor("Name")->getText();
     newProject.setProperty (Tags::name, name);
     const auto dataPath = Versicap::getProjectsPath().getNonexistentChildFile (name, "");

@@ -63,12 +63,12 @@ void Layer::setMissingProperties()
 
 //=========================================================================
 Project::Project()
-    : ObjectModel (Tags::project)
+    : ObjectModel (ValueTree())
 {
     setMissingProperties();
 }
 
-Project::~Project() {}
+Project::~Project() { }
 
 //=========================================================================
 void Project::setActiveLayer (const Layer& layer)

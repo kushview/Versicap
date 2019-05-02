@@ -37,7 +37,6 @@ public:
 
         setupGlobals();
         triggerAsyncUpdate();
-        versicap->launched();
     }
 
     void shutdown() override
@@ -58,7 +57,7 @@ public:
             if (result == 1)
                 versicap->getCommandManager().invokeDirectly (Commands::projectSave, false);
         }
-        
+
         quit();
     }
 
@@ -75,6 +74,8 @@ public:
             DBG("[VCP] loading last project: " << file.getFullPathName());
             versicap->loadProject (file);
         }
+
+        versicap->launched();
     }
 
 private:

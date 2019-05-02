@@ -305,6 +305,8 @@ public:
         notes.setProject (project);
         props->setProject (project);
         repaint();
+
+        checkValidProject();
     }
 
     ValueTree createState()
@@ -348,6 +350,9 @@ public:
 
     void displayObject (const ValueTree& object)
     {
+        if (! (bool) versicap.getUnlockStatus().isUnlocked())
+            return;
+        
         bool callDisplay = true;
         if (object.hasType (Tags::exporter))
         {
@@ -381,6 +386,15 @@ public:
             view->displayObject (object);
 
         repaint();
+    }
+
+    void checkValidProject()
+    {
+        if ((bool) versicap.getUnlockStatus().isUnlocked())
+        {
+            if (! project.isValid())
+                versicap.getCommandManager().invokeDirectly (Commands::projectNew, true);
+        }
     }
 
 private:
@@ -500,6 +514,7 @@ void MainComponent::changeListenerCallback (ChangeBroadcaster* bcaster)
         if ((bool) versicap.getUnlockStatus().isUnlocked())
         {
             content->showOverlay (false);
+            content->checkValidProject();
         }
         else
         {

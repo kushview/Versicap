@@ -485,6 +485,9 @@ Result Versicap::startRendering()
        
     const auto project = getProject();
 
+    if (project.getDataPath() == File())
+        return Result::fail ("Project data path is not set");
+
     if (project.getNumLayers() <= 0)
         return Result::fail ("Project has no layers for recording");
     

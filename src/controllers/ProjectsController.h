@@ -25,6 +25,8 @@ public:
     void initialize() override;
     void shutdown() override;
 
+    void createNewProject (const String& alertTitle);
+
 private:
     std::unique_ptr<ProjectDocument> document;
     ProjectWatcher watcher;

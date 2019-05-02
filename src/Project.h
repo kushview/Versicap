@@ -119,10 +119,23 @@ public:
 class Project : public kv::ObjectModel
 {
 public:
-    Project (const ValueTree& data) : kv::ObjectModel (data) {}
+    Project (const ValueTree& data) : kv::ObjectModel (data) { }
+    /** Creates an invalid project */
     Project();
     ~Project();
 
+    /** Creates a new, valid, project */
+    static Project create() 
+    {
+        ValueTree data (Tags::project);
+        Project project (data);
+        project.setMissingProperties();
+        return project;
+    }
+
+    //=========================================================================
+    bool isValid() const { return objectData.isValid() && objectData.hasType (Tags::project); }
+    
     //=========================================================================
     File getDataPath() const;
     
