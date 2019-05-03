@@ -26,7 +26,11 @@ public:
         getHeader().addColumn ("Name", NameColumn, 96);
 
         watcher.onChanged = [this]() { refreshSamples(); };
-        watcher.onSamplesAdded = [this]() { refreshSamples(); };
+        watcher.onSamplesAdded = watcher.onSampleAdded = watcher.onSampleRemoved = [this]()
+        { 
+            refreshSamples(); 
+        };
+        
         watcher.onActiveLayerChanged = [this]()
         {
             layer = watcher.getProject().getActiveLayer();
@@ -54,8 +58,22 @@ public:
         const auto project = watcher.getProject();
         filtered.clearQuick (true);
         auto layerIdx = project.indexOf (layer);
+        
         if (isPositiveAndBelow (layerIdx, project.getNumLayers()))
             project.getSamples (layerIdx, filtered);
+        
+        struct NameSort
+        {
+            int compareElements (Sample* lhs, Sample* rhs) {
+                return lhs->getNote() < rhs->getNote() ? -1 
+                     : lhs->getNote() == rhs->getNote() ? 0
+                     : lhs->getNote() > rhs->getNote() ? 1
+                     : 0;
+            }
+        } sorter;
+
+        filtered.sort (sorter);
+
         updateContent();
         repaint();
     }

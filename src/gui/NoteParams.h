@@ -31,7 +31,11 @@ public:
         noteStart.setTextBoxStyle (noteStart.getTextBoxPosition(), false, 30, noteStart.getTextBoxHeight());
         noteStart.textFromValueFunction = Util::noteValue;
         noteStart.updateText();
-        noteStart.onValueChange = [this]() { adjustNoteEnd(); };
+        noteStart.onValueChange = [this]() { 
+            adjustNoteEnd(); 
+            project.rebuildSampleList();
+            DBG(project.getSamples().getValueTree().toXmlString());
+        };
 
         addAndMakeVisible (noteEnd);
         noteEnd.setSliderStyle (Slider::IncDecButtons);
@@ -39,7 +43,10 @@ public:
         noteEnd.setTextBoxStyle (noteEnd.getTextBoxPosition(), false, 30, noteEnd.getTextBoxHeight());
         noteEnd.textFromValueFunction = Util::noteValue;
         noteEnd.updateText();
-        noteEnd.onValueChange = [this]() { adjustNoteStart(); };
+        noteEnd.onValueChange = [this]() {
+            adjustNoteStart();
+            project.rebuildSampleList();
+        };
 
         addAndMakeVisible (stepLabel);
         stepLabel.setFont (Font (12.f));
@@ -86,33 +93,36 @@ private:
 
     void menuResult (int result)
     {
+        bool handled = true;
         switch (result)
         {
             case 37:
-                noteStart.setValue (36, sendNotificationSync);
-                noteEnd.setValue (72, sendNotificationSync);
+                project.setNotes (36, 72);
                 break;
             case 49:
-                noteStart.setValue (36, sendNotificationSync);
-                noteEnd.setValue (84, sendNotificationSync);
+                project.setNotes (36, 84);
                 break;
             case 61:
-                noteStart.setValue (36, sendNotificationSync);
-                noteEnd.setValue (96, sendNotificationSync);
+                project.setNotes (36, 96);
                 break;
             case 76:
-                noteStart.setValue (36, sendNotificationSync);
-                noteEnd.setValue (108, sendNotificationSync);
+                project.setNotes (36, 108);
                 break;
             case 88:
-                noteStart.setValue (21, sendNotificationSync);
-                noteEnd.setValue (108, sendNotificationSync);
+                project.setNotes (21, 108);
                 break;
             case 100:
-                noteStart.setValue (0, sendNotificationSync);
-                noteEnd.setValue (127, sendNotificationSync);
+                project.setNotes (0, 127);
+                break;
+            default: handled = false;
                 break;
         };
+
+        if (handled)
+        {
+            project.rebuildSampleList();
+            DBG(project.getSamples().getValueTree().toXmlString());    
+        }
     }
 
     bool adjustNoteEnd()

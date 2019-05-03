@@ -51,26 +51,24 @@ public:
     Sample (const Sample& o) { operator= (o); }
     ~Sample() { }
 
-    bool isValid() const { return objectData.isValid() && objectData.hasType (Tags::sample); }
-    
-    String getNoteName() const
-    {
-        return isPositiveAndBelow (getNote(), 128)
-            ? MidiMessage::getMidiNoteName (getNote(), true, true, 4) 
-            : String();
-    }
+    static Sample create();
 
+    bool isValid() const;
+    bool isForLayer (const Layer& layer) const;
+
+    String getNoteName() const;
     String getFileName () const;
 
     Uuid getUuid() const;
     String getUuidString() const;
-    bool isForLayer (const Layer& layer) const;
-
+    
     File getFile() const;
+    
     int getNote() const { return getProperty (Tags::note); }
     
     double getSampleRate() const;
     double getTotalTime() const;
+    
     double getStartTime() const;
     double getEndTime() const;
     double getLength() const;
@@ -82,6 +80,8 @@ public:
         objectData = o.objectData;
         return *this;
     }
+private:
+    void setMissingProperties();
 };
 
 class SampleArray : public kv::ObjectModel
@@ -135,7 +135,17 @@ public:
 
     //=========================================================================
     bool isValid() const { return objectData.isValid() && objectData.hasType (Tags::project); }
-    
+
+    // sample builder
+    void rebuildSampleList();
+    void setNotes (int start, int end)
+    {
+        setProperty (Tags::noteStart, start);
+        setProperty (Tags::noteEnd, end);
+    }
+
+    void getPossibleNoteNumbers (Array<int>& notes) const;
+
     //=========================================================================
     File getDataPath() const;
     
@@ -148,13 +158,15 @@ public:
     int indexOf (const Layer& layer) const;
 
     //=========================================================================
-    void addExporter (ExporterType& type, const String& name = String());
-    ValueTree getExportersTree() const              { return objectData.getChildWithName (Tags::exporters); }
+    void addExporter (ExporterType& type, const String& name = String());    
     int getNumExporters() const                     { return getExportersTree().getNumChildren(); }
-    ValueTree getExporterData (int index) const     { return getExportersTree().getChild (index); }
     Exporter getExporter (int index) const          { return Exporter (getExporterData (index)); }
     void setActiveExporter (int index);
+
+    ValueTree getExportersTree() const              { return objectData.getChildWithName (Tags::exporters); }
+    ValueTree getExporterData (int index) const     { return getExportersTree().getChild (index); }
     ValueTree getActiveExporterData() const;
+
     void getExportTasks (OwnedArray<ExportTask>&) const;
     
     //=========================================================================
@@ -207,6 +219,9 @@ public:
 private:
     void setMissingProperties();
     ValueTree find (const Identifier& listType, const Identifier& property, const var& value) const;
+    ValueTree find (const Identifier& listType,
+                    const Identifier& p1, const var& v1,
+                    const Identifier& p2, const var& v2) const;
 };
 
 }

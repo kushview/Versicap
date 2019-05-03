@@ -3,6 +3,30 @@
 
 namespace vcp {
 
+void Sample::setMissingProperties()
+{
+    stabilizePropertyString (Tags::uuid, Uuid().toString());
+    stabilizePropertyString (Tags::layer, "");
+    stabilizePropertyString (Tags::name, "");
+}
+
+Sample Sample::create()
+{
+    ValueTree data (Tags::sample);
+    Sample sample (data);
+    sample.setMissingProperties();
+    return sample;
+}
+
+bool Sample::isValid() const { return objectData.isValid() && objectData.hasType (Tags::sample); }
+
+String Sample::getNoteName() const
+{
+    return isPositiveAndBelow (getNote(), 128)
+        ? MidiMessage::getMidiNoteName (getNote(), true, true, 4) 
+        : String();
+}
+
 //=========================================================================
 String Sample::getUuidString() const {   return getProperty (Tags::uuid).toString(); }
 

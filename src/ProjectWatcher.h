@@ -43,6 +43,8 @@ public:
 
     std::function<void()> onSamplesRemoved;
     std::function<void()> onSamplesAdded;
+    std::function<void()> onSampleRemoved;
+    std::function<void()> onSampleAdded;
     std::function<void()> onActiveSampleChanged;
 
     std::function<void()> onExportersChanged;
@@ -105,7 +107,14 @@ private:
             if (onSamplesAdded)
                 onSamplesAdded();
         }
-        else if (child.hasType ("exporter") && parent.hasType (Tags::exporters))
+        else if (child.hasType (Tags::sample) && 
+                 parent.hasType (Tags::samples) && 
+                 parent.getParent() == data)
+        {
+            if (onSampleAdded)
+                onSampleAdded();
+        }
+        else if (child.hasType (Tags::exporter) && parent.hasType (Tags::exporters))
         {
             if (onExportersChanged)
                 onExportersChanged();
@@ -128,7 +137,19 @@ private:
             if (onSamplesRemoved)
                 onSamplesRemoved();
         }
-
+        else if (child.hasType (Tags::sample) && 
+                 parent.hasType (Tags::samples) && 
+                 parent.getParent() == data)
+        {
+            if (onSampleRemoved)
+                onSampleRemoved();
+        }
+        else if (child.hasType (Tags::exporter) && parent.hasType (Tags::exporters))
+        {
+            if (onExportersChanged)
+                onExportersChanged();
+        }
+        
         notifyModified();
     }
 

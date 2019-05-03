@@ -210,6 +210,56 @@ void Project::getAudioDeviceSetup (AudioDeviceManager::AudioDeviceSetup& setup) 
     }
 }
 
+void Project::getPossibleNoteNumbers (Array<int>& notes) const
+{
+    int key = getProperty (Tags::noteStart, -1);
+    const int step = getProperty (Tags::noteStep, -1);
+    const int end  = getProperty (Tags::noteEnd, -1);
+    if (key < 0 || step < 0 || end < 0)
+        return;
+    
+    while (key <= end && key < 128)
+    {
+        notes.add (key);
+        key += step;
+    }
+}
+
+void Project::rebuildSampleList()
+{
+    Array<int> notes;
+    getPossibleNoteNumbers (notes);
+    auto samples = objectData.getOrCreateChildWithName (Tags::samples, nullptr);
+    
+    //objectData.removeChild (samples, nullptr);
+
+    for (int i = 0; i < getNumLayers(); ++i)
+    {
+        const auto layer = getLayer (i);
+        const auto layerId = layer.getUuidString();
+        
+        for (const auto& note : notes)
+        {
+            Sample sample (find (Tags::samples, Tags::layer, layerId,
+                                                Tags::note,  note));
+            if (! sample.isValid())
+            {
+                sample = Sample::create();
+                sample.setProperty (Tags::note, note)
+                      .setProperty (Tags::layer, layerId);
+                samples.appendChild (sample.getValueTree(), nullptr);
+            }
+        }
+    }
+
+    for (int i = samples.getNumChildren(); --i >= 0;)
+    {
+        const Sample sample (samples.getChild (i));
+        if (! notes.contains (sample.getNote()))
+            samples.removeChild (sample.getValueTree(), nullptr);
+    }
+}
+
 void Project::setAudioDeviceSetup (const AudioDeviceManager::AudioDeviceSetup& setup)
 {
     auto& project = *this;
@@ -403,6 +453,17 @@ ValueTree Project::find (const Identifier& listType,
 {
     const auto parent = objectData.getChildWithName (listType);
     return parent.getChildWithProperty (property, value);
+}
+
+ValueTree Project::find (const Identifier& listType,
+                         const Identifier& p1, const var& v1,
+                         const Identifier& p2, const var& v2) const
+{
+    const auto parent = objectData.getChildWithName (listType);
+    for (int i = 0; i < parent.getNumChildren(); ++i)
+        if (parent.getChild (i)[p1] == v1 && parent.getChild(i)[p2] == v2)
+            return parent.getChild (i);
+    return { };
 }
 
 void Project::addExporter (ExporterType& type, const String& name)
