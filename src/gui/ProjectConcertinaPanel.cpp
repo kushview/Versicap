@@ -11,7 +11,7 @@ ProjectConcertinaPanel::ProjectConcertinaPanel()
     setSize (220, 640);
 }
 
-ProjectConcertinaPanel::~ProjectConcertinaPanel() { }
+ProjectConcertinaPanel::~ProjectConcertinaPanel() {}
 
 void ProjectConcertinaPanel::createPanels (Versicap& versicap)
 {
@@ -23,7 +23,7 @@ void ProjectConcertinaPanel::createPanels (Versicap& versicap)
     for (int i = 0; i < getNumPanels(); ++i)
         setPanelHeaderSize (getPanel (i), 23);
     setPanelSize (getPanel (0), 140, false);
-    setPanelSize (getPanel (2), 0, false);
+    setPanelSize (getPanel (2), 200, false);
 }
 
 }

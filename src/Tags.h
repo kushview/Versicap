@@ -26,10 +26,11 @@ namespace Tags {
     static const Identifier fileOrId        = "fileOrId";
     static const Identifier format          = "format";
     
-    static const Identifier uuid            = "uuid";
+    static const Identifier height          = "height";
+
     static const Identifier identifier      = "identifier";
+
     static const Identifier latencyComp     = "latencyComp";
-    
     static const Identifier layer           = "layer";
     static const Identifier layers          = "layers";
     static const Identifier length          = "length";
@@ -63,12 +64,14 @@ namespace Tags {
 
     static const Identifier source          = "source";
     static const Identifier state           = "state";
-    static const Identifier tailLength      = "tailLength";
 
+    static const Identifier tailLength      = "tailLength";
     static const Identifier timeIn          = "timeIn";
     static const Identifier timeOut         = "timeOut";
     static const Identifier type            = "type";
 
+    static const Identifier uuid            = "uuid";
+    
     static const Identifier value           = "value";
     static const Identifier velocity        = "velocity";
     static const Identifier version         = "version";

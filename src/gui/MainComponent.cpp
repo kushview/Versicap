@@ -20,7 +20,6 @@
 #include "UnlockStatus.h"
 #include "Utils.h"
 
-#define VCP_DO_LOGO  1
 namespace vcp {
 
 class RenderProgress : public Component
@@ -188,12 +187,10 @@ public:
     void paint (Graphics& g) override
     {
         g.fillAll (kv::LookAndFeel_KV1::widgetBackgroundColor.darker());
-       #if VCP_DO_LOGO
         g.drawImageWithin (logo, 12, 6, 32, 32, RectanglePlacement::centred, false);
         g.setColour (kv::LookAndFeel_KV1::textColor);
         g.drawText (project.getProperty (Tags::name), getNameRectangle(), 
                     Justification::centredLeft);
-       #endif
     }
 
     void resized() override
@@ -311,8 +308,9 @@ public:
 
     ValueTree createState()
     {
-        ValueTree data ("state");
-        ValueTree projectPanelData = data.getOrCreateChildWithName ("project", nullptr);
+        ValueTree data (Tags::state);
+        ValueTree projectPanelData = data.getOrCreateChildWithName (Tags::project, nullptr);
+        
         for (int i = 0; i < projectPanel.getNumPanels(); ++i)
         {
             ValueTree panelData ("panel");
@@ -320,6 +318,8 @@ public:
             panelData.setProperty ("height", panel->getHeight(), nullptr);
             projectPanelData.appendChild (panelData, nullptr);
         }
+
+        data.setProperty ("mainView", view->getComponentID(), nullptr);
 
         if (auto xml = std::unique_ptr<XmlElement> (props->getOpennessState()))
         {
@@ -333,11 +333,14 @@ public:
 
     void applyState (const ValueTree& data)
     {
-        auto projectPanelData = data.getChildWithName ("project");
-        for (int i = 0; i < projectPanelData.getNumChildren(); ++i)
+        for (int i = projectPanel.getNumPanels(); --i >= 1;)
+            projectPanel.setPanelSize (projectPanel.getPanel (i), 0, false);
+ 
+        auto projectPanelData = data.getChildWithName (Tags::project);
+        for (int i = projectPanelData.getNumChildren(); --i >= 0;)
         {
             auto child = projectPanelData.getChild (i);
-            int height = child.getProperty ("height");
+            int height = child.getProperty (Tags::height);
             if (auto* const panel = projectPanel.getPanel (i))
                 projectPanel.setPanelSize (panel, height, false);
         }
@@ -346,6 +349,23 @@ public:
         if (mb.fromBase64Encoding (data.getProperty ("propsOpenness").toString()))
             if (auto xml = std::unique_ptr<XmlElement> (XmlDocument::parse (mb.toString())))
                 props->restoreOpennessState (*xml);
+
+        const auto mainView = data.getProperty ("mainView").toString();
+        std::function<void()> postResized;
+        if (mainView == "SampleEditContentView")
+        {
+            view.reset (new SampleEditContentView (versicap));
+        }
+        else if (mainView == "ExporterContentView")
+        {
+            view.reset (new ExporterContentView (versicap));
+        }
+
+        addAndMakeVisible (view.get());
+        resized();
+
+        if (postResized)
+            postResized();
     }
 
     void displayObject (const ValueTree& object)
