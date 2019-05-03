@@ -517,6 +517,8 @@ private:
 SampleEditContentView::SampleEditContentView (Versicap& vc)
     : ContentView (vc)
 {
+    setName ("Sample Editor");
+    setComponentID ("SampleEditContentView");
     content.reset (new Content (*this));
     addAndMakeVisible (content.get());
     versicap.addListener (this);

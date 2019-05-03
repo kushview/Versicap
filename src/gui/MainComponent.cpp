@@ -310,6 +310,7 @@ public:
     {
         ValueTree data (Tags::state);
         ValueTree projectPanelData = data.getOrCreateChildWithName (Tags::project, nullptr);
+        
         for (int i = 0; i < projectPanel.getNumPanels(); ++i)
         {
             ValueTree panelData ("panel");
@@ -317,6 +318,8 @@ public:
             panelData.setProperty ("height", panel->getHeight(), nullptr);
             projectPanelData.appendChild (panelData, nullptr);
         }
+
+        data.setProperty ("mainView", view->getComponentID(), nullptr);
 
         if (auto xml = std::unique_ptr<XmlElement> (props->getOpennessState()))
         {
@@ -346,6 +349,23 @@ public:
         if (mb.fromBase64Encoding (data.getProperty ("propsOpenness").toString()))
             if (auto xml = std::unique_ptr<XmlElement> (XmlDocument::parse (mb.toString())))
                 props->restoreOpennessState (*xml);
+
+        const auto mainView = data.getProperty ("mainView").toString();
+        std::function<void()> postResized;
+        if (mainView == "SampleEditContentView")
+        {
+            view.reset (new SampleEditContentView (versicap));
+        }
+        else if (mainView == "ExporterContentView")
+        {
+            view.reset (new ExporterContentView (versicap));
+        }
+
+        addAndMakeVisible (view.get());
+        resized();
+
+        if (postResized)
+            postResized();
     }
 
     void displayObject (const ValueTree& object)

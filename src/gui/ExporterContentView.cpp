@@ -96,6 +96,8 @@ private:
 ExporterContentView::ExporterContentView (Versicap& vc)
     : ContentView (vc)
 {
+    setName ("Target");
+    setComponentID ("ExporterContentView");
     content.reset (new Content (vc));
     addAndMakeVisible (content.get());
 }
