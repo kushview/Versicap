@@ -31,23 +31,14 @@ public:
         noteStart.setTextBoxStyle (noteStart.getTextBoxPosition(), false, 30, noteStart.getTextBoxHeight());
         noteStart.textFromValueFunction = Util::noteValue;
         noteStart.updateText();
-        noteStart.onValueChange = [this]() { 
-            adjustNoteEnd(); 
-            project.rebuildSampleList();
-            DBG(project.getSamples().getValueTree().toXmlString());
-        };
-
+        
         addAndMakeVisible (noteEnd);
         noteEnd.setSliderStyle (Slider::IncDecButtons);
         noteEnd.setRange (0, 127, 1);
         noteEnd.setTextBoxStyle (noteEnd.getTextBoxPosition(), false, 30, noteEnd.getTextBoxHeight());
         noteEnd.textFromValueFunction = Util::noteValue;
         noteEnd.updateText();
-        noteEnd.onValueChange = [this]() {
-            adjustNoteStart();
-            project.rebuildSampleList();
-        };
-
+        
         addAndMakeVisible (stepLabel);
         stepLabel.setFont (Font (12.f));
         stepLabel.setText ("Step:", dontSendNotification);
@@ -55,29 +46,50 @@ public:
         noteStep.setSliderStyle (Slider::IncDecButtons);
         noteStep.setRange (1, 12, 1);
         noteStep.setTextBoxStyle (noteStep.getTextBoxPosition(), false, 24, noteStep.getTextBoxHeight());
+
+        addAndMakeVisible (applyButton);
+        applyButton.setButtonText ("Apply");
+        applyButton.setConnectedEdges (Button::ConnectedOnRight);
+        applyButton.setEnabled (false);
+        applyButton.onClick = [this]() { applyChanges(); };
+
+        addAndMakeVisible (resetButton);
+        resetButton.setButtonText ("Reset");
+        resetButton.setConnectedEdges (Button::ConnectedOnLeft);
+        resetButton.setEnabled (false);
+        resetButton.onClick = [this]() {
+            stabilizeComponents();
+            setChanged (false);
+        };
+
+        setChanged (false);
+
+        bind();
     }
 
     ~NoteParams() = default;
 
-    int getRequiredWidth() { return (64 * 3) + 40 + 34 + 4; }
+    int getRequiredWidth() { return (64 * 3) + 34 + 34 + 4 + 34 + 34 + 2; }
 
     void resized() override
     {
         auto r2 = getLocalBounds().withWidth (jmax (getRequiredWidth(), getWidth()));
+        resetButton.setBounds (r2.removeFromRight (34));
+        applyButton.setBounds (r2.removeFromRight (34));
+        r2.removeFromRight (2);
         noteStep.setBounds (r2.removeFromRight (64));
         stepLabel.setBounds (r2.removeFromRight (34));
         r2.removeFromRight (4);
         noteEnd.setBounds (r2.removeFromRight (64));
         noteStart.setBounds (r2.removeFromRight (64));
-        notesButton.setBounds (r2.removeFromRight (40));
+        notesButton.setBounds (r2.removeFromRight (34));
     }
 
     void setProject (const Project& newProject)
     {
         project = newProject;
-        noteStart.getValueObject().referTo (project.getPropertyAsValue (Tags::noteStart));
-        noteEnd.getValueObject().referTo (project.getPropertyAsValue (Tags::noteEnd));
-        noteStep.getValueObject().referTo (project.getPropertyAsValue (Tags::noteStep));
+        stabilizeComponents();
+        setChanged (false);
     }
 
     static void menuResult (int result, NoteParams* params) {
@@ -90,39 +102,94 @@ private:
     Label stepLabel;
     Slider noteStart, noteEnd, noteStep;
     TextButton notesButton;
+    TextButton applyButton;
+    TextButton resetButton;
+    bool changedFlag = false;
+    
+    void bind()
+    {
+        noteStart.onValueChange = [this]() {
+            adjustNoteEnd();
+            setChanged (true);
+        };
+
+        noteEnd.onValueChange = [this]() {
+            adjustNoteStart();
+            setChanged (true);
+        };
+
+        noteStep.onValueChange = [this]() { setChanged (true); };
+    }
+
+    void unbind()
+    {
+        noteStart.onValueChange = nullptr;
+        noteEnd.onValueChange = nullptr;
+        noteStep.onValueChange = nullptr;
+    }
+
+    void stabilizeComponents()
+    {
+        unbind();
+        noteStart.setValue (project.getProperty (Tags::noteStart), dontSendNotification);
+        noteEnd.setValue (project.getProperty (Tags::noteEnd), dontSendNotification);
+        noteStep.setValue (project.getProperty (Tags::noteStep), dontSendNotification);
+        bind();
+    }
+
+    void applyChanges()
+    {
+        project.setProperty (Tags::noteStart, roundToInt (noteStart.getValue()));
+        project.setProperty (Tags::noteEnd, roundToInt (noteEnd.getValue()));
+        project.setProperty (Tags::noteStep, roundToInt (noteStep.getValue()));
+        project.rebuildSampleList();
+        setChanged (false);
+    }
+
+    void setChanged (bool changed)
+    {
+        changedFlag = changed;
+        resetButton.setEnabled (changedFlag);
+        applyButton.setEnabled (changedFlag);
+        resized();
+    }
 
     void menuResult (int result)
     {
         bool handled = true;
+        
         switch (result)
         {
             case 37:
-                project.setNotes (36, 72);
+                noteStart.setValue (36);
+                noteEnd.setValue (72);
                 break;
             case 49:
-                project.setNotes (36, 84);
+                noteStart.setValue (36);
+                noteEnd.setValue (84);
                 break;
             case 61:
-                project.setNotes (36, 96);
+                noteStart.setValue (36);
+                noteEnd.setValue (96);
                 break;
             case 76:
-                project.setNotes (36, 108);
+                noteStart.setValue (36);
+                noteEnd.setValue (108);
                 break;
             case 88:
-                project.setNotes (21, 108);
+                noteStart.setValue (21);
+                noteEnd.setValue (108);
                 break;
             case 100:
-                project.setNotes (0, 127);
+                noteStart.setValue (0);
+                noteEnd.setValue (127);
                 break;
             default: handled = false;
                 break;
         };
 
         if (handled)
-        {
-            project.rebuildSampleList();
-            DBG(project.getSamples().getValueTree().toXmlString());    
-        }
+            setChanged (handled);
     }
 
     bool adjustNoteEnd()

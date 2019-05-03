@@ -28,7 +28,7 @@ public:
         setContentOwned (cc, true);
 
         setResizable (true, false);
-        constrain.setMinimumSize (870, 460);
+        constrain.setMinimumSize (890, 470);
         // constrain.setMaximumSize (1280, 340);
         setConstrainer (&constrain);
         centreWithSize (1200, 600);

@@ -238,6 +238,8 @@ void Project::rebuildSampleList()
         const auto layer = getLayer (i);
         const auto layerId = layer.getUuidString();
         
+        // MessageManager::getInstance()->runDispatchLoopUntil (20);
+
         for (const auto& note : notes)
         {
             Sample sample (find (Tags::samples, Tags::layer, layerId,

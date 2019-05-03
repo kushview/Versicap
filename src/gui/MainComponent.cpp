@@ -214,6 +214,9 @@ public:
         panicButton.changeWidthToFitText (r2.getHeight());
         panicButton.setBounds (recordButton.getRight(), r2.getY(), panicButton.getWidth() - 1, r2.getHeight());
 
+        if (notes.getX() < panicButton.getRight())
+            notes.setBounds (notes.getBoundsInParent().withX (panicButton.getRight()));
+        
         r.removeFromTop (1);
         r.removeFromLeft (6);
         r.removeFromRight (6);
@@ -555,6 +558,7 @@ void MainComponent::renderWillStart()
     progress.setProgressText ("Waiting...");
     progress.onCancel = std::bind (&Versicap::stopRendering, &versicap);
     content->showProgress (true);
+    content->recordButton.setEnabled (false);
 }
 
 void MainComponent::renderStarted()
@@ -566,6 +570,7 @@ void MainComponent::renderStarted()
 void MainComponent::renderWillStop()
 {
     content->showProgress (false);
+    content->recordButton.setEnabled (true);
 }
 
 void MainComponent::renderProgress (double value, const String& message)
