@@ -132,10 +132,12 @@ public:
     { 
         addAndMakeVisible (addButton);
         addButton.setButtonText ("A");
+        
         addButton.onClick = [this]()
         {
             auto project = table.getProject();
             auto layer = project.addLayer();
+            project.rebuildSampleList();
             table.selectRow (project.indexOf (layer));
         };
 

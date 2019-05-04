@@ -20,6 +20,7 @@ public:
 
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo&) override;
     bool perform (const ApplicationCommandTarget::InvocationInfo&) override;
+    
     void projectChanged() override;
 
     void initialize() override;

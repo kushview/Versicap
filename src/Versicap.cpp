@@ -162,6 +162,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     OptionalScopedPointer<PluginManager> plugins;
     std::unique_ptr<UnlockStatus> unlock;
     MidiKeyboardState keyboardState;
+    std::unique_ptr<UndoManager> undoManager;
 
     //=========================================================================
     std::unique_ptr<PluginWindow> window;
@@ -177,6 +178,7 @@ Versicap::Versicap()
     impl->unlock.reset (new UnlockStatus (impl->settings));
     impl->engine.reset (new AudioEngine (*impl->formats, impl->plugins->getAudioPluginFormats()));
     impl->exporter.reset (new ExportThread());
+    impl->undoManager.reset (new UndoManager (30000, 30));
 
     auto& controllers = impl->controllers;
     controllers.add (new GuiController (*this));
@@ -406,6 +408,7 @@ AudioFormatManager& Versicap::getAudioFormats()             { return *impl->form
 MidiKeyboardState& Versicap::getMidiKeyboardState()         { return impl->keyboardState; }
 PluginManager& Versicap::getPluginManager()                 { return *impl->plugins; }
 UnlockStatus& Versicap::getUnlockStatus()                   { return *impl->unlock; }
+UndoManager& Versicap::getUndoManager()                     { return *impl->undoManager; }
 
 void Versicap::loadPlugin (const PluginDescription& type, bool clearProjectPlugin)
 {

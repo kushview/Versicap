@@ -55,7 +55,8 @@ public:
 
     bool isValid() const;
     bool isForLayer (const Layer& layer) const;
-
+    String getLayerUuidString() const;
+    
     String getNoteName() const;
     String getFileName () const;
 

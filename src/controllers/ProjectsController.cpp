@@ -70,10 +70,8 @@ void ProjectsController::initialize()
     document.reset (new ProjectDocument (versicap));
     versicap.getDeviceManager().addChangeListener (this);
     watcher.setProject (versicap.getProject());
-    watcher.onProjectModified = [this]() {
-       document->changed();
-    };
-    watcher.onSourceChanged = std::bind (&ProjectsController::updateEngineContext, this);
+    watcher.onProjectModified = std::bind (&ProjectDocument::changed, document.get());
+    watcher.onSourceChanged   = std::bind (&ProjectsController::updateEngineContext, this);
 }
 
 void ProjectsController::shutdown()

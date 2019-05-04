@@ -178,8 +178,17 @@ void Project::removeLayer (int index)
 {
     if (! isPositiveAndBelow (index, getNumLayers()))
         return;
-    auto layers = objectData.getChildWithName (Tags::layers);
+    auto layers  = objectData.getChildWithName (Tags::layers);
+    auto samples = objectData.getChildWithName (Tags::samples);
+    const auto layerId = layers.getChild (index).getProperty (Tags::uuid).toString();
+
     layers.removeChild (index, nullptr);
+    for (int i = samples.getNumChildren(); --i >= 0;)
+    {
+        const Sample sample (samples.getChild (i));
+        if (sample.getLayerUuidString() == layerId)
+            samples.removeChild (i, nullptr);
+    }
 }
 
 int Project::indexOf (const Layer& layer) const

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "exporters/Exporter.h"
-#include "Settings.h"
 #include "Project.h"
+#include "Settings.h"
 #include "Tags.h"
 
 namespace vcp {
@@ -14,7 +14,12 @@ class Render;
 class RenderContext;
 class UnlockStatus;
 
-struct DisplayObjectMessage : public Message
+struct AppMessage : public Message
+{
+
+};
+
+struct DisplayObjectMessage : public AppMessage
 {
     DisplayObjectMessage (const ValueTree& o) : object (o) { }
     const ValueTree object;
@@ -88,6 +93,7 @@ public:
     PluginManager& getPluginManager();
     AudioFormatManager& getAudioFormats();
     MidiKeyboardState& getMidiKeyboardState();
+    UndoManager& getUndoManager();
 
     //=========================================================================
     static MainWindow* getMainWindow();

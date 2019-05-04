@@ -52,9 +52,11 @@ String Sample::getFileName () const
     return tokens.joinIntoString("_");
 }
 
+String Sample::getLayerUuidString() const { return getProperty (Tags::layer).toString(); }
+
 bool Sample::isForLayer (const Layer& layer) const
 {
-    const Uuid sid (getProperty (Tags::layer).toString());
+    const Uuid sid (getLayerUuidString());
     const Uuid lid (layer.getUuid());
     return !sid.isNull() && !lid.isNull() && sid == lid;
 }
