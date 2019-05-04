@@ -16,17 +16,16 @@ public:
 
     String getName() const override { return "Projects"; }
     
+    void createNewProject (const String& alertTitle);
     bool hasProjectChanged() const;
 
+    void initialize() override;
+    void shutdown() override;
+    
     void getCommandInfo (CommandID commandID, ApplicationCommandInfo&) override;
     bool perform (const ApplicationCommandTarget::InvocationInfo&) override;
     
     void projectChanged() override;
-
-    void initialize() override;
-    void shutdown() override;
-
-    void createNewProject (const String& alertTitle);
 
 private:
     std::unique_ptr<ProjectDocument> document;
