@@ -285,6 +285,39 @@ void Project::setAudioDeviceSetup (const AudioDeviceManager::AudioDeviceSetup& s
 //=========================================================================
 void Project::setSamples (const ValueTree& newSamples)
 {
+    for (int i = 0; i < newSamples.getNumChildren(); ++i)
+    {
+        const Sample recorded (newSamples.getChild (i));
+        Sample existing (find (Tags::samples, Tags::layer, recorded.getLayerUuidString(),
+                                              Tags::note,  recorded.getNote()));
+        
+        Array<Identifier> propsToCopy, propsToCopyIfNotThere;
+        propsToCopy.addArray ({ Tags::file, Tags::sampleRate, Tags::length });
+        propsToCopyIfNotThere.addArray ({
+            Tags::layer, Tags::name, Tags::note, 
+            Tags::timeIn, Tags::timeOut
+        });
+        
+        if (! existing.isValid())
+        {
+            jassertfalse;
+            existing = Sample::create();
+            objectData.getChildWithName (Tags::samples).appendChild (
+                existing.getValueTree(), nullptr);
+        }
+
+        for (const auto& prop : propsToCopy)
+            existing.setProperty (prop, recorded.getProperty (prop));
+        
+        for (const auto& prop : propsToCopyIfNotThere)
+            if (! existing.hasProperty (prop))
+                existing.setProperty (prop, recorded.getProperty (prop));
+        
+        if (existing.getEndTime() > existing.getLength())
+            existing.setProperty (Tags::timeOut, existing.getLength());
+    }
+
+   #if 0
     int lastIndex = -1;
     for (int i = objectData.getNumChildren(); --i >= 0;)
     {
@@ -302,6 +335,7 @@ void Project::setSamples (const ValueTree& newSamples)
     // DBG(newSamples.toXmlString());
     // DBG("===================================================");
     // DBG(objectData.toXmlString());
+   #endif
 }
 
 SampleArray Project::getSamples() const

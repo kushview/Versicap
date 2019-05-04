@@ -205,9 +205,11 @@ void ProjectsController::record()
 {
     const auto result = versicap.startRendering();
     if (! result.wasOk())
+    {
         NativeMessageBox::showMessageBoxAsync (AlertWindow::WarningIcon,
             "Versicap", result.getErrorMessage(),
             Versicap::getMainWindow());
+    }
 }
 
 void ProjectsController::changeListenerCallback (ChangeBroadcaster*)
