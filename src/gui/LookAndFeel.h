@@ -33,11 +33,18 @@ public:
 
         // List Box
         setColour (ListBox::textColourId, textColor);
+        setColour (ListBox::backgroundColourId, widgetBackgroundColor.darker (0.82));
 
+        // table header
         setColour (TableHeaderComponent::backgroundColourId, widgetBackgroundColor.darker());
         setColour (TableHeaderComponent::textColourId, Colours::black);
         setColour (TableHeaderComponent::highlightColourId, Colours::orange.withAlpha (0.6f));
 
+        // // table
+        // setColour (TableListBox::textColourId, textColor);
+        // setColour (TableListBox::backgroundColourId, widgetBackgroundColor.darker (0.82));
+
+        // text editor
         setColour (TextEditor::highlightColourId, Colours::whitesmoke);
         setColour (TextEditor::focusedOutlineColourId, Colours::orange.withAlpha (0.6f));
 
@@ -80,7 +87,12 @@ public:
     }
 
     // label
-    Font getLabelFont (Label&) override { return Font (13.f); }
+    Font getLabelFont (Label& label) override
+    {
+        if (nullptr != dynamic_cast<PropertyComponent*> (label.getParentComponent()))
+            label.setFont (Font (13.f));
+        return label.getFont();
+    }
     
     // scrollbar
     int getDefaultScrollbarWidth() override { return 14; }
