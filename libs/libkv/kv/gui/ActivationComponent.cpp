@@ -1,6 +1,11 @@
 
 #include <kv/kv.h>
 
+#if ! defined (KV_ACTIVATION_INSTRUCTIONS)
+ #define KV_ACTIVATION_INSTRUCTIONS      "APPNAME requires activation to run.\n" \
+                                         "Please enter your license key for APPNAME."
+#endif
+
 namespace kv {
 
 ActivationComponent::ActivationComponent (UnlockStatus& _status)
@@ -154,6 +159,17 @@ ActivationComponent::~ActivationComponent()
     //[/Destructor]
 }
 
+
+void ActivationComponent::setAppName (const String& newName)
+{
+    appName = newName;
+    appNameLabel->setText (appName, dontSendNotification);
+    instructionLabel->setText (
+        instructionLabel->getText().replace ("APPNAME", appName),
+        dontSendNotification);
+    activateInstructions = instructionLabel->getText();
+}
+
 //==============================================================================
 void ActivationComponent::paint (Graphics& g)
 {
@@ -203,6 +219,7 @@ void ActivationComponent::resized()
         copyMachineButton.setBounds (getWidth() - 94, getHeight() - 32,
                                      24, 22);
     }
+
     if (syncButton && syncButton->isVisible())
     {
         int shiftLeft = activateButton->getHeight() / 2;
@@ -387,10 +404,12 @@ void ActivationComponent::buttonClicked (Button* buttonThatWasClicked)
             unlockRef->setShowText (overlayShowText);
             unlockRef->onFinished = [this](const UnlockStatus::UnlockResult result, UnlockOverlay::Action)
             {
-                #if 0
+                
                 if (result.succeeded)
                 {
-                    auto& _status = gui.getWorld().getUnlockStatus();
+
+                    auto& _status = status;
+                   #if 0
                     if (EL_IS_TRIAL_EXPIRED(_status) ||
                         EL_IS_TRIAL_NOT_EXPIRED(_status))
                     {
@@ -402,7 +421,9 @@ void ActivationComponent::buttonClicked (Button* buttonThatWasClicked)
                         setForTrial (true);
                         resized();
                     }
-                    else if (auto* dialog = findParentComponentOfClass<ActivationDialog>())
+                    else 
+                   #endif
+                    if (auto* dialog = findParentComponentOfClass<ActivationDialog>())
                     {
                         // if in the dialog, close it
                         dialog->closeButtonPressed();
@@ -412,9 +433,8 @@ void ActivationComponent::buttonClicked (Button* buttonThatWasClicked)
                         // otherwise go to management
                         setForManagement (true);
                     }
-                    _status.refreshed();
+                    _status.sendChangeMessage();
                 }
-                #endif
             };
             addAndMakeVisible (unlock.get());
         }
@@ -621,7 +641,7 @@ void ActivationComponent::setForManagement (bool setupManagement)
     if (isForManagement)
     {
         auto managementText = String("Your license for APPNAME is active on this machine.")
-                                   .replace("APPNAME", "The Application");
+                                   .replace("APPNAME", appName);
         
         // TODO?: if (gui.getUnlockStatus().isTrial())
         //     managementText = managementText.replace("Your license", "Your trial license");

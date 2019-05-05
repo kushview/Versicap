@@ -29,8 +29,11 @@ public:
 private:
     std::unique_ptr<LookAndFeel> look;
     std::unique_ptr<MainWindow> window;
+    std::unique_ptr<Component> unlock;
     ValueTree displayedObject;
+
     ContentComponent* getContent();
+    void checkUnlockStatus();
 };
 
 }

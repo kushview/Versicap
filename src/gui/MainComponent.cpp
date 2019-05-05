@@ -498,7 +498,7 @@ MainComponent::MainComponent (Versicap& vc)
     versicap.addListener (this);
     versicap.getUnlockStatus().addChangeListener (this);
     if (! (bool) versicap.getUnlockStatus().isUnlocked())
-        content->showUnlockForm();
+        content->showOverlay (true);
 }
 
 MainComponent::~MainComponent()
@@ -535,15 +535,7 @@ void MainComponent::changeListenerCallback (ChangeBroadcaster* bcaster)
 {
     if (bcaster == &versicap.getUnlockStatus())
     {
-        if ((bool) versicap.getUnlockStatus().isUnlocked())
-        {
-            content->showOverlay (false);
-            content->checkValidProject();
-        }
-        else
-        {
-            content->showUnlockForm();
-        }
+        content->showOverlay (! (bool) versicap.getUnlockStatus().isUnlocked());
     }
 }
 

@@ -4,6 +4,7 @@
 #include "Project.h"
 #include "Settings.h"
 #include "Tags.h"
+#include "UnlockStatus.h"
 
 namespace vcp {
 

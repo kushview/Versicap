@@ -13,6 +13,8 @@ public:
     ActivationComponent (UnlockStatus& _status);
     ~ActivationComponent();
 
+    void setAppName (const String& newName);
+
     void setForTrial (bool setupForTrial);
     void setForRegistration (bool setupRegistration);
     void setForManagement (bool setupManagement);
@@ -42,6 +44,8 @@ private:
     Colour backgroundColour;
     UnlockStatus& status;
     std::unique_ptr<Component> unlock;
+
+    String appName;
 
     double progress = 0.0;
     float overlayOpacity = 0.72f;
@@ -104,6 +108,17 @@ public:
     void closeButtonPressed() override
     {
         owner.reset();
+    }
+
+    ActivationComponent* getActivationComponent() const
+    {
+        return dynamic_cast<ActivationComponent*> (getContentComponent());
+    }
+
+    void setAppName (const String& appName)
+    {
+        if (auto* const ac = getActivationComponent())
+            ac->setAppName (appName);
     }
 
 private:

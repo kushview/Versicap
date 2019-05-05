@@ -140,7 +140,7 @@ def build_mac (bld):
         source      = [ 'src/Main.cpp' ],
         includes    = [ 'jucer/JuceLibraryCode', \
                         'libs/kv/modules', \
-                        'src', \
+                        'src', 'libs/libkv', \
                         os.path.expanduser('~') + '/SDKs/VST_SDK/VST3_SDK', \
                         os.path.expanduser('~') + '/SDKs/VST_SDK/VST2_SDK', \
                         os.path.expanduser('~') + '/SDKs/JUCE/modules' ],

@@ -1,4 +1,6 @@
 
+#include <kv/kv.h>
+
 #include "controllers/GuiController.h"
 #include "gui/LookAndFeel.h"
 #include "gui/MainWindow.h"
@@ -36,6 +38,7 @@ void GuiController::launched()
     if (window)
         return;
     window.reset (new MainWindow ("Versicap", versicap));
+    checkUnlockStatus();
 }
 
 ContentComponent* GuiController::getContent()
@@ -75,6 +78,23 @@ bool GuiController::perform (const ApplicationCommandTarget::InvocationInfo& inf
             break;
     }
     return handled;
+}
+
+void GuiController::checkUnlockStatus()
+{
+    if ((bool) versicap.getUnlockStatus().isUnlocked())
+    {
+        unlock.reset();
+    }
+    else
+    {
+        if (nullptr == unlock)
+        {
+            auto* const dialog = new kv::ActivationDialog (versicap.getUnlockStatus(), unlock);
+            dialog->centreAroundComponent (window.get(), dialog->getWidth(), dialog->getHeight());
+            dialog->setAppName ("VERSICAP");
+        }
+    }
 }
 
 }
