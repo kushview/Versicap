@@ -80,10 +80,14 @@ bool GuiController::perform (const ApplicationCommandTarget::InvocationInfo& inf
         case Commands::showLicenseManagement:
         {    
             auto* const dialog = new kv::ActivationDialog (versicap.getUnlockStatus(), unlock);
+            auto* const ac = dialog->getActivationComponent();
+
             dialog->centreAroundComponent (window.get(), dialog->getWidth(), dialog->getHeight());
-            dialog->setAppName ("VERSICAP");
+            ac->setAppName ("VERSICAP");
+            ac->setShouldDialogWhenFinished (false);
+            ac->setQuitButtonText ("Continue");
             if ((bool) versicap.getUnlockStatus().isUnlocked())
-                dialog->getActivationComponent()->setForManagement (true);
+                ac->setForManagement (true);
         } break;
 
         default: handled = false;

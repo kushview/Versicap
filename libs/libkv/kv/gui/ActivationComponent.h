@@ -19,18 +19,23 @@ public:
     void setForRegistration (bool setupRegistration);
     void setForManagement (bool setupManagement);
     
+    void setQuitButtonText (const String& text) { quitButton->setButtonText (text); }
+    
     void setQuitButtonTextForTrial (const String& text)
     {
         trialQuitButtonText = text;
         if (isForTrial)
-            quitButton->setButtonText (trialQuitButtonText);
+            setQuitButtonText (trialQuitButtonText);
     }
 
-    void visibilityChanged() override;
-    void timerCallback() override;
     void setBackgroundColour (const Colour& color) { backgroundColour = color; repaint(); }
     void setOverlayOpacity (float opacity) { overlayOpacity = jlimit (0.f, 1.f, opacity); }
     void setOverlayShowText (bool showIt) { overlayShowText = showIt; }
+
+    void setShouldDialogWhenFinished (bool closeIt) { closeDialogWhenFinished = closeIt; }
+
+    void visibilityChanged() override;
+    void timerCallback() override;
 
     bool isInterestedInFileDrag (const StringArray& files) override;
     void filesDropped (const StringArray& files, int x, int y) override;
@@ -55,6 +60,8 @@ private:
     bool isForTrial = false;
     bool isForRegistration = false;
     bool isForManagement = false;
+
+    bool closeDialogWhenFinished = true;
 
     String textBeforeReg;
     Label emailLabel { "Email"};

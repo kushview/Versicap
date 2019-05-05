@@ -270,6 +270,7 @@ void ActivationComponent::resized()
 void ActivationComponent::buttonClicked (Button* buttonThatWasClicked)
 {
     //[UserbuttonClicked_Pre]
+    auto* const dialog = findParentComponentOfClass<DialogWindow>();
     //[/UserbuttonClicked_Pre]
 
     if (buttonThatWasClicked == activateButton.get())
@@ -404,10 +405,9 @@ void ActivationComponent::buttonClicked (Button* buttonThatWasClicked)
             unlockRef->setShowText (overlayShowText);
             unlockRef->onFinished = [this](const UnlockStatus::UnlockResult result, UnlockOverlay::Action)
             {
-                
+                auto* const dialog = findParentComponentOfClass<DialogWindow>();
                 if (result.succeeded)
                 {
-
                     auto& _status = status;
                    #if 0
                     if (EL_IS_TRIAL_EXPIRED(_status) ||
@@ -423,7 +423,7 @@ void ActivationComponent::buttonClicked (Button* buttonThatWasClicked)
                     }
                     else 
                    #endif
-                    if (auto* dialog = findParentComponentOfClass<ActivationDialog>())
+                    if (closeDialogWhenFinished && nullptr != dialog)
                     {
                         // if in the dialog, close it
                         dialog->closeButtonPressed();
@@ -433,14 +433,15 @@ void ActivationComponent::buttonClicked (Button* buttonThatWasClicked)
                         // otherwise go to management
                         setForManagement (true);
                     }
+
                     _status.sendChangeMessage();
                 }
             };
+
             addAndMakeVisible (unlock.get());
         }
 
         resized();
-        //[/UserButtonCode_activateButton]
     }
     else if (buttonThatWasClicked == quitButton.get())
     {
@@ -486,14 +487,14 @@ void ActivationComponent::buttonClicked (Button* buttonThatWasClicked)
         }
         else
         {
-           #if EL_ALLOW_TRIAL_REGISTRATION
             if (quitButton->getButtonText() == "Quit")
                 JUCEApplication::getInstance()->systemRequestedQuit();
+            else if (dialog != nullptr && quitButton->getButtonText() == "Continue")
+                dialog->closeButtonPressed();
             else
                 setForRegistration (true);
-           #else
+           
             JUCEApplication::getInstance()->systemRequestedQuit();
-           #endif
         }
         //[/UserButtonCode_quitButton]
     }
@@ -703,6 +704,8 @@ void ActivationComponent::handleRefreshResult (const UnlockStatus::UnlockResult 
     if (result.succeeded)
     {
         auto& _status = status;
+        auto* const dialog = findParentComponentOfClass<ActivationDialog>();
+
        #if 0
         if (EL_IS_TRIAL_EXPIRED(_status) || EL_IS_TRIAL_NOT_EXPIRED(_status))
         {
@@ -712,8 +715,9 @@ void ActivationComponent::handleRefreshResult (const UnlockStatus::UnlockResult 
         }
         else 
        #endif
-        if (auto* dialog = findParentComponentOfClass<ActivationDialog>())
-        {
+        
+        if (dialog && closeDialogWhenFinished)
+        {            
             dialog->closeButtonPressed();
         }
         else
