@@ -1,13 +1,12 @@
 
 #pragma once
-#include "JuceHeader.h"
+#include <kv/kv.h>
 
 namespace vcp {
 
 class Settings;
 
-class UnlockStatus : public kv::EDDOnlineUnlockStatus,
-                     public ChangeBroadcaster
+class UnlockStatus : public kv::UnlockStatus
 {
 public:
     UnlockStatus (Settings&);

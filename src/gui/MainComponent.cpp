@@ -165,6 +165,9 @@ public:
         setProject (versicap.getProject());
 
         startTimerHz (30);
+
+        // auto* dialog = new kv::ActivationDialog (versicap.getUnlockStatus(), unlocker);
+        // dialog->centreAroundComponent (this, dialog->getWidth(), dialog->getHeight());
     }
 
     ~Content()
@@ -449,6 +452,8 @@ private:
     Component::SafePointer<UnlockForm> unlock;
 
     Image logo;
+
+    std::unique_ptr<Component> unlocker;
 
     struct Overlay : public Component
     {

@@ -12,6 +12,7 @@
                 "${workspaceRoot}/jucer/JuceLibraryCode",
                 "${workspaceRoot}/src",
                 "${workspaceRoot}/libs/kv/modules",
+                "${workspaceRoot}/libs/libkv",
                 "${HOME}/SDKs/JUCE/modules"
             ],
             "defines": [ ],
