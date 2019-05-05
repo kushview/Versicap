@@ -38,7 +38,6 @@ public:
     void buttonClicked (Button* buttonThatWasClicked) override;
 
 private:
-    //[UserVariables]   -- You can add your own custom variables in this section.
     String activateInstructions;
     Colour backgroundColour;
     UnlockStatus& status;
@@ -48,6 +47,7 @@ private:
     float overlayOpacity = 0.72f;
     bool overlayShowText = true;
     bool grabbedFirstFocus = false;
+    
     bool isForTrial = false;
     bool isForRegistration = false;
     bool isForManagement = false;
