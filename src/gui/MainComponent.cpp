@@ -165,9 +165,6 @@ public:
         setProject (versicap.getProject());
 
         startTimerHz (30);
-
-        // auto* dialog = new kv::ActivationDialog (versicap.getUnlockStatus(), unlocker);
-        // dialog->centreAroundComponent (this, dialog->getWidth(), dialog->getHeight());
     }
 
     ~Content()
@@ -292,9 +289,8 @@ public:
     void showUnlockForm()
     {
         showOverlay (true);
-        unlock = new UnlockForm (versicap.getUnlockStatus(), 
-            "Sign in to your account to unlock Versicap", false, true);
-        addAndMakeVisible (unlock.getComponent(), 10000);
+        auto* dialog = new kv::ActivationDialog (versicap.getUnlockStatus(), unlocker);
+        dialog->centreAroundComponent (&owner, dialog->getWidth(), dialog->getHeight());
         resized();
     }
 

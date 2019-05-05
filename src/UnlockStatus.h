@@ -25,6 +25,12 @@ public:
     virtual String getMessageForConnectionFailure (bool isInternetConnectionWorking);
     virtual String getMessageForUnexpectedReply() override;
 #endif
+    void dump()
+    {
+        DBG ("[VCP] expires:  " << int (getExpiryTime() > Time()));
+        DBG ("[VCP] unlocked: " << (int) isUnlocked());
+    }
+
 private:
     Settings& settings;
     ValueTree props;

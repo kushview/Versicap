@@ -313,6 +313,7 @@ void Versicap::initializePlugins()
 void Versicap::initializeUnlockStatus()
 {
     getUnlockStatus().load();
+    getUnlockStatus().dump();
     impl->updateLockedStatus();
     getUnlockStatus().addChangeListener (impl.get());
 }
