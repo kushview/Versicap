@@ -15,7 +15,7 @@ GuiController::~GuiController() { }
 void GuiController::initialize()
 {
     look.reset (new LookAndFeel());
-    look->setColour (Slider::backgroundColourId, LookAndFeel::widgetBackgroundColor.darker());
+    
     LookAndFeel::setDefaultLookAndFeel (look.get());
 }
 

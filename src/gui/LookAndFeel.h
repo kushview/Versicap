@@ -20,11 +20,12 @@ public:
         setColour (PropertyComponent::labelTextColourId, LookAndFeel::textColor);
         setColour (PropertyComponent::backgroundColourId, LookAndFeel::widgetBackgroundColor.brighter (0.002));
         
-       
+        // text property
         setColour (TextPropertyComponent::outlineColourId,      findColour (TextEditor::outlineColourId));
         setColour (TextPropertyComponent::backgroundColourId,   findColour (TextEditor::backgroundColourId));
         setColour (TextPropertyComponent::textColourId,         findColour (TextEditor::textColourId));
 
+        // toggle button
         setColour (ToggleButton::textColourId, textColor);
         
         // Boolean property comp
@@ -40,7 +41,7 @@ public:
         setColour (TableHeaderComponent::textColourId, Colours::black);
         setColour (TableHeaderComponent::highlightColourId, Colours::orange.withAlpha (0.6f));
 
-        // // table
+        // table
         // setColour (TableListBox::textColourId, textColor);
         // setColour (TableListBox::backgroundColourId, widgetBackgroundColor.darker (0.82));
 
@@ -48,6 +49,9 @@ public:
         setColour (TextEditor::highlightColourId, Colours::whitesmoke);
         setColour (TextEditor::focusedOutlineColourId, Colours::orange.withAlpha (0.6f));
 
+        // slider
+        setColour (Slider::backgroundColourId, LookAndFeel::widgetBackgroundColor.darker());
+        
         // popup menu
         setColour (PopupMenu::highlightedBackgroundColourId, Colours::black.brighter (0.02));
         setColour (PopupMenu::highlightedTextColourId, Colours::white);
