@@ -14,6 +14,7 @@ enum ID {
     layerRecord         = 0x00002000,
     
     showAbout           = 0x00005000,
+    showLicenseManagement,
 
     checkForUpdates     = 0x00006000
 };

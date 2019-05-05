@@ -62,6 +62,9 @@ void GuiController::getCommandInfo (CommandID commandID, ApplicationCommandInfo&
         case Commands::showAbout:
             result.setInfo ("Show About", "Show information about Versicap", "Application", 0);
             break;
+        case Commands::showLicenseManagement:
+            result.setInfo ("Manage License...", "Manage your Versicap license", "Application", 0);
+            break;
     }
 }
 
@@ -73,6 +76,15 @@ bool GuiController::perform (const ApplicationCommandTarget::InvocationInfo& inf
         case Commands::showAbout:
             DBG("show about");
             break;
+
+        case Commands::showLicenseManagement:
+        {    
+            auto* const dialog = new kv::ActivationDialog (versicap.getUnlockStatus(), unlock);
+            dialog->centreAroundComponent (window.get(), dialog->getWidth(), dialog->getHeight());
+            dialog->setAppName ("VERSICAP");
+            if ((bool) versicap.getUnlockStatus().isUnlocked())
+                dialog->getActivationComponent()->setForManagement (true);
+        } break;
 
         default: handled = false;
             break;

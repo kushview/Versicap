@@ -24,6 +24,9 @@ void MainMenu::setupMenu()
     macMenu.reset (new PopupMenu());
     macMenu->addCommandItem (&commands, Commands::showAbout, "About Vesricap");
     macMenu->addCommandItem (&commands, Commands::checkForUpdates, "Check for updates...");
+    macMenu->addSeparator();
+    macMenu->addCommandItem (&commands, Commands::showLicenseManagement);
+    
     // macMenu->addCommandItem (&cmd, Commands::showAbout, Util::appName ("About"));
     // macMenu->addCommandItem (&cmd, Commands::checkNewerVersion, "Check For Updates...");
     // macMenu->addSeparator();
