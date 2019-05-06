@@ -9,3 +9,7 @@
 [submodule "libs/sf2cute"]
 	path = libs/sf2cute
 	url = https://github.com/gocha/sf2cute
+[submodule "libs/ksp1"]
+	path = libs/ksp1
+	url = https://github.com/kushview/ksp1
+	branch = develop
