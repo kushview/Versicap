@@ -16,6 +16,8 @@
 #include "UnlockStatus.h"
 #include "Versicap.h"
 
+#include "IncludeKSP1.h"
+
 namespace vcp {
 
 struct Versicap::Impl : public AudioIODeviceCallback,
@@ -155,6 +157,8 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     std::unique_ptr<AudioEngine> engine;
     Settings settings;
     AudioThumbnailCache peaks;
+    std::unique_ptr<KSP1::SampleCache> sampleCache;
+
     ApplicationCommandManager commands;
     ExporterTypeArray exporters;
     std::unique_ptr<ExportThread> exporter;
@@ -180,6 +184,7 @@ Versicap::Versicap()
     impl->engine.reset (new AudioEngine (*impl->formats, impl->plugins->getAudioPluginFormats()));
     impl->exporter.reset (new ExportThread());
     impl->undoManager.reset (new UndoManager (30000, 30));
+    impl->sampleCache.reset (new KSP1::SampleCache (*impl->formats));
 
     auto& controllers = impl->controllers;
     controllers.add (new GuiController (*this));
@@ -233,6 +238,8 @@ Versicap::Versicap()
 Versicap::~Versicap()
 {
     impl->engine.reset();
+    impl->sampleCache->deacitvate();
+    impl->sampleCache.reset();
     impl->formats->clearFormats();
     impl->controllers.clear (true);
     impl.reset();

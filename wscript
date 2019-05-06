@@ -120,7 +120,9 @@ def build_mac (bld):
                       bld.path.ant_glob ("jucer/JuceLibraryCode/*.mm") +
                       [ 'jucer/JuceLibraryCode/BinaryData.cpp',
                         'libs/libkv/kv.cpp',
-                        'libs/ksp1/src/engine/SampleCache.cpp' ],
+                        'libs/ksp1/src/engine/SampleCache.cpp',
+                        'libs/ksp1/src/engine/LayerData.cpp',
+                        'libs/ksp1/src/engine/LowPassFilter.cpp' ],
         includes    = [ 'jucer/JuceLibraryCode', \
                         'libs/kv/modules', \
                         'libs/libkv',
