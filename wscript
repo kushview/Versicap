@@ -119,10 +119,12 @@ def build_mac (bld):
         source      = bld.path.ant_glob ("src/**/*.cpp") +
                       bld.path.ant_glob ("jucer/JuceLibraryCode/*.mm") +
                       [ 'jucer/JuceLibraryCode/BinaryData.cpp',
-                        'libs/libkv/kv.cpp' ],
+                        'libs/libkv/kv.cpp',
+                        'libs/ksp1/src/engine/SampleCache.cpp' ],
         includes    = [ 'jucer/JuceLibraryCode', \
                         'libs/kv/modules', \
-                        'libs/libkv', \
+                        'libs/libkv',
+                        'libs/ksp1/src', \
                         'src', \
                         os.path.expanduser('~') + '/SDKs/VST_SDK/VST3_SDK', \
                         os.path.expanduser('~') + '/SDKs/VST_SDK/VST2_SDK', \
