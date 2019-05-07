@@ -121,10 +121,13 @@ def build_mac (bld):
                       [ 'jucer/JuceLibraryCode/BinaryData.cpp',
                         'libs/libkv/kv.cpp',
                         'libs/ksp1/src/engine/ADSR.cpp',
-                        'libs/ksp1/src/engine/SampleCache.cpp',
+                        'libs/ksp1/src/engine/Articulator.cpp',
                         'libs/ksp1/src/engine/LayerData.cpp',
                         'libs/ksp1/src/engine/LowPassFilter.cpp',
+                        'libs/ksp1/src/engine/SampleCache.cpp',
                         'libs/ksp1/src/engine/SamplerSounds.cpp',
+                        'libs/ksp1/src/engine/SamplerSynth.cpp',
+                        'libs/ksp1/src/engine/SamplerVoice.cpp',
                         'libs/ksp1/src/DataPath.cpp' ],
         includes    = [ 'jucer/JuceLibraryCode', \
                         'libs/kv/modules', \

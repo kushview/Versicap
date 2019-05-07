@@ -3,6 +3,11 @@
 
 #include "Types.h"
 
+namespace KSP1 {
+class SampleCache;
+class SamplerSynth;
+}
+
 namespace vcp {
 
 class Render;
@@ -12,7 +17,8 @@ class AudioEngine
 {
 public:
     AudioEngine (AudioFormatManager& formatManager,
-                 AudioPluginFormatManager& pluginManager);
+                 AudioPluginFormatManager& pluginManager,
+                 KSP1::SampleCache&);
     ~AudioEngine();
 
     struct Monitor : public ReferenceCountedObject
@@ -69,6 +75,10 @@ private:
     //=========================================================================
     AudioFormatManager& formats;
     AudioPluginFormatManager& plugins;
+    KSP1::SampleCache& sampleCache;
+    
+    //=========================================================================
+    std::unique_ptr<KSP1::SamplerSynth> sampler;
 
     //=========================================================================
     bool prepared = false;
@@ -108,6 +118,10 @@ private:
     MidiBuffer incomingMidi;
     MidiBuffer pluginMidi;
     MidiBuffer renderMidi;
+
+    MidiBuffer  samplerMidi;
+    AudioSampleBuffer samplerAudio;
+
     MidiMessageCollector messageCollector;
 
     //=========================================================================

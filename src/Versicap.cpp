@@ -181,10 +181,13 @@ Versicap::Versicap()
     impl->formats.setOwned (new AudioFormatManager());
     impl->plugins.setOwned (new PluginManager());
     impl->unlock.reset (new UnlockStatus (impl->settings));
-    impl->engine.reset (new AudioEngine (*impl->formats, impl->plugins->getAudioPluginFormats()));
+    
     impl->exporter.reset (new ExportThread());
     impl->undoManager.reset (new UndoManager (30000, 30));
-    impl->sampleCache.reset (new KSP1::SampleCache (*impl->formats));
+    impl->sampleCache.reset (new KSP1::SampleCache (*impl->formats, impl->peaks));
+    impl->engine.reset (new AudioEngine (*impl->formats, 
+        impl->plugins->getAudioPluginFormats(), 
+        *impl->sampleCache));
 
     auto& controllers = impl->controllers;
     controllers.add (new GuiController (*this));

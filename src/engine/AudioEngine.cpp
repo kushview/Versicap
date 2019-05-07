@@ -2,16 +2,21 @@
 #include "engine/AudioEngine.h"
 #include "PluginManager.h"
 #include "Render.h"
+#include "IncludeKSP1.h"
 
 namespace vcp {
 
 AudioEngine::AudioEngine (AudioFormatManager& formatManager, 
-                          AudioPluginFormatManager& pluginManager)
+                          AudioPluginFormatManager& pluginManager,
+                          KSP1::SampleCache& cache)
     : formats (formatManager),
-      plugins (pluginManager)
+      plugins (pluginManager),
+      sampleCache (cache)
 {
     monitor = new Monitor();
 
+    sampler.reset (KSP1::SamplerSynth::create (sampleCache));
+    
     render.reset (new Render (formatManager));
     render->onCancelled = [this]()
     {
@@ -90,6 +95,7 @@ void AudioEngine::clearAudioProcessor()
 bool AudioEngine::isRendering() const { return render && render->isRendering(); }
 void AudioEngine::cancelRendering() { if (render) render->cancel(); }
 void AudioEngine::setRenderContext (const RenderContext& context) { if (render) render->setContext (context); }
+
 Result AudioEngine::startRendering (const RenderContext& context)
 {
     int latency = 0;
@@ -223,6 +229,7 @@ void AudioEngine::process (const float** input, int numInputs,
     const int source        = render->getSourceType();
     renderBuffer.setSize (context.channels, nframes, false, false, true);
     pluginBuffer.setSize (pluginChannels, nframes, false, false, true);
+    samplerAudio.setSize (2, nframes, false, false, true);
     
     render->getNextMidiBlock (renderMidi, nframes);
     
@@ -315,6 +322,8 @@ void AudioEngine::process (const float** input, int numInputs,
     render->writeAudioFrames (renderBuffer);
     render->renderCycleEnd();
 
+    sampler->renderNextBlock (samplerAudio, samplerMidi, 0, nframes);
+
     for (int c = 0; c < numOutputs; ++c)
         memset (output [c], 0, nbytes);
     
@@ -344,6 +353,7 @@ void AudioEngine::process (const float** input, int numInputs,
     renderMidi.clear();
     incomingMidi.clear();
     pluginMidi.clear();
+    samplerMidi.clear();
 }
 
 void AudioEngine::prepare (double expectedSampleRate, int maxBufferSize,
@@ -367,6 +377,8 @@ void AudioEngine::prepare (double expectedSampleRate, int maxBufferSize,
     channels.calloc ((size_t) jmax (numInputChans, numOutputChans) + 2);
     render->prepare (sampleRate, bufferSize);
 
+    sampler->setCurrentPlaybackSampleRate (sampleRate);
+    
     if (processor)
     {
         prepare (*processor);
