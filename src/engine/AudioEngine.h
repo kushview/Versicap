@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "ProjectWatcher.h"
 #include "Types.h"
 
 namespace KSP1 {
@@ -30,6 +31,9 @@ public:
     typedef ReferenceCountedObjectPtr<Monitor> MonitorPtr;
 
     //=========================================================================
+    void setProject (const Project& project);
+
+    //=========================================================================
     MonitorPtr getMonitor() const { return monitor; }
 
     //=========================================================================
@@ -50,7 +54,6 @@ public:
     Result startRendering (const RenderContext& ctx);
     ValueTree getRenderedSamples() const;
     
-
     //=========================================================================
     void addMidiMessage (const MidiMessage& msg);
     void setDefaultMidiOutput (const String& name);
@@ -64,6 +67,7 @@ public:
                   float** output, int numOutputs, int nframes);
     void release();
 
+    //=========================================================================
     std::function<void()> onRenderStopped;
     std::function<void()> onRenderStarted;
     std::function<void()> onRenderCancelled;
@@ -125,11 +129,16 @@ private:
     MidiMessageCollector messageCollector;
 
     //=========================================================================
+    ProjectWatcher watcher;
+
+    //=========================================================================
     void updatePluginProperties();
     void prepare (AudioProcessor& plugin);
     void release (AudioProcessor& plugin);
 
     void addPanicMessages (MidiBuffer&);
+
+    void onProjectLoaded();
 };
 
 }

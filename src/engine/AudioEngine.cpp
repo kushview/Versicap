@@ -42,12 +42,26 @@ AudioEngine::AudioEngine (AudioFormatManager& formatManager,
             onRenderProgress (progress, title);
         }
     };
+
+    watcher.onChanged = std::bind (&AudioEngine::onProjectLoaded, this);
 }
 
 AudioEngine::~AudioEngine()
 {
+    watcher.onChanged = nullptr;
     render->onCancelled = render->onStarted = render->onStopped = nullptr;
     render.reset();
+}
+
+void AudioEngine::setProject (const Project& project)
+{
+    watcher.setProject (project);
+}
+
+void AudioEngine::onProjectLoaded()
+{
+    sampler->clearSounds();
+    sampler->clearAllSounds();
 }
 
 void AudioEngine::panic()
