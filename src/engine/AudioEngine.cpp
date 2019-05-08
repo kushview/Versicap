@@ -109,9 +109,6 @@ void AudioEngine::onActiveSampleChanged()
     {
         if (sound->insertLayerData (data))
             wasLoaded = data->loadAudioFile (sample.getFile());
-        if (wasLoaded)
-        {
-        }
     }
 
     if (wasLoaded)
