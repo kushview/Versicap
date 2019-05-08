@@ -44,11 +44,14 @@ AudioEngine::AudioEngine (AudioFormatManager& formatManager,
     };
 
     watcher.onChanged = std::bind (&AudioEngine::onProjectLoaded, this);
+    watcher.onActiveSampleChanged = std::bind (&AudioEngine::onActiveSampleChanged, this);
 }
 
 AudioEngine::~AudioEngine()
 {
     watcher.onChanged = nullptr;
+    watcher.onActiveSampleChanged = nullptr;
+    
     render->onCancelled = render->onStarted = render->onStopped = nullptr;
     render.reset();
 }
