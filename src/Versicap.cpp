@@ -3,6 +3,8 @@
 #include "controllers/ProjectsController.h"
 
 #include "engine/AudioEngine.h"
+#include "engine/RenderContext.h"
+
 #include "exporters/Exporter.h"
 #include "exporters/ExportThread.h"
 
@@ -12,7 +14,6 @@
 #include "Commands.h"
 #include "PluginManager.h"
 #include "Project.h"
-#include "Render.h"
 #include "UnlockStatus.h"
 #include "Versicap.h"
 
@@ -632,6 +633,8 @@ bool Versicap::setProject (const Project& newProject)
             exporter.setProperty (Tags::object, type.get(), nullptr);
         }
     }
+    
+    engine.setProject (impl->project);
     
     listeners.call ([](Listener& listener) { listener.projectChanged(); });
 

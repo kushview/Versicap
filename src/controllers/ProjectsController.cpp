@@ -1,10 +1,9 @@
 
 #include "controllers/GuiController.h"
 #include "controllers/ProjectsController.h"
-#include "gui/MainWindow.h"
-
 #include "engine/AudioEngine.h"
-#include "RenderContext.h"
+#include "engine/RenderContext.h"
+#include "gui/MainWindow.h"
 #include "Commands.h"
 #include "Project.h"
 #include "ProjectWatcher.h"

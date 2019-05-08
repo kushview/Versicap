@@ -1,8 +1,8 @@
 
+#include "engine/RenderContext.h"
 #include "exporters/Exporter.h"
 #include "PluginManager.h"
 #include "Project.h"
-#include "RenderContext.h"
 #include "Tags.h"
 #include "Types.h"
 
@@ -92,6 +92,13 @@ void Project::setActiveSample (const Sample& sample)
     if (samples.getProperty (Tags::active).toString() == sample.getUuidString())
         samples.removeProperty (Tags::active, nullptr);
     samples.setProperty (Tags::active, sample.getUuidString(), nullptr);
+}
+
+Sample Project::getSample (int index) const
+{
+    auto samples = objectData.getChildWithName (Tags::samples);
+    Sample sample (samples.getChild (index));
+    return sample;
 }
 
 Sample Project::getActiveSample() const
@@ -354,6 +361,14 @@ void Project::getSamples (int layerIdx, OwnedArray<Sample>& out) const
     const auto layer = getLayer (layerIdx);
     for (int i = 0; i < samples.size(); ++i)
         if (samples[i].isForLayer (layer))
+            out.add (new Sample (samples [i]));
+}
+
+void Project::getSamplesForNote (int note, OwnedArray<Sample>& out) const
+{
+    const auto samples = getSamples();
+    for (int i = 0; i < samples.size(); ++i)
+        if (samples[i].getNote() == note)
             out.add (new Sample (samples [i]));
 }
 

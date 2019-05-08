@@ -1,7 +1,7 @@
 
 #include "engine/AudioEngine.h"
+#include "engine/Render.h"
 #include "PluginManager.h"
-#include "Render.h"
 #include "IncludeKSP1.h"
 
 namespace vcp {
@@ -60,8 +60,37 @@ void AudioEngine::setProject (const Project& project)
 
 void AudioEngine::onProjectLoaded()
 {
-    sampler->clearSounds();
+    using KSP1::SamplerSound;
     sampler->clearAllSounds();
+    sampler->clearSounds();
+
+#if 0
+    // EXPERIMENTAL: load entire project into sampler
+    DBG("[VCP] project loaded in engine");
+    
+    const auto project = watcher.getProject();
+    Array<int> notes;
+    project.getPossibleNoteNumbers (notes);
+
+    OwnedArray<Sample> samples;
+    for (const auto& note : notes)
+    {
+        project.getSamplesForNote (note, samples);
+        std::unique_ptr<SamplerSound> sound (new SamplerSound (note));
+        
+        for (auto* const sample : samples)
+        {
+            if (auto* const data = sampleCache.getLayerData (true))
+                if (data->loadAudioFile (sample->getFile()))
+                    sound->insertLayerData (data);
+        }
+
+        if (sound->getNumLayers() > 0)
+            sampler->insertSound (sound.release());
+        
+        samples.clearQuick (false);
+    }
+#endif
 }
 
 void AudioEngine::panic()

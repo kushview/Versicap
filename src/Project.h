@@ -183,9 +183,13 @@ public:
     void setSamples (const ValueTree& samples);
     void setActiveSample (const Sample& sample);
     SampleArray getSamples() const;
-    void getSamples (int layer, OwnedArray<Sample>& samples) const;        
+    void getSamples (int layer, OwnedArray<Sample>& samples) const;
+    void getSamplesForNote (int note, OwnedArray<Sample>& samples) const;
+          
     Sample getActiveSample() const;
     Sample findSample (const String& uuid) const { return Sample (find (Tags::samples, Tags::uuid, uuid)); }
+    int getNumSamples() const { return objectData.getChildWithName (Tags::samples).getNumChildren(); }
+    Sample getSample (int index) const;
 
     //=========================================================================
     void getRenderContext (RenderContext&) const;

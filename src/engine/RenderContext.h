@@ -1,7 +1,7 @@
 #pragma once
 
 #include "JuceHeader.h"
-#include "Types.h"
+#include "../Types.h"
 
 namespace vcp {
 

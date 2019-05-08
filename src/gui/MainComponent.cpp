@@ -10,13 +10,11 @@
 #include "gui/SamplePropertiesContentView.h"
 #include "gui/SamplesTableContentView.h"
 #include "gui/SampleEditContentView.h"
-
 #include "gui/MainComponent.h"
 #include "gui/UnlockForm.h"
 
 #include "Commands.h"
 #include "Versicap.h"
-#include "RenderContext.h"
 #include "UnlockStatus.h"
 #include "Utils.h"
 

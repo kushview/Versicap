@@ -1,6 +1,6 @@
 #pragma once
 
-#include "RenderContext.h"
+#include "engine/RenderContext.h"
 #include "Project.h"
 #include "Types.h"
 #include "Versicap.h"
@@ -23,8 +23,8 @@ public:
         }
     }
 
-    const String getId() const { return getCategory().toLowerCase() + "." + getSlug().toLowerCase(); }
-    const String& getSlug() const { return slug; }
+    const String getId()        const { return getCategory().toLowerCase() + "." + getSlug().toLowerCase(); }
+    const String& getSlug()     const { return slug; }
 
 protected:
     void initializeVersicap()
