@@ -63,7 +63,6 @@ void AudioEngine::onProjectLoaded()
     using KSP1::SamplerSound;
     sampler->clearAllSounds();
     sampler->clearSounds();
-
 #if 0
     // EXPERIMENTAL: load entire project into sampler
     DBG("[VCP] project loaded in engine");
@@ -91,6 +90,41 @@ void AudioEngine::onProjectLoaded()
         samples.clearQuick (false);
     }
 #endif
+}
+
+void AudioEngine::onActiveSampleChanged()
+{
+    const auto project = watcher.getProject();
+    const auto sample = project.getActiveSample();
+    if (! sample.isValid())
+        return;
+    using KSP1::SamplerSound;
+    sampler->clearAllSounds();
+    sampler->clearSounds();
+    bool wasLoaded = false;
+
+    std::unique_ptr<SamplerSound> sound (new SamplerSound (sample.getNote()));
+
+    if (auto* data = sampleCache.getLayerData (true))
+    {
+        if (sound->insertLayerData (data))
+            wasLoaded = data->loadAudioFile (sample.getFile());
+        if (wasLoaded)
+        {
+        }
+    }
+
+    if (wasLoaded)
+    {
+        sound->setMidiChannel (1);
+        sound->setDefaultLength();
+        sampler->insertSound (sound.release());
+    }
+    else
+    {
+        sound.reset();
+        DBG("[VCP] failed to load sample: " << sample.getFile().getFileName());
+    }
 }
 
 void AudioEngine::panic()

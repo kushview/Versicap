@@ -139,6 +139,7 @@ private:
     void addPanicMessages (MidiBuffer&);
 
     void onProjectLoaded();
+    void onActiveSampleChanged();
 };
 
 }
