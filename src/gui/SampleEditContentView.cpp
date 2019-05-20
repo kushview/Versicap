@@ -2,7 +2,7 @@
 #include "gui/LookAndFeel.h"
 #include "gui/SampleEditContentView.h"
 #include "gui/WaveDisplayComponent.h"
-
+#include "engine/AudioEngine.h"
 #include "ProjectWatcher.h"
 #include "Versicap.h"
 
@@ -301,6 +301,13 @@ public:
         zoomOutButton.setButtonText ("-");
         zoomOutButton.onClick = [this]() { zoomOut(); };
 
+        addAndMakeVisible (previewButton);
+        previewButton.setButtonText ("P");
+        previewButton.onClick = [this]() {
+            auto& engine = owner.getVersicap().getAudioEngine();
+            engine.previewActiveSample();
+        };
+
         timeIn.addListener (this);
         timeOut.addListener (this);
     }
@@ -413,6 +420,7 @@ public:
         zoomBar.setRange (wave.getStartTime(), wave.getEndTime());
         zoomInButton.setBounds (r2.removeFromRight (24));
         zoomOutButton.setBounds (r2.removeFromRight (24));
+        previewButton.setBounds (r2.removeFromRight (24));
         r2.removeFromRight (2);
 
         zoomBar.setBounds (r2);
@@ -442,6 +450,7 @@ private:
     WaveDisplayComponent wave;
     WaveZoomBar zoomBar;
     TextButton zoomInButton, zoomOutButton;
+    TextButton previewButton;
     WaveCursor inPoint, outPoint;
 
     Rectangle<int> displayBounds;

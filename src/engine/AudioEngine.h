@@ -60,6 +60,9 @@ public:
     String getDefaultMidiOutputName() const { return midiOutName; }
 
     //=========================================================================
+    void previewActiveSample();
+
+    //=========================================================================
     void prepare (double expectedSampleRate, int maxBufferSize,
                   int numInputs, int numOutputs);
     void prepare (AudioIODevice* device);
@@ -83,6 +86,9 @@ private:
     
     //=========================================================================
     std::unique_ptr<KSP1::SamplerSynth> sampler;
+    AudioSampleBuffer samplerAudio;
+    MidiBuffer samplerMidi;
+    MidiMessageCollector samplerMidiCollector;
 
     //=========================================================================
     bool prepared = false;
@@ -122,9 +128,6 @@ private:
     MidiBuffer incomingMidi;
     MidiBuffer pluginMidi;
     MidiBuffer renderMidi;
-
-    MidiBuffer  samplerMidi;
-    AudioSampleBuffer samplerAudio;
 
     MidiMessageCollector messageCollector;
 

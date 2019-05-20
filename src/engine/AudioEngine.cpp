@@ -102,22 +102,22 @@ void AudioEngine::onActiveSampleChanged()
     if (! sample.isValid())
         return;
     using KSP1::SamplerSound;
+    using KSP1::LayerData;
+
     sampler->clearAllSounds();
     sampler->clearSounds();
     bool wasLoaded = false;
 
     std::unique_ptr<SamplerSound> sound (new SamplerSound (sample.getNote()));
 
-    if (auto* data = sampleCache.getLayerData (true))
-    {
-        if (sound->insertLayerData (data))
-            wasLoaded = data->loadAudioFile (sample.getFile());
-    }
+    LayerData* data = sampleCache.getLayerData (true);
+    wasLoaded = data != nullptr ? data->loadAudioFile (sample.getFile()) : false;
 
     if (wasLoaded)
     {
         sound->setMidiChannel (1);
         sound->setDefaultLength();
+        sound->insertLayerData (data);
         sampler->insertSound (sound.release());
     }
     else
@@ -245,6 +245,17 @@ void AudioEngine::setDefaultMidiOutput (const String& name)
     }
 }
 
+void AudioEngine::previewActiveSample()
+{
+    bool starting = true;
+    const auto project = watcher.getProject();
+    const auto sample  = project.getActiveSample();
+    MidiMessage message = starting ? MidiMessage::noteOn  (1, sample.getNote(), (uint8) 127)
+                                   : MidiMessage::noteOff (1, sample.getNote());
+    message.setTimeStamp (1.0 + Time::getMillisecondCounterHiRes());
+    samplerMidiCollector.addMessageToQueue (message);
+}
+
 void AudioEngine::updatePluginProperties()
 {
     if (! processor)
@@ -298,6 +309,8 @@ void AudioEngine::process (const float** input, int numInputs,
     }
 
     messageCollector.removeNextBlockOfMessages (incomingMidi, nframes);
+    samplerMidiCollector.removeNextBlockOfMessages (samplerMidi, nframes);
+
     ScopedLock slr (render->getCallbackLock());
     render->renderCycleBegin();
 
@@ -399,6 +412,13 @@ void AudioEngine::process (const float** input, int numInputs,
     render->writeAudioFrames (renderBuffer);
     render->renderCycleEnd();
 
+    MidiBuffer::Iterator iter (samplerMidi);
+    MidiMessage msg; int frame;
+    while (iter.getNextEvent (msg, frame)) {
+        DBG("got midi");
+    }
+
+    samplerAudio.clear (0, nframes);
     sampler->renderNextBlock (samplerAudio, samplerMidi, 0, nframes);
 
     for (int c = 0; c < numOutputs; ++c)
@@ -415,6 +435,9 @@ void AudioEngine::process (const float** input, int numInputs,
             memcpy (output[c], renderBuffer.getReadPointer (c), nbytes);
     }
     
+    for (int c = jmin (numOutputs, samplerAudio.getNumChannels()); --c >= 0;)
+        FloatVectorOperations::add (output[c], samplerAudio.getReadPointer (c), nframes);
+
     const AudioSampleBuffer rmsBuf (output, numOutputs, nframes);
     if (numOutputs == 1)
     {
@@ -427,9 +450,9 @@ void AudioEngine::process (const float** input, int numInputs,
         monitor->levelRight.set (rmsBuf.getRMSLevel (1, 0, nframes));
     }
     
-    renderMidi.clear();
     incomingMidi.clear();
     pluginMidi.clear();
+    renderMidi.clear();
     samplerMidi.clear();
 }
 
@@ -451,6 +474,13 @@ void AudioEngine::prepare (double expectedSampleRate, int maxBufferSize,
     pluginLatency       = 0;
 
     messageCollector.reset (sampleRate);
+    incomingMidi.clear();
+    pluginMidi.clear();
+    renderMidi.clear();
+
+    samplerMidiCollector.reset (sampleRate);
+    samplerMidi.clear();
+
     channels.calloc ((size_t) jmax (numInputChans, numOutputChans) + 2);
     render->prepare (sampleRate, bufferSize);
 
