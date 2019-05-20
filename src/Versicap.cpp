@@ -63,7 +63,7 @@ struct Versicap::Impl : public AudioIODeviceCallback,
 
     void updateLockedStatus()
     {
-        const bool unlocked = (bool) unlock->isUnlocked();
+        const bool unlocked = KV_IS_ACTIVATED (*unlock);
         shouldProcess.set (unlocked ? 1 : 0);
         engine->setEnabled (unlocked);
     }
