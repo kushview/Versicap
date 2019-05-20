@@ -723,7 +723,7 @@ void ActivationComponent::handleRefreshResult (const UnlockStatus::UnlockResult 
         else
         {
             isForTrial = false;
-            setForManagement ((bool) _status.isUnlocked());
+            setForManagement (KV_IS_ACTIVATED (_status));
         }
 
         _status.sendChangeMessage();

@@ -86,7 +86,7 @@ bool GuiController::perform (const ApplicationCommandTarget::InvocationInfo& inf
             ac->setAppName ("VERSICAP");
             ac->setShouldDialogWhenFinished (false);
             ac->setQuitButtonText ("Continue");
-            if ((bool) versicap.getUnlockStatus().isUnlocked())
+            if (KV_IS_ACTIVATED (versicap.getUnlockStatus()))
                 ac->setForManagement (true);
         } break;
 
@@ -98,7 +98,7 @@ bool GuiController::perform (const ApplicationCommandTarget::InvocationInfo& inf
 
 void GuiController::checkUnlockStatus()
 {
-    if ((bool) versicap.getUnlockStatus().isUnlocked())
+    if (KV_IS_ACTIVATED (versicap.getUnlockStatus()))
     {
         unlock.reset();
     }

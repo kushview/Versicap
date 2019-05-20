@@ -2,7 +2,7 @@
 #include "Settings.h"
 #include "UnlockStatus.h"
 
-#define VCP_LOCAL_AUTH      0
+#define VCP_LOCAL_AUTH      1
 
 #if VCP_LOCAL_AUTH
  #define VCP_LICENSE_SETTINGS_KEY "VCPL"
@@ -11,6 +11,7 @@
  #define VCP_PUBKEY "3,753d95fa8511b392b09e5800043d41d1a7b2d330705f5714dcf2b31c8e22a7e9"
  #define VCP_PRIVKEY "4e290ea703612261cb143aaaad7e2be03282bec968eea82b7d064226e66321ab,753d95fa8511b392b09e5800043d41d1a7b2d330705f5714dcf2b31c8e22a7e9"
  #define VCP_PRODUCT_ID "784"
+ #define KV_GOLD_ID "1008"
 
 #else
  #define VCP_LICENSE_SETTINGS_KEY "VCPL"
@@ -32,7 +33,11 @@ UnlockStatus::UnlockStatus (Settings& s)
     : settings (s) { }
 
 String UnlockStatus::getProductID() { return VCP_PRODUCT_ID; }
-bool UnlockStatus::doesProductIDMatch (const String& returnedIDFromServer) { return getProductID() == returnedIDFromServer; }
+bool UnlockStatus::doesProductIDMatch (const String& returnedIDFromServer)
+{
+    StringArray pids { KV_GOLD_ID };
+    return pids.contains (returnedIDFromServer);
+}
 
 RSAKey UnlockStatus::getPublicKey()
 {
