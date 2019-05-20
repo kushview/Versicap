@@ -370,7 +370,7 @@ public:
 
     void displayObject (const ValueTree& object)
     {
-        if (! (bool) versicap.getUnlockStatus().isUnlocked())
+        if (! KV_IS_ACTIVATED (versicap.getUnlockStatus()))
             return;
         
         bool callDisplay = true;
@@ -410,7 +410,7 @@ public:
 
     void checkValidProject()
     {
-        if ((bool) versicap.getUnlockStatus().isUnlocked())
+        if (KV_IS_ACTIVATED (versicap.getUnlockStatus()))
         {
             if (! project.isValid())
                 versicap.getCommandManager().invokeDirectly (Commands::projectNew, true);
@@ -495,7 +495,7 @@ MainComponent::MainComponent (Versicap& vc)
 
     versicap.addListener (this);
     versicap.getUnlockStatus().addChangeListener (this);
-    if (! (bool) versicap.getUnlockStatus().isUnlocked())
+    if (! KV_IS_ACTIVATED (versicap.getUnlockStatus()))
         content->showOverlay (true);
 }
 
@@ -533,7 +533,7 @@ void MainComponent::changeListenerCallback (ChangeBroadcaster* bcaster)
 {
     if (bcaster == &versicap.getUnlockStatus())
     {
-        content->showOverlay (! (bool) versicap.getUnlockStatus().isUnlocked());
+        content->showOverlay (! KV_IS_ACTIVATED (versicap.getUnlockStatus()));
     }
 }
 

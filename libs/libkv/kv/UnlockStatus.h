@@ -1,6 +1,10 @@
 
 #pragma once
 
+// true if activated perpetual or subscription license
+#define KV_IS_ACTIVATED(status) ((status).isUnlocked() || \
+    (!(status).isUnlocked() && (status).getExpiryTime() > Time() && (status).getExpiryTime() >= Time::getCurrentTime()))
+
 namespace kv {
 
 class UnlockStatus : public kv::EDDOnlineUnlockStatus,
