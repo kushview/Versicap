@@ -63,10 +63,10 @@ void AudioEngine::setProject (const Project& project)
 
 void AudioEngine::onProjectLoaded()
 {
+   #if 0
     using KSP1::SamplerSound;
     sampler->clearAllSounds();
     sampler->clearSounds();
-#if 0
     // EXPERIMENTAL: load entire project into sampler
     DBG("[VCP] project loaded in engine");
     
@@ -92,13 +92,15 @@ void AudioEngine::onProjectLoaded()
         
         samples.clearQuick (false);
     }
-#endif
+   #else
+    onActiveSampleChanged();
+   #endif
 }
 
 void AudioEngine::onActiveSampleChanged()
 {
     const auto project = watcher.getProject();
-    const auto sample = project.getActiveSample();
+    auto sample = project.getActiveSample();
     if (! sample.isValid())
         return;
     using KSP1::SamplerSound;
@@ -108,17 +110,16 @@ void AudioEngine::onActiveSampleChanged()
     sampler->clearSounds();
     bool wasLoaded = false;
 
-    std::unique_ptr<SamplerSound> sound (new SamplerSound (sample.getNote()));
-
+    ReferenceCountedObjectPtr<SamplerSound> sound (new SamplerSound (sample.getNote()));
     LayerData* data = sampleCache.getLayerData (true);
     wasLoaded = data != nullptr ? data->loadAudioFile (sample.getFile()) : false;
 
     if (wasLoaded)
     {
-        sound->setMidiChannel (1);
         sound->setDefaultLength();
         sound->insertLayerData (data);
-        sampler->insertSound (sound.release());
+        sampler->insertSound (sound.get());
+        sample.setProperty (Tags::object, sound.get());
     }
     else
     {
@@ -245,13 +246,12 @@ void AudioEngine::setDefaultMidiOutput (const String& name)
     }
 }
 
-void AudioEngine::previewActiveSample()
+void AudioEngine::setPreviewActiveSample (bool previewing)
 {
-    bool starting = true;
-    const auto project = watcher.getProject();
-    const auto sample  = project.getActiveSample();
-    MidiMessage message = starting ? MidiMessage::noteOn  (1, sample.getNote(), (uint8) 127)
-                                   : MidiMessage::noteOff (1, sample.getNote());
+    const auto project  = watcher.getProject();
+    const auto sample   = project.getActiveSample();
+    MidiMessage message = previewing ? MidiMessage::noteOn  (1, sample.getNote(), (uint8) 127)
+                                     : MidiMessage::noteOff (1, sample.getNote());
     message.setTimeStamp (1.0 + Time::getMillisecondCounterHiRes());
     samplerMidiCollector.addMessageToQueue (message);
 }

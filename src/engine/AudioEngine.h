@@ -60,7 +60,7 @@ public:
     String getDefaultMidiOutputName() const { return midiOutName; }
 
     //=========================================================================
-    void previewActiveSample();
+    void setPreviewActiveSample (bool previewing);
 
     //=========================================================================
     void prepare (double expectedSampleRate, int maxBufferSize,

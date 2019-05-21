@@ -8,6 +8,30 @@
 
 namespace vcp {
 
+class PreviewButton : public TextButton
+{
+public:
+    PreviewButton() { }
+    ~PreviewButton() = default;
+
+    void mouseDown (const MouseEvent& ev) override
+    {
+        if (onStart)
+            onStart();
+        TextButton::mouseDown (ev);
+    }
+
+    void mouseUp (const MouseEvent& ev) override
+    {
+        if (onStop)
+            onStop();
+        TextButton::mouseUp (ev);
+    }
+
+    std::function<void()> onStart;
+    std::function<void()> onStop;
+};
+
 class WaveZoomBar : public Component
 {
 public:
@@ -303,10 +327,8 @@ public:
 
         addAndMakeVisible (previewButton);
         previewButton.setButtonText ("P");
-        previewButton.onClick = [this]() {
-            auto& engine = owner.getVersicap().getAudioEngine();
-            engine.previewActiveSample();
-        };
+        previewButton.onStart = [this]() { owner.getVersicap().getAudioEngine().setPreviewActiveSample (true); };
+        previewButton.onStop  = [this]() { owner.getVersicap().getAudioEngine().setPreviewActiveSample (false); };
 
         timeIn.addListener (this);
         timeOut.addListener (this);
@@ -450,7 +472,7 @@ private:
     WaveDisplayComponent wave;
     WaveZoomBar zoomBar;
     TextButton zoomInButton, zoomOutButton;
-    TextButton previewButton;
+    PreviewButton previewButton;
     WaveCursor inPoint, outPoint;
 
     Rectangle<int> displayBounds;
