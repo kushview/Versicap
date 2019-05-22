@@ -2,7 +2,7 @@
 #include "Settings.h"
 #include "UnlockStatus.h"
 
-#define VCP_LOCAL_AUTH      1
+#define VCP_LOCAL_AUTH      0
 
 #if VCP_LOCAL_AUTH
  #define VCP_LICENSE_SETTINGS_KEY "VCPL"
@@ -36,7 +36,7 @@ UnlockStatus::UnlockStatus (Settings& s)
 String UnlockStatus::getProductID() { return VCP_PRODUCT_ID; }
 bool UnlockStatus::doesProductIDMatch (const String& returnedIDFromServer)
 {
-    StringArray pids { KV_GOLD_ID };
+    StringArray pids { KV_GOLD_ID, VCP_PRODUCT_ID };
     return pids.contains (returnedIDFromServer);
 }
 
