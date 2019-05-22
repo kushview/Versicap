@@ -54,6 +54,7 @@ public:
     static Sample create();
 
     bool isValid() const;
+    bool isEmpty() const;
     bool isForLayer (const Layer& layer) const;
     String getLayerUuidString() const;
     

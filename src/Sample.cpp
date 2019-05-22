@@ -20,6 +20,14 @@ Sample Sample::create()
 
 bool Sample::isValid() const { return objectData.isValid() && objectData.hasType (Tags::sample); }
 
+bool Sample::isEmpty() const
+{
+    return ! hasProperty (Tags::file) ||
+        ! hasProperty (Tags::timeIn) ||
+        ! hasProperty (Tags::timeOut) ||
+        ! hasProperty (Tags::sampleRate);
+}
+
 String Sample::getNoteName() const
 {
     return isPositiveAndBelow (getNote(), 128)

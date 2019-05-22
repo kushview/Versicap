@@ -371,13 +371,14 @@ public:
         timeIn.removeListener (this);
         timeOut.removeListener (this);
         
-        if (sample.isValid())
+        if (sample.isValid() && ! sample.isEmpty())
         {
             zoomBar.setRange (wave.getStartTime(), wave.getEndTime(), sample.getTotalTime());
+            
             timeIn = sample.getPropertyAsValue (Tags::timeIn);
             inPoint.getPositionValue().referTo (timeIn);
             inPoint.setMaxPosition (sample.getTotalTime() - 0.01);
-            
+
             timeOut = sample.getPropertyAsValue (Tags::timeOut);
             outPoint.getPositionValue().referTo (timeOut);
             outPoint.setMinPosition (0.01);

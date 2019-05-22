@@ -173,7 +173,6 @@ void AudioEngine::onActiveSampleChanged()
         sound->setDefaultLength();
         sound->insertLayerData (data);
         sampler->insertSound (sound.get());
-        sample.setProperty (Tags::object, sound.get());
         sampleSoundSync.reset (new SampleSoundSync (sample, sound.get(), sound->getNumLayers() - 1));
     }
     else

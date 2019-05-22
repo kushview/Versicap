@@ -262,7 +262,6 @@ void Render::handleAsyncUpdate()
         captureDir.deleteRecursively();
         
         samples = manifest;
-        
         stopped.triggerAsyncUpdate();
     }
     else
