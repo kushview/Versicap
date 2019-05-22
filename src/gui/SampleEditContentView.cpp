@@ -377,11 +377,12 @@ public:
             
             timeIn = sample.getPropertyAsValue (Tags::timeIn);
             inPoint.getPositionValue().referTo (timeIn);
-            inPoint.setMaxPosition (sample.getTotalTime() - 0.01);
+            inPoint.setMinPosition (0.0);
+            inPoint.setMaxPosition (sample.getTotalTime());
 
             timeOut = sample.getPropertyAsValue (Tags::timeOut);
             outPoint.getPositionValue().referTo (timeOut);
-            outPoint.setMinPosition (0.01);
+            outPoint.setMinPosition (0.0);
             outPoint.setMaxPosition (sample.getTotalTime());
         }
         else
@@ -485,7 +486,7 @@ private:
                            displayBounds.getY(), 
                            1, 
                            displayBounds.getHeight());
-        outPoint.setBounds (roundToInt (wave.getPixelsPerSecond() * (outPoint.getPosition() - visible.getStart())), 
+        outPoint.setBounds (roundToInt (wave.getPixelsPerSecond() * (outPoint.getPosition() - visible.getStart())) - 1, 
                             displayBounds.getY(), 
                             1, 
                             displayBounds.getHeight());
