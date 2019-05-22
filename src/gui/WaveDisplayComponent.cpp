@@ -47,7 +47,7 @@ void WaveDisplayComponent::paint (Graphics& g)
     {
         auto wr = getLocalBounds().withHeight (jmin (getHeight(), 340));
         wr.setY ((getHeight() / 2) - (wr.getHeight() / 2));
-        float step = (float)wr.getHeight() / ((float)thumb->getNumChannels());
+        float step = (float)wr.getHeight() / ((float) thumb->getNumChannels());
         auto iter = wr.getY() + step - (step / 2.f);
         
         for (int c = 0; c < thumb->getNumChannels(); ++c)

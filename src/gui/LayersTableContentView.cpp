@@ -169,7 +169,7 @@ private:
 LayersTableContentView::LayersTableContentView (Versicap& vc)
     : ContentView (vc)
 {
-    setName ("Layers");
+    setName ("Sample Sets");
     content.reset (new Content());
     addAndMakeVisible (content.get());
     versicap.addListener (this);
