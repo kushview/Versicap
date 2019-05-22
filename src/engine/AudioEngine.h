@@ -135,6 +135,10 @@ private:
     ProjectWatcher watcher;
 
     //=========================================================================
+    class SampleSoundSync;
+    std::unique_ptr<SampleSoundSync> sampleSoundSync;
+
+    //=========================================================================
     void updatePluginProperties();
     void prepare (AudioProcessor& plugin);
     void release (AudioProcessor& plugin);

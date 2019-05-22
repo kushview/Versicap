@@ -6,7 +6,59 @@
 
 namespace vcp {
 
-AudioEngine::AudioEngine (AudioFormatManager& formatManager, 
+class AudioEngine::SampleSoundSync : private ValueTree::Listener
+{
+public:
+    SampleSoundSync (const Sample& sampleToMonitor,
+                     KSP1::SamplerSound* soundToUpdate,
+                     int layerDataIndex)
+        : sample (sampleToMonitor),
+          sound (soundToUpdate),
+          soundLayerIdx (layerDataIndex)
+    {
+        data = sample.getValueTree();
+        data.addListener (this);
+    }
+
+    ~SampleSoundSync()
+    {
+        data.removeListener (this);
+        sound.reset();
+    }
+
+private:
+    Sample sample;
+    ValueTree data;
+    KSP1::SamplerSoundPtr sound;
+    int soundLayerIdx;
+
+    void valueTreePropertyChanged (ValueTree& tree, const Identifier& prop) override
+    {
+        auto* const layerData = sound != nullptr ? sound->getLayer (soundLayerIdx) : nullptr;
+        if (! layerData || tree != data)
+            return;
+        
+        const var& value = tree.getProperty (prop);
+        // DBG(prop.toString() << " = " << value.toString());
+
+        if (prop == Tags::timeIn)
+        {
+            layerData->setStartTime ((double) value);
+        }
+        else if (prop == Tags::timeOut)
+        {
+            layerData->setEndTime ((double) value);
+        }
+    }
+
+    void valueTreeChildAdded (ValueTree& parentTree, ValueTree& childWhichHasBeenAdded) override {}
+    void valueTreeChildRemoved (ValueTree& parentTree, ValueTree& childWhichHasBeenRemoved, int indexFromWhichChildWasRemoved) override {}
+    void valueTreeChildOrderChanged (ValueTree& parentTreeWhoseChildrenHaveMoved, int oldIndex, int newIndex) override {}
+    void valueTreeParentChanged (ValueTree& treeWhoseParentHasChanged) override {}
+    void valueTreeRedirected (ValueTree& treeWhichHasBeenChanged) override {}
+};
+
+AudioEngine::AudioEngine (AudioFormatManager& formatManager,
                           AudioPluginFormatManager& pluginManager,
                           KSP1::SampleCache& cache)
     : formats (formatManager),
@@ -103,14 +155,16 @@ void AudioEngine::onActiveSampleChanged()
     auto sample = project.getActiveSample();
     if (! sample.isValid())
         return;
+    using KSP1::SamplerSoundPtr;
     using KSP1::SamplerSound;
     using KSP1::LayerData;
 
+    sampleSoundSync.reset();
     sampler->clearAllSounds();
     sampler->clearSounds();
     bool wasLoaded = false;
 
-    ReferenceCountedObjectPtr<SamplerSound> sound (new SamplerSound (sample.getNote()));
+    SamplerSoundPtr sound (new SamplerSound (sample.getNote()));
     LayerData* data = sampleCache.getLayerData (true);
     wasLoaded = data != nullptr ? data->loadAudioFile (sample.getFile()) : false;
 
@@ -120,6 +174,7 @@ void AudioEngine::onActiveSampleChanged()
         sound->insertLayerData (data);
         sampler->insertSound (sound.get());
         sample.setProperty (Tags::object, sound.get());
+        sampleSoundSync.reset (new SampleSoundSync (sample, sound.get(), sound->getNumLayers() - 1));
     }
     else
     {
