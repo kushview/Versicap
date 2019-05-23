@@ -3,6 +3,7 @@
 
 #include "gui/ExporterContentView.h"
 #include "gui/LayersTableContentView.h"
+#include "gui/LookAndFeel.h"
 #include "gui/MainPropertiesContentView.h"
 #include "gui/NoteParams.h"
 #include "gui/ProjectPropertiesContentView.h"
@@ -111,6 +112,43 @@ private:
     Label text;
     TextButton cancelButton;
     DropShadowEffect shadow;
+};
+
+class EmptyProjectContentView : public ContentView
+{
+public:
+    EmptyProjectContentView (Versicap& vc)
+        : ContentView (vc)
+    {
+        addAndMakeVisible (createProjectButton);
+        createProjectButton.setButtonText ("Create New Project");
+        createProjectButton.setCommandToTrigger (&vc.getCommandManager(), Commands::projectNew, false);
+        addAndMakeVisible (message);
+        message.setText ("Empty Project...", dontSendNotification);
+        message.setJustificationType (Justification::centredBottom);
+    }
+
+    ~EmptyProjectContentView() { }
+
+    void paint (Graphics& g) override
+    {
+    }
+
+    void resized() override
+    {
+        int messageWidth = 250;
+        int btnHeight = 26;
+        message.setBounds ((getWidth() / 2) - (messageWidth / 2), getHeight() / 2, messageWidth, 100);
+        createProjectButton.changeWidthToFitText (btnHeight);
+        createProjectButton.setBounds ((getWidth() / 2) - (createProjectButton.getWidth() / 2),
+                                        message.getBottom() + 3, 
+                                        createProjectButton.getWidth(),
+                                        btnHeight);
+    }
+
+private:
+    Label message;
+    TextButton createProjectButton;
 };
 
 class MainComponent::Content : public Component,
@@ -350,7 +388,11 @@ public:
 
         const auto mainView = data.getProperty ("mainView").toString();
         std::function<void()> postResized;
-        if (mainView == "SampleEditContentView")
+        if (! versicap.getProject().isValid())
+        {
+            view.reset (new EmptyProjectContentView (versicap));
+        }
+        else if (mainView == "SampleEditContentView")
         {
             view.reset (new SampleEditContentView (versicap));
         }
@@ -406,12 +448,31 @@ public:
         repaint();
     }
 
+    template<class ViewType> bool viewHasType() const
+    {
+        return nullptr != dynamic_cast<ViewType*> (view.get());
+    }
+
     void checkValidProject()
     {
-        if (KV_IS_ACTIVATED (versicap.getUnlockStatus()))
+        if (! KV_IS_ACTIVATED (versicap.getUnlockStatus()))
+            return;
+
+        if (! project.isValid())
         {
-            if (! project.isValid())
-                versicap.getCommandManager().invokeDirectly (Commands::projectNew, true);
+            view.reset (new EmptyProjectContentView (versicap));
+            addAndMakeVisible (view.get());
+            resized();
+            // versicap.getCommandManager().invokeDirectly (Commands::projectNew, true);
+        }
+        else
+        {
+            if (viewHasType<EmptyProjectContentView>())
+            {
+                view.reset (new SampleEditContentView (versicap));
+                addAndMakeVisible (view.get());
+                resized();
+            }
         }
     }
 
@@ -495,6 +556,8 @@ MainComponent::MainComponent (Versicap& vc)
     versicap.getUnlockStatus().addChangeListener (this);
     if (! KV_IS_ACTIVATED (versicap.getUnlockStatus()))
         content->showOverlay (true);
+    
+    stabilizeProject();
 }
 
 MainComponent::~MainComponent()
@@ -531,6 +594,7 @@ void MainComponent::changeListenerCallback (ChangeBroadcaster* bcaster)
 {
     if (bcaster == &versicap.getUnlockStatus())
     {
+        content->checkValidProject();
         content->showOverlay (! KV_IS_ACTIVATED (versicap.getUnlockStatus()));
     }
 }
@@ -539,11 +603,12 @@ void MainComponent::changeListenerCallback (ChangeBroadcaster* bcaster)
 void MainComponent::projectChanged()
 {
     content->setProject (versicap.getProject());
+    stabilizeProject();
 }
 
 void MainComponent::stabilizeProject()
 {
-    content->setProject (versicap.getProject());
+    content->checkValidProject();
 }
 
 void MainComponent::renderWillStart()

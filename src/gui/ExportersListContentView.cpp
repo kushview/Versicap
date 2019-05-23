@@ -56,7 +56,7 @@ public:
         {
             auto exporters = project.getExportersTree();
             PopupMenu menu;
-            menu.addItem (1, "Remove Exporter");
+            menu.addItem (1, "Remove Target");
             const auto result = menu.show();
             
             if (result == 1)
@@ -149,6 +149,8 @@ private:
         {
             project.addExporter (*type);
             exporters->selectRow (project.getNumExporters() - 1);
+            versicap.post (new DisplayObjectMessage (
+                project.getExporterData (project.getNumExporters() - 1)));
         }
     }
 
