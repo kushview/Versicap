@@ -10,6 +10,17 @@
 
 namespace vcp {
 
+struct SampleNoteSort
+{
+    int compareElements (Sample* lhs, Sample* rhs)
+    {
+        return lhs->getNote() < rhs->getNote() ? -1 
+                : lhs->getNote() == rhs->getNote() ? 0
+                : lhs->getNote() > rhs->getNote() ? 1
+                : 0;
+    }
+};
+
 class ProjectDocument : public FileBasedDocument
 {
 public:
@@ -86,6 +97,26 @@ void ProjectsController::projectChanged()
     watcher.setProject (versicap.getProject());
     if (document->getFile() != versicap.getProjectFile())
         document->setFile (versicap.getProjectFile());
+    
+   #if 0
+    auto project = watcher.getProject();
+    if (project.getNumLayers() > 0)
+    {
+        auto sample = project.getActiveSample();
+        if (! sample.isValid())
+        {
+            OwnedArray<Sample> samples;
+            project.getSamples (0, samples);
+            SampleNoteSort sorter;
+            samples.sort (sorter);
+            if (samples.size() > 0)
+            {
+                project.setActiveSample (*samples.getFirst());
+            }
+        }
+    }
+   #endif
+
     updateEngineContext();
     document->setChangedFlag (false);
 }

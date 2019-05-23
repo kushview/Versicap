@@ -302,8 +302,6 @@ public:
         notes.setProject (project);
         props->setProject (project);
         repaint();
-
-        checkValidProject();
     }
 
     ValueTree createState()
@@ -539,6 +537,11 @@ void MainComponent::changeListenerCallback (ChangeBroadcaster* bcaster)
 
 //=============================================================================
 void MainComponent::projectChanged()
+{
+    content->setProject (versicap.getProject());
+}
+
+void MainComponent::stabilizeProject()
 {
     content->setProject (versicap.getProject());
 }

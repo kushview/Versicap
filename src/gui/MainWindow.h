@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "gui/ContentComponent.h"
 #include "gui/MainComponent.h"
 #include "gui/MainMenu.h"
 #include "Versicap.h"
@@ -54,6 +55,8 @@ public:
        #endif
         menu.reset();
     }
+
+    ContentComponent* getContent() const { return dynamic_cast<ContentComponent*> (getContentComponent()); }
 
     void savePersistentData()
     {

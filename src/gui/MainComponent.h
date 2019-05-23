@@ -24,6 +24,7 @@ public:
     void displayObject (const ValueTree&) override;
     void getState (String&) override;
     void applyState (const String& state) override;
+    void stabilizeProject() override;
 
     void paint (Graphics&) override;
     void resized() override;

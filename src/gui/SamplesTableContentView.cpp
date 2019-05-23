@@ -130,20 +130,25 @@ public:
         }
     }
 
+    void cellClicked (int rowNumber, int columnId, const MouseEvent& ev) override
+    {
+        ignoreUnused (columnId, ev);
+        auto project = getProject();
+        if (auto* sample = filtered [rowNumber])
+            project.setActiveSample (*sample);
+    }
+
     void selectedRowsChanged (int lastRowSelected) override
     {
-        auto project = getProject();
         if (auto* sample = filtered [lastRowSelected])
-        {
-            project.setActiveSample (*sample);
             if (onSelected)
                 onSelected (*sample);
-        }
     }
+
    #if 0
     virtual Component* refreshComponentForCell (int rowNumber, int columnId, bool isRowSelected,
                                                 Component* existingComponentToUpdate);
-    virtual void cellClicked (int rowNumber, int columnId, const MouseEvent&);
+    
     virtual void cellDoubleClicked (int rowNumber, int columnId, const MouseEvent&);
     virtual void backgroundClicked (const MouseEvent&);
     virtual void sortOrderChanged (int newSortColumnId, bool isForwards);

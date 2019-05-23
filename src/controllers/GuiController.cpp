@@ -78,7 +78,7 @@ bool GuiController::perform (const ApplicationCommandTarget::InvocationInfo& inf
             break;
 
         case Commands::showLicenseManagement:
-        {    
+        {
             auto* const dialog = new kv::ActivationDialog (versicap.getUnlockStatus(), unlock);
             auto* const ac = dialog->getActivationComponent();
 

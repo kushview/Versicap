@@ -82,22 +82,15 @@ public:
                     Justification::centredLeft);
     }
 
-    void cellClicked (int rowNumber, int columnId, const MouseEvent&) override
+    void cellClicked (int rowNumber, int columnId, const MouseEvent& ev) override
     {
-        ignoreUnused (columnId);
-        if (rowNumber == getSelectedRow())
-        {
-            // needed to updated active layer even when clicked row is already selected
-            selectedRowsChanged (rowNumber);
-        }
-    }
-
-    void selectedRowsChanged (int lastRowSelected) override
-    {
+        ignoreUnused (columnId, ev);
         auto project = watcher.getProject();
-        const auto layer = project.getLayer (lastRowSelected);
+        const auto layer = project.getLayer (rowNumber);
         project.setActiveLayer (layer);
     }
+
+    void selectedRowsChanged (int lastRowSelected) override { }
 
     void deleteKeyPressed (int lastRowSelected) override
     {
@@ -157,6 +150,7 @@ public:
         auto r2 = r1.removeFromTop(22);
         addButton.setBounds (r2.removeFromLeft (24));
         r1.removeFromTop (2);
+        table.getHeader().setColumnWidth (1, table.getWidth() - 1);
         table.setBounds (r1);
     }
 

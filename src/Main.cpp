@@ -69,14 +69,14 @@ public:
 
     void handleAsyncUpdate() override
     {
+        versicap->launched();
+
         const auto file = versicap->getSettings().getLastProject();
         if (file.existsAsFile())
         {
             DBG("[VCP] loading last project: " << file.getFullPathName());
             versicap->loadProject (file);
         }
-
-        versicap->launched();
     }
 
 private:

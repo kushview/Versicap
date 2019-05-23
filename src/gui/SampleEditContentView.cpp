@@ -396,6 +396,7 @@ public:
         timeIn.addListener (this);
         timeOut.addListener (this);
 
+        DBG("size: " << owner.getWidth() << "x" << owner.getHeight());
         setSize (owner.getWidth(), owner.getHeight());
     }
 
@@ -532,6 +533,7 @@ public:
     void setProject (const Project& project)
     {
         watcher.setProject (project);
+        auto sample = project.getActiveSample();
         refreshWithActiveSample();
     }
 
