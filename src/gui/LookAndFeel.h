@@ -55,6 +55,8 @@ public:
         // popup menu
         setColour (PopupMenu::highlightedBackgroundColourId, Colours::black.brighter (0.02));
         setColour (PopupMenu::highlightedTextColourId, Colours::white);
+
+        setColour (HyperlinkButton::textColourId, Colours::orange);
     }
 
     ~LookAndFeel() { }

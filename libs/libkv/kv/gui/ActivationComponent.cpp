@@ -1,9 +1,9 @@
 
 #include <kv/kv.h>
 
-#if ! defined (KV_ACTIVATION_INSTRUCTIONS)
- #define KV_ACTIVATION_INSTRUCTIONS      "APPNAME requires activation to run.\n" \
-                                         "Please enter your license key for APPNAME."
+#ifndef KV_ACTIVATION_INSTRUCTIONS
+ #define KV_ACTIVATION_INSTRUCTIONS "APPNAME requires activation to run.  \n" \
+                                           "Please enter your license key to unlock APPNAME."
 #endif
 
 namespace kv {
@@ -99,7 +99,7 @@ ActivationComponent::ActivationComponent (UnlockStatus& _status)
 
     appNameLabel->setText ("The Application", dontSendNotification);
     instructionLabel->setText (
-        instructionLabel->getText().replace ("APPNAME", "The Application"),
+        String(KV_ACTIVATION_INSTRUCTIONS).replace ("APPNAME", "The Application"),
         dontSendNotification);
     activateInstructions = instructionLabel->getText();
 
@@ -159,13 +159,21 @@ ActivationComponent::~ActivationComponent()
     //[/Destructor]
 }
 
+void ActivationComponent::setLinks (const String& purchaseLink,
+                                    const String& helpLink)
+{
+    if (URL::isProbablyAWebsiteURL (purchaseLink))
+        getLicenseLink->setURL (URL (purchaseLink));
+    if (URL::isProbablyAWebsiteURL (helpLink))
+        onlineActivateLink->setURL (URL (helpLink));
+}
 
 void ActivationComponent::setAppName (const String& newName)
 {
     appName = newName;
-    appNameLabel->setText (appName, dontSendNotification);
+    appNameLabel->setText (appName.toUpperCase(), dontSendNotification);
     instructionLabel->setText (
-        instructionLabel->getText().replace ("APPNAME", appName),
+        String(KV_ACTIVATION_INSTRUCTIONS).replace ("APPNAME", appName),
         dontSendNotification);
     activateInstructions = instructionLabel->getText();
 }

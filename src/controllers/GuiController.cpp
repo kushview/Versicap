@@ -107,8 +107,10 @@ void GuiController::checkUnlockStatus()
         if (nullptr == unlock)
         {
             auto* const dialog = new kv::ActivationDialog (versicap.getUnlockStatus(), unlock);
+            auto* const activation = dialog->getActivationComponent();
+            activation->setAppName ("Versicap");
+            activation->setLinks ("https://kushview.net/products/versicap/");
             dialog->centreAroundComponent (window.get(), dialog->getWidth(), dialog->getHeight());
-            dialog->setAppName ("VERSICAP");
         }
     }
 }

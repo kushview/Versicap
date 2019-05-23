@@ -15,6 +15,16 @@ public:
 
     void setAppName (const String& newName);
 
+    void setLinks (const String& purchaseLink,
+                   const String& helpLink = String());
+
+    /*
+    onlineActivateLink->setURL (URL ("EL_URL_HELP_ACTIVATION"));
+    myLicenseLink->setURL (URL ("EL_URL_MY_LICENSES"));
+    getLicenseLink->setURL (URL ("EL_URL_ELEMENT_PURCHASE"));
+    registerTrialLink->setURL (URL ("EL_URL_ELEMENT_GET_TRIAL"));
+    */
+
     void setForTrial (bool setupForTrial);
     void setForRegistration (bool setupRegistration);
     void setForManagement (bool setupManagement);
