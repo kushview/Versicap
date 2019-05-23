@@ -37,7 +37,8 @@ public:
     void setProject (const Project& newProject)
     { 
         watcher.setProject (newProject);
-        selectActiveLayer();
+        if (newProject.isValid())
+            selectActiveLayer();
     }
     
     Project getProject() const { return watcher.getProject(); }
@@ -180,6 +181,7 @@ void LayersTableContentView::projectChanged()
     auto project = versicap.getProject();
     auto& table = content->table;
     table.setProject (project);
+    setEnabled (project.isValid());
 }
 
 void LayersTableContentView::resized()
