@@ -219,6 +219,7 @@ void SamplesTableContentView::projectChanged()
     auto project = versicap.getProject();
     auto& table = content->table;
     table.setProject (project);
+    content->setEnabled (project.isValid());
 }
 
 }

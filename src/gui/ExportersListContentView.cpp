@@ -155,6 +155,7 @@ private:
     void projectChanged() override
     {
         watcher.setProject (versicap.getProject());
+        setEnabled (watcher.getProject().isValid());
     }
 };
 

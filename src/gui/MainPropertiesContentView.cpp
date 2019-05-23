@@ -47,6 +47,8 @@ void MainPropertiesContentView::refreshCompletePanel()
 
     if (xml)
         panel.restoreOpennessState (*xml);
+
+    setEnabled (project.isValid());
 }
 
 void MainPropertiesContentView::resized()
