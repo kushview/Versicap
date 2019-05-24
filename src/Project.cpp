@@ -127,7 +127,7 @@ int Project::getSourceType() const
     const int type = SourceType::fromSlug (getProperty (Tags::source));
     jassert (type >= SourceType::Begin && type < SourceType::End);
     return type >= SourceType::Begin && type < SourceType::End 
-        ? type : SourceType::MidiDevice;
+        ? type : SourceType::Hardware;
 }
 
 //=========================================================================
@@ -487,7 +487,7 @@ void Project::setMissingProperties()
     stabilizePropertyString (Tags::dataPath, {});
     
     RenderContext context;
-    stabilizePropertyString (Tags::source,      SourceType::getSlug (SourceType::MidiDevice));
+    stabilizePropertyString (Tags::source,      SourceType::getSlug (SourceType::Hardware));
     stabilizePropertyPOD (Tags::latencyComp,    0);
     stabilizePropertyPOD (Tags::noteStart,      36);
     stabilizePropertyPOD (Tags::noteEnd,        60);

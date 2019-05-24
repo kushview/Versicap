@@ -221,18 +221,18 @@ struct SourceType
 {
     enum ID
     {
-        MidiDevice  = 0,
+        Hardware  = 0,
         AudioPlugin
     };
 
     enum
     {
-        NumTypes = 2,
-        Begin = 0,
-        End = NumTypes
+        NumTypes    = 2,
+        Begin       = 0,
+        End         = NumTypes
     };
 
-    SourceType() : type (MidiDevice) { }
+    SourceType() : type (Hardware)      { }
     SourceType (const int t)            { operator= (t); }
     SourceType (const ID t)             { operator= (t); }
     SourceType (const SourceType& o)    { operator= (o); }
@@ -258,8 +258,8 @@ struct SourceType
     {
         switch (t)
         {
-            case MidiDevice: return "MIDI Device"; break;
-            case AudioPlugin: return "Audio Plugin"; break;
+            case Hardware:      return "Hardware";      break;
+            case AudioPlugin:   return "Audio Plugin";  break;
         }
 
         return "none";
@@ -270,7 +270,7 @@ struct SourceType
     {
         switch (t)
         {
-            case MidiDevice: return "midi"; break;
+            case Hardware: return "midi"; break;
             case AudioPlugin: return "plugin"; break;
         }
 
@@ -279,8 +279,8 @@ struct SourceType
 
     static int fromSlug (const String& t)
     {
-        if (t == "midi")    return MidiDevice;
-        if (t == "plugin")  return AudioPlugin;
+        if (t == "midi" || t == "hardware") return Hardware;
+        if (t == "plugin")                  return AudioPlugin;
         jassertfalse;
         return -1;
     }

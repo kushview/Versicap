@@ -86,7 +86,7 @@ struct LayerInfo
 
 struct RenderContext
 {
-    int source                  = SourceType::MidiDevice;
+    int source                  = SourceType::Hardware;
 
     int keyStart                = 36;   // C2
     int keyEnd                  = 60;   // C4

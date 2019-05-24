@@ -238,7 +238,7 @@ Result AudioEngine::startRendering (const RenderContext& context)
             return Result::fail ("No plugin selected to render");
         latency = processor->getLatencySamples();
     }
-    else if (context.source == SourceType::MidiDevice)
+    else if (context.source == SourceType::Hardware)
     {
         latency = inputLatency + roundToInt (0.001 * sampleRate);
     }
@@ -396,7 +396,7 @@ void AudioEngine::process (const float** input, int numInputs,
 
     if (auto* const out = midiOut.get())
     {
-        if (! rendering || (rendering && source == SourceType::MidiDevice))
+        if (! rendering || (rendering && source == SourceType::Hardware))
             out->sendBlockOfMessages (renderMidi, Time::getMillisecondCounterHiRes() + 1.0,
                                       sampleRate);
     }
@@ -430,7 +430,7 @@ void AudioEngine::process (const float** input, int numInputs,
                 renderBuffer.copyFrom (c, 0, pluginBuffer, c, 0, nframes);
         }
     }
-    else if (source == SourceType::MidiDevice)
+    else if (source == SourceType::Hardware)
     {
         if (numInputs == context.channels)
         {
