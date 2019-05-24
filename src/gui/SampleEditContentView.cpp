@@ -8,24 +8,28 @@
 
 namespace vcp {
 
-class PreviewButton : public TextButton
+class PreviewButton : public kv::IconButton
 {
 public:
-    PreviewButton() { }
+    PreviewButton()
+    { 
+        setIcon (kv::Icon (kv::getIcons().fasPlay, Colours::white), 5.f);
+    }
+
     ~PreviewButton() = default;
 
     void mouseDown (const MouseEvent& ev) override
     {
         if (onStart)
             onStart();
-        TextButton::mouseDown (ev);
+        IconButton::mouseDown (ev);
     }
 
     void mouseUp (const MouseEvent& ev) override
     {
         if (onStop)
             onStop();
-        TextButton::mouseUp (ev);
+        IconButton::mouseUp (ev);
     }
 
     std::function<void()> onStart;
@@ -326,7 +330,6 @@ public:
         zoomOutButton.onClick = [this]() { zoomOut(); };
 
         addAndMakeVisible (previewButton);
-        previewButton.setButtonText ("P");
         previewButton.onStart = [this]() { owner.getVersicap().getAudioEngine().setPreviewActiveSample (true); };
         previewButton.onStop  = [this]() { owner.getVersicap().getAudioEngine().setPreviewActiveSample (false); };
 
@@ -396,7 +399,6 @@ public:
         timeIn.addListener (this);
         timeOut.addListener (this);
 
-        DBG("size: " << owner.getWidth() << "x" << owner.getHeight());
         setSize (owner.getWidth(), owner.getHeight());
     }
 
@@ -438,17 +440,20 @@ public:
     void resized() override
     {
         auto r1 = getLocalBounds();
-        auto r2 = r1.removeFromBottom (22);
+        auto r2 = r1.removeFromTop (22);
+        auto r3 = r1.removeFromBottom (22);
         wave.setBounds (r1);
         displayBounds = r1;
 
         zoomBar.setRange (wave.getStartTime(), wave.getEndTime());
         zoomInButton.setBounds (r2.removeFromRight (24));
         zoomOutButton.setBounds (r2.removeFromRight (24));
-        previewButton.setBounds (r2.removeFromRight (24));
         r2.removeFromRight (2);
-
         zoomBar.setBounds (r2);
+
+        const int pbw = 24;
+        previewButton.setBounds ((r3.getWidth() / 2) - (pbw / 2), r3.getY(), pbw, r3.getHeight());
+
         updateMarkerBounds();
     }
 
