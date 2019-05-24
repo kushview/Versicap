@@ -71,8 +71,8 @@ void Exporter::getProperties (Array<PropertyComponent*>& props)
         type->getProperties (*this, props);
     }
 
-    props.add (new ChoicePropertyComponent (getPropertyAsValue (Tags::layers),
-        "Layers", { "All Sample Sets" }, { "all" }));
+    // props.add (new ChoicePropertyComponent (getPropertyAsValue (Tags::layers),
+    //     "Layers", { "All Sample Sets" }, { "all" }));
 }
 
 }

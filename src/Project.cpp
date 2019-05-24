@@ -173,7 +173,7 @@ Layer Project::addLayer()
 {
     auto layers = objectData.getChildWithName (Tags::layers);
     Layer layer;
-    String layerName = "Layer ";
+    String layerName = "Set ";
     layerName << int (getNumLayers() + 1);
     layer.setProperty (Tags::velocity, 127)
          .setProperty (Tags::name, layerName);

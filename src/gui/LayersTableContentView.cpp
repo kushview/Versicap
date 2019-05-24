@@ -77,7 +77,7 @@ public:
                                    : kv::LookAndFeel_KV1::textColor);
         auto text = layer.getProperty (Tags::name).toString();
         if (text.isEmpty())
-            text = "Layer " + String (1 + project.indexOf (layer));
+            text = "Set " + String (1 + project.indexOf (layer));
 
         g.drawText (text, 10, 0, width - 10, height, 
                     Justification::centredLeft);
@@ -164,7 +164,7 @@ private:
 LayersTableContentView::LayersTableContentView (Versicap& vc)
     : ContentView (vc)
 {
-    setName ("Sample Sets");
+    setName ("Sets");
     content.reset (new Content());
     addAndMakeVisible (content.get());
     versicap.addListener (this);
