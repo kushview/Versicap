@@ -93,9 +93,9 @@ public:
                    OwnedArray<ExportTask>& tasks) const override
     {
         OwnedArray<Sample> samples;
-        for (int layerIdx = 0; layerIdx < project.getNumLayers(); ++layerIdx)
+        for (int layerIdx = 0; layerIdx < project.getNumSampleSets(); ++layerIdx)
         {
-            const auto layer = project.getLayer (layerIdx);
+            const auto layer = project.getSampleSet (layerIdx);
             layer.getSamples (samples);
             
             for (auto* const sample : samples)

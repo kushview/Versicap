@@ -46,15 +46,15 @@ public:
     void selectActiveLayer()
     {
         const auto project = watcher.getProject();
-        const auto layer = project.getActiveLayer();
+        const auto layer = project.getActiveSampleSet();
         auto layerIdx = project.indexOf (layer);
         ProjectWatcher::ScopedBlock sb (watcher);
-        if (isPositiveAndBelow (layerIdx, project.getNumLayers()))
+        if (isPositiveAndBelow (layerIdx, project.getNumSampleSets()))
             selectRow (layerIdx);
     }
 
     //=========================================================================
-    int getNumRows() override { return watcher.getProject().getNumLayers(); }
+    int getNumRows() override { return watcher.getProject().getNumSampleSets(); }
 
     void paintRowBackground (Graphics& g, int rowNumber,
                              int width, int height, 
@@ -72,7 +72,7 @@ public:
                     int width, int height, bool rowIsSelected) override
     {
         const auto project = watcher.getProject();
-        const auto layer = project.getLayer (rowNumber);
+        const auto layer = project.getSampleSet (rowNumber);
         g.setColour (rowIsSelected ? Colours::white
                                    : kv::LookAndFeel_KV1::textColor);
         auto text = layer.getProperty (Tags::name).toString();
@@ -87,8 +87,8 @@ public:
     {
         ignoreUnused (columnId, ev);
         auto project = watcher.getProject();
-        const auto layer = project.getLayer (rowNumber);
-        project.setActiveLayer (layer);
+        const auto layer = project.getSampleSet (rowNumber);
+        project.setActiveSampleSet (layer);
     }
 
     void selectedRowsChanged (int lastRowSelected) override { }
@@ -96,8 +96,8 @@ public:
     void deleteKeyPressed (int lastRowSelected) override
     {
         auto project = watcher.getProject();
-        const auto layer = project.getLayer (lastRowSelected);
-        project.removeLayer (project.indexOf (layer));
+        const auto layer = project.getSampleSet (lastRowSelected);
+        project.removeSampleSet (project.indexOf (layer));
     }
 
    #if 0
@@ -130,7 +130,7 @@ public:
         addButton.onClick = [this]()
         {
             auto project = table.getProject();
-            auto layer = project.addLayer();
+            auto layer = project.addSampleSet();
             project.rebuildSampleList();
             table.selectRow (project.indexOf (layer));
         };

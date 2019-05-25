@@ -245,7 +245,7 @@ void Render::handleAsyncUpdate()
                 auto totalTime = static_cast<double> (info->stop - info->start) / sampleRate;
 
                 sample.setProperty (Tags::uuid, Uuid().toString(), nullptr)
-                      .setProperty (Tags::layer, info->layerId.toString(), nullptr)
+                      .setProperty (Tags::set, info->layerId.toString(), nullptr)
                       .setProperty (Tags::file, info->file.getFileName(), nullptr)
                       .setProperty (Tags::note, info->note, nullptr)
                       .setProperty (Tags::sampleRate, sampleRate, nullptr)

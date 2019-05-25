@@ -42,6 +42,7 @@ public:
 private:
     void setMissingProperties();
 };
+typedef Layer SampleSet;
 
 class Sample : public kv::ObjectModel
 {
@@ -55,8 +56,8 @@ public:
 
     bool isValid() const;
     bool isEmpty() const;
-    bool isForLayer (const Layer& layer) const;
-    String getLayerUuidString() const;
+    bool isForSampleSet (const Layer& layer) const;
+    String getSampleSetUuidString() const;
     
     String getNoteName() const;
     String getFileName () const;
@@ -172,13 +173,13 @@ public:
     void getExportTasks (OwnedArray<ExportTask>&) const;
     
     //=========================================================================
-    int getNumLayers() const;
-    Layer getLayer (int index) const;
-    Layer addLayer();
-    void removeLayer (int index);
-    Layer findLayer (const String& uuid) const { return Layer (find (Tags::layers, Tags::uuid, uuid)); }
-    void setActiveLayer (const Layer& layer);
-    Layer getActiveLayer() const;
+    int getNumSampleSets() const;
+    Layer getSampleSet (int index) const;
+    Layer addSampleSet();
+    void removeSampleSet (int index);
+    Layer findSampleSet (const String& uuid) const { return Layer (find (Tags::sets, Tags::uuid, uuid)); }
+    void setActiveSampleSet (const Layer& layer);
+    Layer getActiveSampleSet() const;
 
     //=========================================================================
     void setSamples (const ValueTree& samples);

@@ -11,7 +11,7 @@ public:
     {
         beginTest ("properties");
         Project project;
-        expect (project.getNumLayers() == 0);
+        expect (project.getNumSampleSets() == 0);
         expect (project.getFormatType() == FormatType::WAVE);
         expect (project.getFormatTypeSlug() == FormatType::getSlug (project.getFormatType()));
     }

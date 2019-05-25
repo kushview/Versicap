@@ -12,7 +12,7 @@ ValueTree ExporterType::createModelData() const
         .setProperty (Tags::name,    getName(), nullptr)
         .setProperty (Tags::type,    getSlug(), nullptr)
         .setProperty (Tags::path,    "", nullptr)
-        .setProperty (Tags::layers,  "all", nullptr);
+        .setProperty (Tags::sets,  "all", nullptr);
     setMissingProperties (data);
     return data;
 }

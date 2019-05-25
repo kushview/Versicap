@@ -100,7 +100,7 @@ void ProjectsController::projectChanged()
     
    #if 0
     auto project = watcher.getProject();
-    if (project.getNumLayers() > 0)
+    if (project.getNumSampleSets() > 0)
     {
         auto sample = project.getActiveSample();
         if (! sample.isValid())

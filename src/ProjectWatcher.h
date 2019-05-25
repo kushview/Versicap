@@ -73,7 +73,7 @@ private:
             if (onSourceChanged)
                 onSourceChanged();
         }
-        else if (tree.hasType (Tags::layers) && property == Tags::active)
+        else if (tree.hasType (Tags::sets) && property == Tags::active)
         {
             if (onActiveLayerChanged)
                 onActiveLayerChanged();
@@ -97,7 +97,7 @@ private:
     {
         if (blocked) return;
 
-        if (child.hasType (Tags::layer) && parent.getParent() == data)
+        if (child.hasType (Tags::set) && parent.getParent() == data)
         {
             if (onLayerAdded)
                 onLayerAdded();
@@ -127,7 +127,7 @@ private:
     {
         if (blocked) return;
 
-        if (child.hasType (Tags::layer) && parent.getParent() == data)
+        if (child.hasType (Tags::set) && parent.getParent() == data)
         {
             if (onLayerRemoved)
                 onLayerRemoved();

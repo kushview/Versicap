@@ -134,12 +134,12 @@ void AudioEngine::onProjectLoaded()
         
         for (auto* const sample : samples)
         {
-            if (auto* const data = sampleCache.getLayerData (true))
+            if (auto* const data = sampleCache.getSampleSetData (true))
                 if (data->loadAudioFile (sample->getFile()))
                     sound->insertLayerData (data);
         }
 
-        if (sound->getNumLayers() > 0)
+        if (sound->getNumSampleSets() > 0)
             sampler->insertSound (sound.release());
         
         samples.clearQuick (false);

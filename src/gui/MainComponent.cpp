@@ -422,7 +422,7 @@ public:
                 addAndMakeVisible (view.get());
             }
         }
-        else if (object.hasType (Tags::layer))
+        else if (object.hasType (Tags::set))
         {
             if (nullptr == dynamic_cast<SampleEditContentView*> (view.get()))
             {

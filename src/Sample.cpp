@@ -6,7 +6,7 @@ namespace vcp {
 void Sample::setMissingProperties()
 {
     stabilizePropertyString (Tags::uuid, Uuid().toString());
-    stabilizePropertyString (Tags::layer, "");
+    stabilizePropertyString (Tags::set, "");
     stabilizePropertyString (Tags::name, "");
 }
 
@@ -47,7 +47,7 @@ Uuid Sample::getUuid() const
 String Sample::getFileName () const
 {
     const Project project (objectData.getParent().getParent());
-    const Layer layer (project.findLayer (getProperty(Tags::layer).toString()));
+    const Layer layer (project.findSampleSet (getProperty(Tags::set).toString()));
 
     String name     = getProperty (Tags::name);
     String noteName = getNoteName();
@@ -60,11 +60,11 @@ String Sample::getFileName () const
     return tokens.joinIntoString("_");
 }
 
-String Sample::getLayerUuidString() const { return getProperty (Tags::layer).toString(); }
+String Sample::getSampleSetUuidString() const { return getProperty (Tags::set).toString(); }
 
-bool Sample::isForLayer (const Layer& layer) const
+bool Sample::isForSampleSet (const Layer& layer) const
 {
-    const Uuid sid (getLayerUuidString());
+    const Uuid sid (getSampleSetUuidString());
     const Uuid lid (layer.getUuid());
     return !sid.isNull() && !lid.isNull() && sid == lid;
 }

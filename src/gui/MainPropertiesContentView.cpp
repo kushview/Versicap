@@ -32,7 +32,7 @@ void MainPropertiesContentView::refreshCompletePanel()
     panel.addSection ("Project", props);
 
     props.clearQuick();
-    auto layer = project.getActiveLayer();
+    auto layer = project.getActiveSampleSet();
     layer.getProperties (props);
     panel.addSection ("Set", props);
 

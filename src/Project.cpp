@@ -12,7 +12,7 @@ namespace vcp {
 
 //=========================================================================
 Layer::Layer()
-    : kv::ObjectModel (Tags::layer)
+    : kv::ObjectModel (Tags::set)
 {
     setMissingProperties();
 }
@@ -20,7 +20,7 @@ Layer::Layer()
 Layer::Layer (const ValueTree& data)
     : kv::ObjectModel (data)
 {
-    if (objectData.hasType (Tags::layer))
+    if (objectData.hasType (Tags::set))
         setMissingProperties();
 }
 
@@ -34,7 +34,7 @@ Uuid Layer::getUuid() const
 
 bool Layer::isValid() const 
 { 
-    return objectData.hasType (Tags::layer) &&
+    return objectData.hasType (Tags::set) &&
            objectData.hasProperty (Tags::uuid) &&
            ! Uuid (getProperty (Tags::uuid).toString()).isNull();
 }
@@ -71,18 +71,18 @@ Project::Project()
 Project::~Project() { }
 
 //=========================================================================
-void Project::setActiveLayer (const Layer& layer)
+void Project::setActiveSampleSet (const Layer& layer)
 {
-    auto layers = objectData.getChildWithName (Tags::layers);
+    auto layers = objectData.getChildWithName (Tags::sets);
     if (layers.getProperty (Tags::active).toString() == layer.getUuidString())
         layers.removeProperty (Tags::active, nullptr);
     layers.setProperty (Tags::active, layer.getUuidString(), nullptr);
 }
 
-Layer Project::getActiveLayer() const
+Layer Project::getActiveSampleSet() const
 {
-    const auto layers = objectData.getChildWithName (Tags::layers);
-    const Layer layer (find (Tags::layers, Tags::uuid, layers.getProperty (Tags::active)));
+    const auto layers = objectData.getChildWithName (Tags::sets);
+    const Layer layer (find (Tags::sets, Tags::uuid, layers.getProperty (Tags::active)));
     return layer;
 }
 
@@ -153,9 +153,9 @@ void Project::getRenderContext (RenderContext& context) const
     // not currently used
     context.sampleRate      = 44100.0;
 
-    for (int i = 0; i < getNumLayers(); ++i)
+    for (int i = 0; i < getNumSampleSets(); ++i)
     {
-        const auto layer (getLayer (i));
+        const auto layer (getSampleSet (i));
         LayerInfo info (layer.getUuidString(), layer.getVelocity());
         info.noteLength  = layer.getNoteLength();
         info.tailLength  = layer.getTailLength();
@@ -166,26 +166,26 @@ void Project::getRenderContext (RenderContext& context) const
 }
 
 //=========================================================================
-int Project::getNumLayers() const { return objectData.getChildWithName (Tags::layers).getNumChildren(); }
-Layer Project::getLayer (int index) const { return Layer (objectData.getChildWithName (Tags::layers).getChild (index)); }
+int Project::getNumSampleSets() const { return objectData.getChildWithName (Tags::sets).getNumChildren(); }
+Layer Project::getSampleSet (int index) const { return Layer (objectData.getChildWithName (Tags::sets).getChild (index)); }
 
-Layer Project::addLayer()
+Layer Project::addSampleSet()
 {
-    auto layers = objectData.getChildWithName (Tags::layers);
+    auto layers = objectData.getChildWithName (Tags::sets);
     Layer layer;
     String layerName = "Set ";
-    layerName << int (getNumLayers() + 1);
+    layerName << int (getNumSampleSets() + 1);
     layer.setProperty (Tags::velocity, 127)
          .setProperty (Tags::name, layerName);
     layers.appendChild (layer.getValueTree(), nullptr);
     return layer;
 }
 
-void Project::removeLayer (int index)
+void Project::removeSampleSet (int index)
 {
-    if (! isPositiveAndBelow (index, getNumLayers()))
+    if (! isPositiveAndBelow (index, getNumSampleSets()))
         return;
-    auto layers  = objectData.getChildWithName (Tags::layers);
+    auto layers  = objectData.getChildWithName (Tags::sets);
     auto samples = objectData.getChildWithName (Tags::samples);
     const auto layerId = layers.getChild (index).getProperty (Tags::uuid).toString();
 
@@ -193,14 +193,14 @@ void Project::removeLayer (int index)
     for (int i = samples.getNumChildren(); --i >= 0;)
     {
         const Sample sample (samples.getChild (i));
-        if (sample.getLayerUuidString() == layerId)
+        if (sample.getSampleSetUuidString() == layerId)
             samples.removeChild (i, nullptr);
     }
 }
 
 int Project::indexOf (const Layer& layer) const
 {
-    return objectData.getChildWithName(Tags::layers).indexOf (layer.getValueTree());
+    return objectData.getChildWithName(Tags::sets).indexOf (layer.getValueTree());
 }
 
 //=========================================================================
@@ -249,22 +249,22 @@ void Project::rebuildSampleList()
     
     //objectData.removeChild (samples, nullptr);
 
-    for (int i = 0; i < getNumLayers(); ++i)
+    for (int i = 0; i < getNumSampleSets(); ++i)
     {
-        const auto layer = getLayer (i);
+        const auto layer = getSampleSet (i);
         const auto layerId = layer.getUuidString();
         
         // MessageManager::getInstance()->runDispatchLoopUntil (20);
 
         for (const auto& note : notes)
         {
-            Sample sample (find (Tags::samples, Tags::layer, layerId,
+            Sample sample (find (Tags::samples, Tags::set, layerId,
                                                 Tags::note,  note));
             if (! sample.isValid())
             {
                 sample = Sample::create();
                 sample.setProperty (Tags::note, note)
-                      .setProperty (Tags::layer, layerId);
+                      .setProperty (Tags::set, layerId);
                 samples.appendChild (sample.getValueTree(), nullptr);
             }
         }
@@ -295,13 +295,13 @@ void Project::setSamples (const ValueTree& newSamples)
     for (int i = 0; i < newSamples.getNumChildren(); ++i)
     {
         const Sample recorded (newSamples.getChild (i));
-        Sample existing (find (Tags::samples, Tags::layer, recorded.getLayerUuidString(),
+        Sample existing (find (Tags::samples, Tags::set, recorded.getSampleSetUuidString(),
                                               Tags::note,  recorded.getNote()));
         
         Array<Identifier> propsToCopy, propsToCopyIfNotThere;
         propsToCopy.addArray ({ Tags::file, Tags::sampleRate, Tags::length });
         propsToCopyIfNotThere.addArray ({
-            Tags::layer, Tags::name, Tags::note, 
+            Tags::set, Tags::name, Tags::note, 
             Tags::timeIn, Tags::timeOut
         });
         
@@ -353,14 +353,14 @@ SampleArray Project::getSamples() const
 
 void Project::getSamples (int layerIdx, OwnedArray<Sample>& out) const
 {
-    if (! isPositiveAndBelow (layerIdx, getNumLayers()))
+    if (! isPositiveAndBelow (layerIdx, getNumSampleSets()))
         return;
 
     const auto samples = getSamples();
 
-    const auto layer = getLayer (layerIdx);
+    const auto layer = getSampleSet (layerIdx);
     for (int i = 0; i < samples.size(); ++i)
-        if (samples[i].isForLayer (layer))
+        if (samples[i].isForSampleSet (layer))
             out.add (new Sample (samples [i]));
 }
 
@@ -502,7 +502,7 @@ void Project::setMissingProperties()
     stabilizePropertyPOD (Tags::bitDepth,       context.bitDepth);
 
     objectData.getOrCreateChildWithName (Tags::exporters,  nullptr);
-    objectData.getOrCreateChildWithName (Tags::layers,  nullptr);
+    objectData.getOrCreateChildWithName (Tags::sets,  nullptr);
     objectData.getOrCreateChildWithName (Tags::samples, nullptr);
     objectData.getOrCreateChildWithName (Tags::plugin,  nullptr);
 }

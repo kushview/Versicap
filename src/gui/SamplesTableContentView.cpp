@@ -33,7 +33,7 @@ public:
         
         watcher.onActiveLayerChanged = [this]()
         {
-            layer = watcher.getProject().getActiveLayer();
+            layer = watcher.getProject().getActiveSampleSet();
             refreshSamples();
         };
     }
@@ -46,7 +46,7 @@ public:
     void setProject (const Project& newProject)
     {
         watcher.setProject (newProject);
-        layer = watcher.getProject().getActiveLayer();
+        layer = watcher.getProject().getActiveSampleSet();
         refreshSamples();
         selectActiveSample();
     }
@@ -59,7 +59,7 @@ public:
         filtered.clearQuick (true);
         auto layerIdx = project.indexOf (layer);
         
-        if (isPositiveAndBelow (layerIdx, project.getNumLayers()))
+        if (isPositiveAndBelow (layerIdx, project.getNumSampleSets()))
             project.getSamples (layerIdx, filtered);
         
         struct NameSort
