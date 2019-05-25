@@ -682,3 +682,14 @@ void Versicap::stopExporting()
 }
 
 }
+
+#include "../libs/libkv/kv.cpp"
+#include "../libs/ksp1/src/engine/ADSR.cpp"
+#include "../libs/ksp1/src/engine/Articulator.cpp"
+#include "../libs/ksp1/src/engine/LayerData.cpp"
+#include "../libs/ksp1/src/engine/LowPassFilter.cpp"
+#include "../libs/ksp1/src/engine/SampleCache.cpp"
+#include "../libs/ksp1/src/engine/SamplerSounds.cpp"
+#include "../libs/ksp1/src/engine/SamplerSynth.cpp"
+#include "../libs/ksp1/src/engine/SamplerVoice.cpp"
+#include "../libs/ksp1/src/DataPath.cpp"

@@ -9,128 +9,129 @@
       <FILE id="EYE9Kw" name="versicap_v1.png" compile="0" resource="1" file="../data/versicap_v1.png"/>
     </GROUP>
     <GROUP id="{8705BA76-3319-E94D-E01D-9874E3FB2A67}" name="src">
-      <GROUP id="{EAEB3878-4F97-8DD8-203E-05575548AC6D}" name="controllers">
-        <FILE id="DUoROX" name="Controller.h" compile="0" resource="0" file="../src/controllers/Controller.h"/>
-        <FILE id="rXqvPF" name="GuiController.cpp" compile="1" resource="0"
+      <GROUP id="{A7AECA7A-09BE-60C2-6B2C-6335CB86E994}" name="controllers">
+        <FILE id="xcLauE" name="Controller.h" compile="0" resource="0" file="../src/controllers/Controller.h"/>
+        <FILE id="gJVpQL" name="GuiController.cpp" compile="1" resource="0"
               file="../src/controllers/GuiController.cpp"/>
-        <FILE id="YcEF16" name="GuiController.h" compile="0" resource="0" file="../src/controllers/GuiController.h"/>
-        <FILE id="H3wGo2" name="ProjectsController.cpp" compile="1" resource="0"
+        <FILE id="uZSRTm" name="GuiController.h" compile="0" resource="0" file="../src/controllers/GuiController.h"/>
+        <FILE id="qt7efg" name="ProjectsController.cpp" compile="1" resource="0"
               file="../src/controllers/ProjectsController.cpp"/>
-        <FILE id="ygQjv9" name="ProjectsController.h" compile="0" resource="0"
+        <FILE id="Noz6wR" name="ProjectsController.h" compile="0" resource="0"
               file="../src/controllers/ProjectsController.h"/>
       </GROUP>
-      <GROUP id="{867077B2-1258-201A-BA33-B13EBAA6183C}" name="engine">
-        <FILE id="AFLApq" name="AudioEngine.cpp" compile="1" resource="0" file="../src/engine/AudioEngine.cpp"/>
-        <FILE id="SStVDu" name="AudioEngine.h" compile="0" resource="0" file="../src/engine/AudioEngine.h"/>
-        <FILE id="NJXFTy" name="AudioPlugin.h" compile="0" resource="0" file="../src/engine/AudioPlugin.h"/>
-        <FILE id="OArz5h" name="ChannelDelay.h" compile="0" resource="0" file="../src/engine/ChannelDelay.h"/>
+      <GROUP id="{89F29FE3-09FA-A711-68EA-0A730FEDB922}" name="engine">
+        <FILE id="rZggeL" name="AudioEngine.cpp" compile="1" resource="0" file="../src/engine/AudioEngine.cpp"/>
+        <FILE id="TfhzX0" name="AudioEngine.h" compile="0" resource="0" file="../src/engine/AudioEngine.h"/>
+        <FILE id="sQ41Y0" name="AudioPlugin.h" compile="0" resource="0" file="../src/engine/AudioPlugin.h"/>
+        <FILE id="BzX3eO" name="ChannelDelay.h" compile="0" resource="0" file="../src/engine/ChannelDelay.h"/>
+        <FILE id="tF3tRo" name="Render.cpp" compile="1" resource="0" file="../src/engine/Render.cpp"/>
+        <FILE id="zUeCnv" name="Render.h" compile="0" resource="0" file="../src/engine/Render.h"/>
+        <FILE id="HfYCmP" name="RenderContext.cpp" compile="1" resource="0"
+              file="../src/engine/RenderContext.cpp"/>
+        <FILE id="OJ02nz" name="RenderContext.h" compile="0" resource="0" file="../src/engine/RenderContext.h"/>
       </GROUP>
-      <GROUP id="{EAB2C6A2-6A3A-180E-D862-30FB8F92D0FE}" name="exporters">
-        <FILE id="VdEXa4" name="AudioFileExporter.cpp" compile="1" resource="0"
+      <GROUP id="{1767F824-A634-6865-62FD-793739C5838F}" name="exporters">
+        <FILE id="q3Xv1t" name="AudioFileExporter.cpp" compile="1" resource="0"
               file="../src/exporters/AudioFileExporter.cpp"/>
-        <FILE id="VDerF0" name="Exporter.cpp" compile="1" resource="0" file="../src/exporters/Exporter.cpp"/>
-        <FILE id="XIf0RN" name="Exporter.h" compile="0" resource="0" file="../src/exporters/Exporter.h"/>
-        <FILE id="b0QLe0" name="ExportTasks.cpp" compile="1" resource="0" file="../src/exporters/ExportTasks.cpp"/>
-        <FILE id="Ybnub3" name="ExportTasks.h" compile="0" resource="0" file="../src/exporters/ExportTasks.h"/>
-        <FILE id="IAcCak" name="ExportThread.cpp" compile="1" resource="0"
+        <FILE id="trPs2v" name="Exporter.cpp" compile="1" resource="0" file="../src/exporters/Exporter.cpp"/>
+        <FILE id="IH10cG" name="Exporter.h" compile="0" resource="0" file="../src/exporters/Exporter.h"/>
+        <FILE id="SLMEHv" name="ExportTasks.cpp" compile="1" resource="0" file="../src/exporters/ExportTasks.cpp"/>
+        <FILE id="FZPFIV" name="ExportTasks.h" compile="0" resource="0" file="../src/exporters/ExportTasks.h"/>
+        <FILE id="VnZhVB" name="ExportThread.cpp" compile="1" resource="0"
               file="../src/exporters/ExportThread.cpp"/>
-        <FILE id="hivxis" name="ExportThread.h" compile="0" resource="0" file="../src/exporters/ExportThread.h"/>
-        <FILE id="wrGYY5" name="EXS24Exporter.h" compile="0" resource="0" file="../src/exporters/EXS24Exporter.h"/>
-        <FILE id="orSciI" name="PythonExporter.h" compile="0" resource="0"
+        <FILE id="LiWBvE" name="ExportThread.h" compile="0" resource="0" file="../src/exporters/ExportThread.h"/>
+        <FILE id="wSBlHl" name="EXS24Exporter.h" compile="0" resource="0" file="../src/exporters/EXS24Exporter.h"/>
+        <FILE id="IrTlCG" name="PythonExporter.h" compile="0" resource="0"
               file="../src/exporters/PythonExporter.h"/>
       </GROUP>
-      <GROUP id="{67B54294-C74B-2985-F3A0-0B0AFF4E213E}" name="gui">
-        <FILE id="S4Ef4e" name="AudioDeviceSelect.h" compile="0" resource="0"
+      <GROUP id="{D0D2F40D-A3D9-6A08-C925-90443635374B}" name="gui">
+        <FILE id="fVcTVK" name="AudioDeviceSelect.h" compile="0" resource="0"
               file="../src/gui/AudioDeviceSelect.h"/>
-        <FILE id="IEMj6v" name="ContentComponent.cpp" compile="1" resource="0"
+        <FILE id="mgpmgD" name="ContentComponent.cpp" compile="1" resource="0"
               file="../src/gui/ContentComponent.cpp"/>
-        <FILE id="qUw1j7" name="ContentComponent.h" compile="0" resource="0"
+        <FILE id="xhSvYj" name="ContentComponent.h" compile="0" resource="0"
               file="../src/gui/ContentComponent.h"/>
-        <FILE id="mlCXPy" name="ContentView.cpp" compile="1" resource="0" file="../src/gui/ContentView.cpp"/>
-        <FILE id="k1PCGn" name="ContentView.h" compile="0" resource="0" file="../src/gui/ContentView.h"/>
-        <FILE id="lXvAyz" name="ExporterContentView.cpp" compile="1" resource="0"
+        <FILE id="EgnMqh" name="ContentView.cpp" compile="1" resource="0" file="../src/gui/ContentView.cpp"/>
+        <FILE id="aRQpk1" name="ContentView.h" compile="0" resource="0" file="../src/gui/ContentView.h"/>
+        <FILE id="yNlItZ" name="ExporterContentView.cpp" compile="1" resource="0"
               file="../src/gui/ExporterContentView.cpp"/>
-        <FILE id="IkUN0f" name="ExporterContentView.h" compile="0" resource="0"
+        <FILE id="OM15E8" name="ExporterContentView.h" compile="0" resource="0"
               file="../src/gui/ExporterContentView.h"/>
-        <FILE id="YqqFiU" name="ExporterProperties.cpp" compile="1" resource="0"
+        <FILE id="GKckBF" name="ExporterProperties.cpp" compile="1" resource="0"
               file="../src/gui/ExporterProperties.cpp"/>
-        <FILE id="UZ6yiE" name="ExportersListContentView.cpp" compile="1" resource="0"
+        <FILE id="whyN8G" name="ExportersListContentView.cpp" compile="1" resource="0"
               file="../src/gui/ExportersListContentView.cpp"/>
-        <FILE id="qmBRQ7" name="ExportersListContentView.h" compile="0" resource="0"
+        <FILE id="movsI3" name="ExportersListContentView.h" compile="0" resource="0"
               file="../src/gui/ExportersListContentView.h"/>
-        <FILE id="IzsM5j" name="LayerProperties.cpp" compile="1" resource="0"
+        <FILE id="tzyFII" name="LayerProperties.cpp" compile="1" resource="0"
               file="../src/gui/LayerProperties.cpp"/>
-        <FILE id="w3D8cZ" name="LayersTableContentView.cpp" compile="1" resource="0"
+        <FILE id="QUrCII" name="LayersTableContentView.cpp" compile="1" resource="0"
               file="../src/gui/LayersTableContentView.cpp"/>
-        <FILE id="eRNKrZ" name="LayersTableContentView.h" compile="0" resource="0"
+        <FILE id="P60KBq" name="LayersTableContentView.h" compile="0" resource="0"
               file="../src/gui/LayersTableContentView.h"/>
-        <FILE id="DCzg11" name="LookAndFeel.h" compile="0" resource="0" file="../src/gui/LookAndFeel.h"/>
-        <FILE id="rGoDzO" name="MainComponent.cpp" compile="1" resource="0"
+        <FILE id="Nm5jk6" name="LookAndFeel.h" compile="0" resource="0" file="../src/gui/LookAndFeel.h"/>
+        <FILE id="iAxnzg" name="MainComponent.cpp" compile="1" resource="0"
               file="../src/gui/MainComponent.cpp"/>
-        <FILE id="t6S8JD" name="MainComponent.h" compile="0" resource="0" file="../src/gui/MainComponent.h"/>
-        <FILE id="UjKRet" name="MainMenu.cpp" compile="1" resource="0" file="../src/gui/MainMenu.cpp"/>
-        <FILE id="t7knzJ" name="MainMenu.h" compile="0" resource="0" file="../src/gui/MainMenu.h"/>
-        <FILE id="I8s9dR" name="MainPropertiesContentView.cpp" compile="1"
+        <FILE id="KNjKA2" name="MainComponent.h" compile="0" resource="0" file="../src/gui/MainComponent.h"/>
+        <FILE id="rx5XcH" name="MainMenu.cpp" compile="1" resource="0" file="../src/gui/MainMenu.cpp"/>
+        <FILE id="MoDhto" name="MainMenu.h" compile="0" resource="0" file="../src/gui/MainMenu.h"/>
+        <FILE id="PeUFHi" name="MainPropertiesContentView.cpp" compile="1"
               resource="0" file="../src/gui/MainPropertiesContentView.cpp"/>
-        <FILE id="zDyp8q" name="MainPropertiesContentView.h" compile="0" resource="0"
+        <FILE id="tptVtD" name="MainPropertiesContentView.h" compile="0" resource="0"
               file="../src/gui/MainPropertiesContentView.h"/>
-        <FILE id="Jo6wYX" name="MainWindow.h" compile="0" resource="0" file="../src/gui/MainWindow.h"/>
-        <FILE id="DPQ8pb" name="NoteParams.h" compile="0" resource="0" file="../src/gui/NoteParams.h"/>
-        <FILE id="gofTb5" name="PluginPicker.h" compile="0" resource="0" file="../src/gui/PluginPicker.h"/>
-        <FILE id="uzf9kf" name="PluginWindow.h" compile="0" resource="0" file="../src/gui/PluginWindow.h"/>
-        <FILE id="fKnycE" name="ProjectConcertinaPanel.cpp" compile="1" resource="0"
+        <FILE id="Fl2Miu" name="MainWindow.h" compile="0" resource="0" file="../src/gui/MainWindow.h"/>
+        <FILE id="Gmrdtl" name="NoteParams.h" compile="0" resource="0" file="../src/gui/NoteParams.h"/>
+        <FILE id="jpvfrX" name="PluginPicker.h" compile="0" resource="0" file="../src/gui/PluginPicker.h"/>
+        <FILE id="mHpRi6" name="PluginWindow.h" compile="0" resource="0" file="../src/gui/PluginWindow.h"/>
+        <FILE id="cTNccR" name="ProjectConcertinaPanel.cpp" compile="1" resource="0"
               file="../src/gui/ProjectConcertinaPanel.cpp"/>
-        <FILE id="GGzUpz" name="ProjectConcertinaPanel.h" compile="0" resource="0"
+        <FILE id="xOyBr8" name="ProjectConcertinaPanel.h" compile="0" resource="0"
               file="../src/gui/ProjectConcertinaPanel.h"/>
-        <FILE id="yvs8Um" name="ProjectProperties.cpp" compile="1" resource="0"
+        <FILE id="jJyPLs" name="ProjectProperties.cpp" compile="1" resource="0"
               file="../src/gui/ProjectProperties.cpp"/>
-        <FILE id="DR7GLr" name="ProjectPropertiesContentView.h" compile="0"
+        <FILE id="k1q3n1" name="ProjectPropertiesContentView.h" compile="0"
               resource="0" file="../src/gui/ProjectPropertiesContentView.h"/>
-        <FILE id="orrIiL" name="SampleEditContentView.cpp" compile="1" resource="0"
+        <FILE id="o7dduY" name="SampleEditContentView.cpp" compile="1" resource="0"
               file="../src/gui/SampleEditContentView.cpp"/>
-        <FILE id="uiGSAk" name="SampleEditContentView.h" compile="0" resource="0"
+        <FILE id="Ip7HRK" name="SampleEditContentView.h" compile="0" resource="0"
               file="../src/gui/SampleEditContentView.h"/>
-        <FILE id="B2eExW" name="SamplePropertiesContentView.cpp" compile="1"
+        <FILE id="wH87FB" name="SamplePropertiesContentView.cpp" compile="1"
               resource="0" file="../src/gui/SamplePropertiesContentView.cpp"/>
-        <FILE id="h1UHCW" name="SamplePropertiesContentView.h" compile="0"
+        <FILE id="xOWYDF" name="SamplePropertiesContentView.h" compile="0"
               resource="0" file="../src/gui/SamplePropertiesContentView.h"/>
-        <FILE id="d9NccK" name="SamplesTableContentView.cpp" compile="1" resource="0"
+        <FILE id="wtAyxc" name="SamplesTableContentView.cpp" compile="1" resource="0"
               file="../src/gui/SamplesTableContentView.cpp"/>
-        <FILE id="QQi8zM" name="SamplesTableContentView.h" compile="0" resource="0"
+        <FILE id="Kjw5im" name="SamplesTableContentView.h" compile="0" resource="0"
               file="../src/gui/SamplesTableContentView.h"/>
-        <FILE id="bV5cQ2" name="UnlockForm.cpp" compile="1" resource="0" file="../src/gui/UnlockForm.cpp"/>
-        <FILE id="Pyvekb" name="UnlockForm.h" compile="0" resource="0" file="../src/gui/UnlockForm.h"/>
-        <FILE id="iFwVaA" name="WaveDisplayComponent.cpp" compile="1" resource="0"
+        <FILE id="P7eo56" name="UnlockForm.cpp" compile="1" resource="0" file="../src/gui/UnlockForm.cpp"/>
+        <FILE id="jeqgPz" name="UnlockForm.h" compile="0" resource="0" file="../src/gui/UnlockForm.h"/>
+        <FILE id="q9vB4Y" name="WaveDisplayComponent.cpp" compile="1" resource="0"
               file="../src/gui/WaveDisplayComponent.cpp"/>
-        <FILE id="sGA7ag" name="WaveDisplayComponent.h" compile="0" resource="0"
+        <FILE id="CqEPuG" name="WaveDisplayComponent.h" compile="0" resource="0"
               file="../src/gui/WaveDisplayComponent.h"/>
       </GROUP>
-      <FILE id="zVM9MO" name="Commands.h" compile="0" resource="0" file="../src/Commands.h"/>
-      <FILE id="UmqRzf" name="Main.cpp" compile="1" resource="0" file="../src/Main.cpp"/>
-      <FILE id="HCOWUc" name="PluginManager.cpp" compile="1" resource="0"
+      <FILE id="toZFVH" name="Commands.h" compile="0" resource="0" file="../src/Commands.h"/>
+      <FILE id="opvseN" name="IncludeKSP1.h" compile="0" resource="0" file="../src/IncludeKSP1.h"/>
+      <FILE id="MDrA1q" name="Main.cpp" compile="1" resource="0" file="../src/Main.cpp"/>
+      <FILE id="O2D24S" name="PluginManager.cpp" compile="1" resource="0"
             file="../src/PluginManager.cpp"/>
-      <FILE id="DI0M1h" name="PluginManager.h" compile="0" resource="0" file="../src/PluginManager.h"/>
-      <FILE id="Fk0QKl" name="Project.cpp" compile="1" resource="0" file="../src/Project.cpp"/>
-      <FILE id="TtCZ1B" name="Project.h" compile="0" resource="0" file="../src/Project.h"/>
-      <FILE id="GpiIaf" name="ProjectWatcher.h" compile="0" resource="0"
+      <FILE id="MzcZGh" name="PluginManager.h" compile="0" resource="0" file="../src/PluginManager.h"/>
+      <FILE id="npHTw8" name="Project.cpp" compile="1" resource="0" file="../src/Project.cpp"/>
+      <FILE id="oiavWv" name="Project.h" compile="0" resource="0" file="../src/Project.h"/>
+      <FILE id="Bk2Itg" name="ProjectWatcher.h" compile="0" resource="0"
             file="../src/ProjectWatcher.h"/>
-      <FILE id="zNdWrt" name="PublicKey.h" compile="0" resource="0" file="../src/PublicKey.h"/>
-      <FILE id="wgJn9z" name="Render.cpp" compile="1" resource="0" file="../src/Render.cpp"/>
-      <FILE id="IJqS4J" name="Render.h" compile="0" resource="0" file="../src/Render.h"/>
-      <FILE id="Mlq9Nw" name="RenderContext.cpp" compile="1" resource="0"
-            file="../src/RenderContext.cpp"/>
-      <FILE id="yfdoAM" name="RenderContext.h" compile="0" resource="0" file="../src/RenderContext.h"/>
-      <FILE id="CDv1wU" name="Sample.cpp" compile="1" resource="0" file="../src/Sample.cpp"/>
-      <FILE id="pSU8Ri" name="Settings.cpp" compile="1" resource="0" file="../src/Settings.cpp"/>
-      <FILE id="GCHbA8" name="Settings.h" compile="0" resource="0" file="../src/Settings.h"/>
-      <FILE id="TpqEw5" name="Tags.h" compile="0" resource="0" file="../src/Tags.h"/>
-      <FILE id="y02D2m" name="Types.h" compile="0" resource="0" file="../src/Types.h"/>
-      <FILE id="Pt1y0s" name="UnlockStatus.cpp" compile="1" resource="0"
+      <FILE id="TLDgK0" name="PublicKey.h" compile="0" resource="0" file="../src/PublicKey.h"/>
+      <FILE id="AkTLtE" name="Sample.cpp" compile="1" resource="0" file="../src/Sample.cpp"/>
+      <FILE id="CPAoFx" name="Settings.cpp" compile="1" resource="0" file="../src/Settings.cpp"/>
+      <FILE id="bQBtrj" name="Settings.h" compile="0" resource="0" file="../src/Settings.h"/>
+      <FILE id="Q01Whs" name="Tags.h" compile="0" resource="0" file="../src/Tags.h"/>
+      <FILE id="qFCoYe" name="Types.h" compile="0" resource="0" file="../src/Types.h"/>
+      <FILE id="ccuaGK" name="UnlockStatus.cpp" compile="1" resource="0"
             file="../src/UnlockStatus.cpp"/>
-      <FILE id="fcGlMv" name="UnlockStatus.h" compile="0" resource="0" file="../src/UnlockStatus.h"/>
-      <FILE id="nqGu9T" name="Utils.h" compile="0" resource="0" file="../src/Utils.h"/>
-      <FILE id="zEmZ22" name="Versicap.cpp" compile="1" resource="0" file="../src/Versicap.cpp"/>
-      <FILE id="YGjrFh" name="Versicap.h" compile="0" resource="0" file="../src/Versicap.h"/>
+      <FILE id="K08OWP" name="UnlockStatus.h" compile="0" resource="0" file="../src/UnlockStatus.h"/>
+      <FILE id="zBNxWA" name="Utils.h" compile="0" resource="0" file="../src/Utils.h"/>
+      <FILE id="c4Q0qa" name="Versicap.cpp" compile="1" resource="0" file="../src/Versicap.cpp"/>
+      <FILE id="PlSGxV" name="Versicap.h" compile="0" resource="0" file="../src/Versicap.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
@@ -138,9 +139,9 @@
                smallIcon="EYE9Kw" bigIcon="EYE9Kw">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="Versicap" codeSigningIdentity="9511F5241B78B0D38961CD756873066A5F0ED225"
-                       osxCompatibility="10.8 SDK" osxArchitecture="64BitIntel" headerPath="../../../src"/>
+                       osxCompatibility="10.8 SDK" osxArchitecture="64BitIntel" headerPath="../../../src&#10;../../../libs/libkv&#10;../../../libs/ksp1/src"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="Versicap" codeSigningIdentity="9511F5241B78B0D38961CD756873066A5F0ED225"
-                       osxCompatibility="10.8 SDK" osxArchitecture="64BitIntel" headerPath="../../../src"/>
+                       osxCompatibility="10.8 SDK" osxArchitecture="64BitIntel" headerPath="../../../src&#10;../../../libs/libkv&#10;../../../libs/ksp1/src"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics" path="~/SDKs/JUCE/modules"/>
@@ -165,9 +166,9 @@
     <VS2017 targetFolder="Builds/VisualStudio2017" toolset="v140_xp" smallIcon="EYE9Kw"
             bigIcon="EYE9Kw">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="Versicap" headerPath="C:\SDKs\ASIOSDK2.3\common&#10;../../../src"
+        <CONFIGURATION isDebug="1" name="Debug" targetName="Versicap" headerPath="C:\SDKs\ASIOSDK2.3\common&#10;../../../src&#10;../../../libs/libkv&#10;../../../libs/ksp1/src"
                        winArchitecture="x64"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="Versicap" headerPath="C:\SDKs\ASIOSDK2.3\common&#10;../../../src"
+        <CONFIGURATION isDebug="0" name="Release" targetName="Versicap" headerPath="C:\SDKs\ASIOSDK2.3\common&#10;../../../src&#10;../../../libs/libkv&#10;../../../libs/ksp1/src"
                        winArchitecture="x64" useRuntimeLibDLL="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

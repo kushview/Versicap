@@ -62,6 +62,9 @@ namespace Tags {
     static const Identifier samples         = "samples";
     static const Identifier sampleRate      = "sampleRate";
 
+    static const Identifier set             = "set";
+    static const Identifier sets            = "sets";
+
     static const Identifier source          = "source";
     static const Identifier state           = "state";
 

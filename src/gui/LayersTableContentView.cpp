@@ -123,9 +123,9 @@ class LayersTableContentView::Content : public Component
 {
 public:
     Content()
-    { 
+    {
         addAndMakeVisible (addButton);
-        addButton.setButtonText ("A");
+        addButton.setButtonText ("+");
         
         addButton.onClick = [this]()
         {
