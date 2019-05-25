@@ -5,7 +5,7 @@
 
 namespace vcp {
 
-class Layer;
+class SampleSet;
 class Project;
 class Versicap;
 

@@ -11,12 +11,12 @@ class Sample;
 class Versicap;
 struct RenderContext;
 
-class Layer : public kv::ObjectModel
+class SampleSet : public kv::ObjectModel
 {
 public:
-    Layer();
-    Layer (const ValueTree& data);
-    ~Layer() = default;
+    SampleSet();
+    SampleSet (const ValueTree& data);
+    ~SampleSet() = default;
 
     Uuid getUuid() const;
     String getUuidString() const;
@@ -33,7 +33,7 @@ public:
     void getProperties (Array<PropertyComponent*>&);
     void getSamples (OwnedArray<Sample>&) const;
 
-    Layer& operator= (const Layer& o)
+    SampleSet& operator= (const SampleSet& o)
     {
         this->objectData = o.objectData;
         return *this;
@@ -42,7 +42,8 @@ public:
 private:
     void setMissingProperties();
 };
-typedef Layer SampleSet;
+
+using Layer = SampleSet;
 
 class Sample : public kv::ObjectModel
 {
@@ -56,7 +57,7 @@ public:
 
     bool isValid() const;
     bool isEmpty() const;
-    bool isForSampleSet (const Layer& layer) const;
+    bool isForSampleSet (const SampleSet& layer) const;
     String getSampleSetUuidString() const;
     
     String getNoteName() const;
@@ -158,7 +159,7 @@ public:
     int getSourceType() const;
 
     //=========================================================================
-    int indexOf (const Layer& layer) const;
+    int indexOf (const SampleSet& layer) const;
 
     //=========================================================================
     void addExporter (ExporterType& type, const String& name = String());    
@@ -174,12 +175,12 @@ public:
     
     //=========================================================================
     int getNumSampleSets() const;
-    Layer getSampleSet (int index) const;
-    Layer addSampleSet();
+    SampleSet getSampleSet (int index) const;
+    SampleSet addSampleSet();
     void removeSampleSet (int index);
-    Layer findSampleSet (const String& uuid) const { return Layer (find (Tags::sets, Tags::uuid, uuid)); }
-    void setActiveSampleSet (const Layer& layer);
-    Layer getActiveSampleSet() const;
+    SampleSet findSampleSet (const String& uuid) const { return SampleSet (find (Tags::sets, Tags::uuid, uuid)); }
+    void setActiveSampleSet (const SampleSet& layer);
+    SampleSet getActiveSampleSet() const;
 
     //=========================================================================
     void setSamples (const ValueTree& samples);

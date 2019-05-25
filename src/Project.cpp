@@ -11,47 +11,47 @@
 namespace vcp {
 
 //=========================================================================
-Layer::Layer()
+SampleSet::SampleSet()
     : kv::ObjectModel (Tags::set)
 {
     setMissingProperties();
 }
 
-Layer::Layer (const ValueTree& data)
+SampleSet::SampleSet (const ValueTree& data)
     : kv::ObjectModel (data)
 {
     if (objectData.hasType (Tags::set))
         setMissingProperties();
 }
 
-String Layer::getUuidString() const {   return getProperty (Tags::uuid).toString(); }
+String SampleSet::getUuidString() const {   return getProperty (Tags::uuid).toString(); }
 
-Uuid Layer::getUuid() const
+Uuid SampleSet::getUuid() const
 {
     const Uuid uuid (getUuidString());
     return uuid;
 }
 
-bool Layer::isValid() const 
+bool SampleSet::isValid() const 
 { 
     return objectData.hasType (Tags::set) &&
            objectData.hasProperty (Tags::uuid) &&
            ! Uuid (getProperty (Tags::uuid).toString()).isNull();
 }
 
-uint8 Layer::getVelocity() const    { return static_cast<uint8> ((int) getProperty (Tags::velocity)); }
-int Layer::getNoteLength() const    { return (int) getProperty (Tags::noteLength); }
-int Layer::getTailLength() const    { return (int) getProperty (Tags::tailLength); }
-int Layer::getMidiChannel() const   { return (int) getProperty (Tags::midiChannel); }
-int Layer::getMidiProgram() const   { return (int) getProperty (Tags::midiProgram); }
+uint8 SampleSet::getVelocity() const    { return static_cast<uint8> ((int) getProperty (Tags::velocity)); }
+int SampleSet::getNoteLength() const    { return (int) getProperty (Tags::noteLength); }
+int SampleSet::getTailLength() const    { return (int) getProperty (Tags::tailLength); }
+int SampleSet::getMidiChannel() const   { return (int) getProperty (Tags::midiChannel); }
+int SampleSet::getMidiProgram() const   { return (int) getProperty (Tags::midiProgram); }
 
-void Layer::getSamples (OwnedArray<Sample>& results) const
+void SampleSet::getSamples (OwnedArray<Sample>& results) const
 {
     const Project project (objectData.getParent().getParent());
     project.getSamples (project.indexOf (*this), results);
 }
 
-void Layer::setMissingProperties()
+void SampleSet::setMissingProperties()
 {
     stabilizePropertyString (Tags::uuid, Uuid().toString());
     stabilizePropertyPOD (Tags::velocity, 127);
@@ -71,7 +71,7 @@ Project::Project()
 Project::~Project() { }
 
 //=========================================================================
-void Project::setActiveSampleSet (const Layer& layer)
+void Project::setActiveSampleSet (const SampleSet& layer)
 {
     auto layers = objectData.getChildWithName (Tags::sets);
     if (layers.getProperty (Tags::active).toString() == layer.getUuidString())
@@ -79,10 +79,10 @@ void Project::setActiveSampleSet (const Layer& layer)
     layers.setProperty (Tags::active, layer.getUuidString(), nullptr);
 }
 
-Layer Project::getActiveSampleSet() const
+SampleSet Project::getActiveSampleSet() const
 {
     const auto layers = objectData.getChildWithName (Tags::sets);
-    const Layer layer (find (Tags::sets, Tags::uuid, layers.getProperty (Tags::active)));
+    const SampleSet layer (find (Tags::sets, Tags::uuid, layers.getProperty (Tags::active)));
     return layer;
 }
 
@@ -167,12 +167,12 @@ void Project::getRenderContext (RenderContext& context) const
 
 //=========================================================================
 int Project::getNumSampleSets() const { return objectData.getChildWithName (Tags::sets).getNumChildren(); }
-Layer Project::getSampleSet (int index) const { return Layer (objectData.getChildWithName (Tags::sets).getChild (index)); }
+SampleSet Project::getSampleSet (int index) const { return SampleSet (objectData.getChildWithName (Tags::sets).getChild (index)); }
 
-Layer Project::addSampleSet()
+SampleSet Project::addSampleSet()
 {
     auto layers = objectData.getChildWithName (Tags::sets);
-    Layer layer;
+    SampleSet layer;
     String layerName = "Set ";
     layerName << int (getNumSampleSets() + 1);
     layer.setProperty (Tags::velocity, 127)
@@ -198,7 +198,7 @@ void Project::removeSampleSet (int index)
     }
 }
 
-int Project::indexOf (const Layer& layer) const
+int Project::indexOf (const SampleSet& layer) const
 {
     return objectData.getChildWithName(Tags::sets).indexOf (layer.getValueTree());
 }
