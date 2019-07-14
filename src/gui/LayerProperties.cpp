@@ -44,7 +44,7 @@ public:
     }
 };
 
-void Layer::getProperties (Array<PropertyComponent*>& props)
+void SampleSet::getProperties (Array<PropertyComponent*>& props)
 {
     props.add (new TextPropertyComponent (getPropertyAsValue (Tags::name), 
         "Name", 100, false, true));

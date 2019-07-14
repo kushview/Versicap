@@ -163,7 +163,7 @@ public:
 
 private:
     ProjectWatcher watcher;
-    Layer layer;
+    SampleSet layer;
     OwnedArray<Sample> filtered;
 };
 

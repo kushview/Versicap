@@ -43,8 +43,6 @@ private:
     void setMissingProperties();
 };
 
-using Layer = SampleSet;
-
 class Sample : public kv::ObjectModel
 {
 public:

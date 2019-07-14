@@ -47,7 +47,7 @@ Uuid Sample::getUuid() const
 String Sample::getFileName () const
 {
     const Project project (objectData.getParent().getParent());
-    const Layer layer (project.findSampleSet (getProperty(Tags::set).toString()));
+    const SampleSet layer (project.findSampleSet (getProperty (Tags::set).toString()));
 
     String name     = getProperty (Tags::name);
     String noteName = getNoteName();
@@ -62,7 +62,7 @@ String Sample::getFileName () const
 
 String Sample::getSampleSetUuidString() const { return getProperty (Tags::set).toString(); }
 
-bool Sample::isForSampleSet (const Layer& layer) const
+bool Sample::isForSampleSet (const SampleSet& layer) const
 {
     const Uuid sid (getSampleSetUuidString());
     const Uuid lid (layer.getUuid());
