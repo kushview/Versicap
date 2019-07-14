@@ -59,7 +59,7 @@ public:
     String getSampleSetUuidString() const;
     
     String getNoteName() const;
-    String getFileName () const;
+    String getFileName() const;
 
     Uuid getUuid() const;
     String getUuidString() const;
@@ -82,6 +82,7 @@ public:
         objectData = o.objectData;
         return *this;
     }
+
 private:
     void setMissingProperties();
 };
@@ -122,6 +123,7 @@ class Project : public kv::ObjectModel
 {
 public:
     Project (const ValueTree& data) : kv::ObjectModel (data) { }
+    
     /** Creates an invalid project */
     Project();
     ~Project();
