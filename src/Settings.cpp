@@ -16,7 +16,7 @@ Settings::Settings()
     opts.applicationName << "Debug";
     opts.storageFormat       = PropertiesFile::storeAsXML;
    #endif
-    
+
    #if JUCE_LINUX
     opts.folderName          = ".config/versicap";
    #else

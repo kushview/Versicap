@@ -2,7 +2,9 @@
 #include "Settings.h"
 #include "UnlockStatus.h"
 
-#define VCP_LOCAL_AUTH      1
+#ifndef VCP_LOCAL_AUTH
+ #define VCP_LOCAL_AUTH      0
+#endif
 
 #if VCP_LOCAL_AUTH
  #define VCP_LICENSE_SETTINGS_KEY "VCPL"
