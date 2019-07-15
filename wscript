@@ -83,7 +83,7 @@ def configure (conf):
         conf.check(lib='pthread', mandatory=True)
 
     print
-    juce.display_header ("Element Configuration")
+    juce.display_header ("Versicap Configuration")
     juce.display_msg (conf, "Product", configure_product_name (conf))
     juce.display_msg (conf, "Docking Windows", conf.options.enable_docking)
     juce.display_msg (conf, "Copy Protection", not conf.options.disable_unlocking)
@@ -115,20 +115,10 @@ def build_mac (bld):
 
     bld.add_group()
     libEnv = bld.env.derive()
-    bld.stlib (
+    bld.shlib (
         source      = bld.path.ant_glob ("src/**/*.cpp") +
                       bld.path.ant_glob ("jucer/JuceLibraryCode/*.mm") +
                       [ 'jucer/JuceLibraryCode/BinaryData.cpp' ],
-                        # 'libs/libkv/kv.cpp',
-                        # 'libs/ksp1/src/engine/ADSR.cpp',
-                        # 'libs/ksp1/src/engine/Articulator.cpp',
-                        # 'libs/ksp1/src/engine/LayerData.cpp',
-                        # 'libs/ksp1/src/engine/LowPassFilter.cpp',
-                        # 'libs/ksp1/src/engine/SampleCache.cpp',
-                        # 'libs/ksp1/src/engine/SamplerSounds.cpp',
-                        # 'libs/ksp1/src/engine/SamplerSynth.cpp',
-                        # 'libs/ksp1/src/engine/SamplerVoice.cpp',
-                        # 'libs/ksp1/src/DataPath.cpp' ],
         includes    = [ 'jucer/JuceLibraryCode', \
                         'libs/kv/modules', \
                         'libs/libkv',
@@ -137,7 +127,7 @@ def build_mac (bld):
                         os.path.expanduser('~') + '/SDKs/VST_SDK/VST3_SDK', \
                         os.path.expanduser('~') + '/SDKs/VST_SDK/VST2_SDK', \
                         os.path.expanduser('~') + '/SDKs/JUCE/modules' ],
-        target      = 'lib/versicap',
+        target      = 'lib/vcp',
         cxxflags    = [ '-DVCP_STLIB=1' ],
         name        = 'VERSICAP',
         env         = libEnv,
