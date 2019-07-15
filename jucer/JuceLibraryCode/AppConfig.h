@@ -63,6 +63,7 @@
 #define JUCE_MODULE_AVAILABLE_juce_product_unlocking      1
 #define JUCE_MODULE_AVAILABLE_kv_core                     1
 #define JUCE_MODULE_AVAILABLE_kv_edd                      1
+#define JUCE_MODULE_AVAILABLE_kv_engines                  1
 #define JUCE_MODULE_AVAILABLE_kv_gui                      1
 #define JUCE_MODULE_AVAILABLE_kv_models                   1
 
@@ -273,6 +274,13 @@
 
 #ifndef    JUCE_ENABLE_LIVE_CONSTANT_EDITOR
  //#define JUCE_ENABLE_LIVE_CONSTANT_EDITOR 0
+#endif
+
+//==============================================================================
+// kv_engines flags:
+
+#ifndef    KV_JACK_AUDIO
+ //#define KV_JACK_AUDIO 0
 #endif
 
 //==============================================================================

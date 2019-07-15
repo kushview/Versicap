@@ -29,6 +29,7 @@
 #include <juce_product_unlocking/juce_product_unlocking.h>
 #include <kv_core/kv_core.h>
 #include <kv_edd/kv_edd.h>
+#include <kv_engines/kv_engines.h>
 #include <kv_gui/kv_gui.h>
 #include <kv_models/kv_models.h>
 
