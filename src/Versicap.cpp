@@ -65,7 +65,6 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     {
         const bool unlocked = KV_IS_ACTIVATED (*unlock);
         shouldProcess.set (unlocked ? 1 : 0);
-        engine->setEnabled (unlocked);
     }
 
     //=========================================================================
@@ -584,8 +583,11 @@ ExporterTypePtr Versicap::getExporterType (const String& slug) const
 
 bool Versicap::setProject (const Project& newProject)
 {
-    auto& engine = getAudioEngine();
+    auto& engine  = getAudioEngine();
     auto& devices = getDeviceManager();
+    auto& unlock  = getUnlockStatus();
+
+    engine.setEnabled (false);
 
     impl->project = newProject;
     auto& project = impl->project;
@@ -635,7 +637,8 @@ bool Versicap::setProject (const Project& newProject)
     }
     
     engine.setProject (impl->project);
-    
+    engine.setEnabled ((bool) unlock.isUnlocked());
+
     listeners.call ([](Listener& listener) { listener.projectChanged(); });
 
     return true;
