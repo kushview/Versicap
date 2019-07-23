@@ -6,7 +6,7 @@ import os, sys
 sys.path.append (os.getcwd() + "/tools/waf")
 import cross, element, juce
 
-VERSION='1.0.0'
+VERSION='1.0.0b1'
 
 def options (opt):
     opt.load ("compiler_c compiler_cxx cross juce")
@@ -176,3 +176,16 @@ def build_mac (bld):
 
 def build (bld):
     build_mac (bld)
+
+def macdeploy (ctx):
+    call (["tools/macdeploy/appbundle.py",
+           "-verbose", "3",
+           "-dmg", "versicap-osx-%s" % VERSION,
+           "-volname", "Versicap",
+           "-fancy", "tools/macdeploy/fancy.plist",
+           "build/Applications/Versicap.app"])
+
+def macrelease (ctx):
+    call (["bash", "tools/macdeploy/sync-jucer.sh"])
+    call (["bash", "tools/macdeploy/clean.sh"])
+    call (["python", "waf", "distclean", "configure", "build", "macdeploy"])
