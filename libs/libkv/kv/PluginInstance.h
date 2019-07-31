@@ -7,10 +7,21 @@ namespace kv {
 class PluginInstance
 {
 public:
-    PluginInstance (KV_Handle _handle) : handle (_handle) { assert (handle != nullptr); }
-    virtual ~PluginInstance() = default;
+    PluginInstance (const KV_Descriptor* _desc, KV_Handle _handle)
+        : desc (*_desc),
+          handle (_handle)
+    { 
+        jassert (handle != nullptr);
+    }
+
+    virtual ~PluginInstance()
+    {
+        desc.destroy (handle);
+        handle = nullptr;
+    }
 
 private:
+    const KV_Descriptor desc;
     KV_Handle handle;
 };
 

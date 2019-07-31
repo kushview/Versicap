@@ -29,17 +29,25 @@ public:
     {
         versicap.reset (new Versicap());
 
+#if 1
         PluginBundle bundle ("/Users/mfisher/workspace/kushview/versicap/build/plugins/test.vcp");
 
-        if (bundle.open ())
-            Logger::writeToLog ("YES");
-        if (maybeLaunchSlave (commandLine))
-            return;
-
+        bundle.open();
+        
         if (bundle.isOpen())
         {
-            bundle.createInstance ("net.kushview.vcp.TestPlugin");
+            if (auto* instance = bundle.createInstance ("com.versicap.TestPlugin"))
+            {
+                Logger::writeToLog ("YES");
+                deleteAndZero (instance);
+            }
         }
+
+        bundle.close();
+#endif
+
+        if (maybeLaunchSlave (commandLine))
+            return;
 
         if (sendCommandLineToPreexistingInstance())
         {

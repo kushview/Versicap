@@ -13,6 +13,11 @@ public:
         : bundlePath (_bundlePath)
     { }
 
+    ~PluginBundle()
+    {
+        close();
+    }
+
     static const String binaryExtension()
     {
        #if JUCE_MAC
@@ -95,7 +100,7 @@ private:
         if (desc == nullptr || desc->instantiate == nullptr || desc->extension == nullptr)
             return nullptr;
         if (KV_Handle handle = desc->instantiate (bundlePath.toRawUTF8()))
-            return new PluginInstance (handle);
+            return new PluginInstance (desc, handle);
 
         return nullptr;
     }
