@@ -29,7 +29,8 @@
                     "${workspaceRoot}/jucer/JuceLibraryCode",
                     "${workspaceRoot}/src",
                     "${workspaceRoot}/libs/kv/modules",
-                    "${HOME}/SDKs/JUCE/modules"
+                    "${HOME}/SDKs/JUCE/modules",
+                    "/usr/local/include/juce-5"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""

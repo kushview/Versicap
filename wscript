@@ -206,6 +206,16 @@ def build_mac (bld):
     # tests.use.append ('SF2CUTE')
     # tests.use.append ('VERSICAP')
 
+    pluginEnv = bld.env.derive()
+    pluginEnv.cxxshlib_PATTERN = pluginEnv.plugin_PATTERN
+    bld.shlib (
+        source      = [ 'plugins/test.vcp/test.cpp' ],
+        includes    = [ 'libs/versicap', 'libs/libkv' ],
+        target      = 'plugins/test.vcp/test',
+        name        = 'TEST_PLUGIN',
+        env         = pluginEnv
+    )
+
 def build (bld):
     build_mac (bld)
 

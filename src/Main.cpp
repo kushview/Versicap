@@ -1,6 +1,9 @@
 
 #ifndef VCP_STLIB
 
+#include "kv/plugin.h"
+#include "kv/PluginBundle.h"
+
 #include "gui/LookAndFeel.h"
 #include "gui/MainWindow.h"
 
@@ -26,8 +29,17 @@ public:
     {
         versicap.reset (new Versicap());
 
+        PluginBundle bundle ("/Users/mfisher/workspace/kushview/versicap/build/plugins/test.vcp");
+
+        if (bundle.open ())
+            Logger::writeToLog ("YES");
         if (maybeLaunchSlave (commandLine))
             return;
+
+        if (bundle.isOpen())
+        {
+            bundle.createInstance ("net.kushview.vcp.TestPlugin");
+        }
 
         if (sendCommandLineToPreexistingInstance())
         {
