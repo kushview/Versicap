@@ -1,5 +1,5 @@
 
-#include <kv/kv.h>
+#include "kv/gui/ActivationComponent.h"
 
 #ifndef KV_ACTIVATION_INSTRUCTIONS
  #define KV_ACTIVATION_INSTRUCTIONS "APPNAME requires activation to run.  \n" \

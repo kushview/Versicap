@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <kv/kv.h>
+
 // true if activated perpetual or subscription license
 #define KV_IS_ACTIVATED(status) ((status).isUnlocked() || \
     (!(status).isUnlocked() && (status).getExpiryTime() > Time() && (status).getExpiryTime() >= Time::getCurrentTime()))

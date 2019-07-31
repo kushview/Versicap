@@ -1,4 +1,6 @@
 
+#include "kv/gui/ActivationComponent.h"
+
 #include "engine/AudioEngine.h"
 
 #include "gui/ExporterContentView.h"
@@ -18,6 +20,8 @@
 #include "Versicap.h"
 #include "UnlockStatus.h"
 #include "Utils.h"
+
+#include "../../jucer/JuceLibraryCode/BinaryData.h"
 
 namespace vcp {
 

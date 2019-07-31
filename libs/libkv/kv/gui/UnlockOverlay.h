@@ -1,5 +1,9 @@
 #pragma once
 
+#include "kv/UnlockStatus.h"
+#include "kv/gui/Spinner.h"
+#include "kv/util.h"
+
 namespace kv {
 
 #if 1

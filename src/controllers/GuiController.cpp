@@ -1,5 +1,6 @@
 
 #include <kv/kv.h>
+#include "kv/gui/ActivationComponent.h"
 
 #include "controllers/GuiController.h"
 #include "gui/LookAndFeel.h"

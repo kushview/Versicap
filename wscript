@@ -66,6 +66,8 @@ def configure (conf):
 
     conf.define ('VERSION_STRING', conf.env.VERSION_STRING)
 
+    conf.check_cfg (package='kv-0', uselib_store='KV', args=['--libs', '--cflags'], mandatory=False)
+
     conf.check(lib='curl', mandatory=False)
     if juce.is_linux():
         conf.check(lib='pthread', mandatory=True)
@@ -115,64 +117,94 @@ def build_mac (bld):
 
     bld.add_group()
     libEnv = bld.env.derive()
-    bld.shlib (
-        source      = bld.path.ant_glob ("src/**/*.cpp") +
-                      bld.path.ant_glob ("jucer/JuceLibraryCode/*.mm") +
-                      [ 'jucer/JuceLibraryCode/BinaryData.cpp' ],
-        includes    = [ 'jucer/JuceLibraryCode', \
-                        'libs/kv/modules', \
-                        'libs/libkv',
-                        'libs/ksp1/src', \
-                        'src', \
-                        os.path.expanduser('~') + '/SDKs/VST_SDK/VST3_SDK', \
-                        os.path.expanduser('~') + '/SDKs/VST_SDK/VST2_SDK', \
-                        os.path.expanduser('~') + '/SDKs/JUCE/modules' ],
-        target      = 'lib/vcp',
-        cxxflags    = [ '-DVCP_STLIB=1' ],
-        name        = 'VERSICAP',
-        env         = libEnv,
-        use         = common_use_flags()
-    )
+    if bld.env.HAVE_KV:
+        bld.shlib (
+            source      = bld.path.ant_glob ("src/**/*.cpp") +
+                          [ 'jucer/JuceLibraryCode/BinaryData.cpp' ],
+            includes    = [ 'libs/compat/libjuce', 'libs/libkv', 'libs/ksp1/src', 'src', \
+                            os.path.expanduser('~') + '/SDKs/VST_SDK/VST3_SDK', \
+                            os.path.expanduser('~') + '/SDKs/VST_SDK/VST2_SDK' ],
+            target      = 'lib/vcp',
+            cxxflags    = [ '-DVCP_STLIB=1' ],
+            name        = 'VERSICAP',
+            env         = libEnv,
+            use         = common_use_flags() + ['KV']
+        )
+    else:
+        bld.shlib (
+            source      = bld.path.ant_glob ("src/**/*.cpp") +
+                        bld.path.ant_glob ("jucer/JuceLibraryCode/*.mm") +
+                        [ 'jucer/JuceLibraryCode/BinaryData.cpp' ],
+            includes    = [ 'jucer/JuceLibraryCode', \
+                            'libs/kv/modules', \
+                            'libs/libkv',
+                            'libs/ksp1/src', \
+                            'src', \
+                            os.path.expanduser('~') + '/SDKs/VST_SDK/VST3_SDK', \
+                            os.path.expanduser('~') + '/SDKs/VST_SDK/VST2_SDK', \
+                            os.path.expanduser('~') + '/SDKs/JUCE/modules' ],
+            target      = 'lib/vcp',
+            cxxflags    = [ '-DVCP_STLIB=1' ],
+            name        = 'VERSICAP',
+            env         = libEnv,
+            use         = common_use_flags()
+        )
 
     bld.add_group()
     appEnv = bld.env.derive()
-    app = bld.program (
-        source      = [ 'src/Main.cpp' ],
-        includes    = [ 'jucer/JuceLibraryCode', \
-                        'libs/kv/modules', \
-                        'src', 'libs/libkv', \
-                        os.path.expanduser('~') + '/SDKs/VST_SDK/VST3_SDK', \
-                        os.path.expanduser('~') + '/SDKs/VST_SDK/VST2_SDK', \
-                        os.path.expanduser('~') + '/SDKs/JUCE/modules' ],
-        target      = 'Applications/Versicap',
-        name        = 'Versicap',
-        env         = appEnv,
-        use         = common_use_flags(),
-        mac_app     = True,
-        mac_plist   = 'tools/macdeploy/Info.plist',
-        mac_files   = [ 'tools/macdeploy/Icon.icns' ]
-    )
+    app = None
+    if bld.env.HAVE_KV:
+        app = bld.program (
+            source      = [ 'src/Main.cpp' ],
+            includes    = [ 'libs/compat/libjuce', 'libs/libkv', 'libs/ksp1/src', 'src', \
+                            os.path.expanduser('~') + '/SDKs/VST_SDK/VST3_SDK', \
+                            os.path.expanduser('~') + '/SDKs/VST_SDK/VST2_SDK' ],
+            target      = 'Applications/Versicap',
+            name        = 'Versicap',
+            env         = appEnv,
+            use         = common_use_flags(),
+            mac_app     = True,
+            mac_plist   = 'tools/macdeploy/Info.plist',
+            mac_files   = [ 'tools/macdeploy/Icon.icns' ]
+        )
+    else:
+        app = bld.program (
+            source      = [ 'src/Main.cpp' ],
+            includes    = [ 'jucer/JuceLibraryCode', \
+                            'libs/kv/modules', \
+                            'src', 'libs/libkv', \
+                            os.path.expanduser('~') + '/SDKs/VST_SDK/VST3_SDK', \
+                            os.path.expanduser('~') + '/SDKs/VST_SDK/VST2_SDK', \
+                            os.path.expanduser('~') + '/SDKs/JUCE/modules' ],
+            target      = 'Applications/Versicap',
+            name        = 'Versicap',
+            env         = appEnv,
+            use         = common_use_flags(),
+            mac_app     = True,
+            mac_plist   = 'tools/macdeploy/Info.plist',
+            mac_files   = [ 'tools/macdeploy/Icon.icns' ]
+        )
     
     app.use.append ('SF2CUTE')
     app.use.append ('VERSICAP')
 
-    bld.add_group()
-    tests = bld.program (
-        source      = bld.path.ant_glob ("tests/**/*.cpp"),
-        includes    = [ 'jucer/JuceLibraryCode', \
-                        'libs/kv/modules', \
-                        'src', \
-                        os.path.expanduser('~') + '/SDKs/VST_SDK/VST3_SDK', \
-                        os.path.expanduser('~') + '/SDKs/VST_SDK/VST2_SDK', \
-                        os.path.expanduser('~') + '/SDKs/JUCE/modules' ],
-        target      = 'bin/test-versicap',
-        name        = 'TEST_VERSICAP',
-        env         = appEnv,
-        use         = common_use_flags(),
-    )
+    # bld.add_group()
+    # tests = bld.program (
+    #     source      = bld.path.ant_glob ("tests/**/*.cpp"),
+    #     includes    = [ 'jucer/JuceLibraryCode', \
+    #                     'libs/kv/modules', \
+    #                     'src', \
+    #                     os.path.expanduser('~') + '/SDKs/VST_SDK/VST3_SDK', \
+    #                     os.path.expanduser('~') + '/SDKs/VST_SDK/VST2_SDK', \
+    #                     os.path.expanduser('~') + '/SDKs/JUCE/modules' ],
+    #     target      = 'bin/test-versicap',
+    #     name        = 'TEST_VERSICAP',
+    #     env         = appEnv,
+    #     use         = common_use_flags(),
+    # )
 
-    tests.use.append ('SF2CUTE')
-    tests.use.append ('VERSICAP')
+    # tests.use.append ('SF2CUTE')
+    # tests.use.append ('VERSICAP')
 
 def build (bld):
     build_mac (bld)

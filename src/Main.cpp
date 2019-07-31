@@ -18,8 +18,8 @@ class Application : public JUCEApplication,
 public:
     Application() { }
 
-    const String getApplicationName() override       { return ProjectInfo::projectName; }
-    const String getApplicationVersion() override    { return ProjectInfo::versionString; }
+    const String getApplicationName() override       { return "Versicap"; }
+    const String getApplicationVersion() override    { return "1.0.0"; }
     bool moreThanOneInstanceAllowed() override       { return true; }
 
     void initialise (const String& commandLine) override

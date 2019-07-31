@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./juce.h"
+#include "JuceHeader.h"
 
 namespace kv {
 

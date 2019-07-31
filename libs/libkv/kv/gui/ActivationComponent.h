@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include "kv/gui/UnlockOverlay.h"
+
 namespace kv {
 
 class ActivationComponent  : public Component,
