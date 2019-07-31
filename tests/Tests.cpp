@@ -1,9 +1,9 @@
 
 
 /*
-    Runner.cpp - This file is part of Element
-    Copyright (C) 2014-2018  Kushview, LLC.  All rights reserved.
-*/
+    This file is part of Versicap
+    Copyright (C) 2019  Kushview, LLC.  All rights reserved.
+ */
 
 #include "Tests.h"
 
@@ -46,7 +46,7 @@ int main (int argc, char** argv)
         Logger::writeToLog (notfound);
     }
 
-    int totalFails, totalPass;
+    int totalFails = 0, totalPass = 0;
     for (int i = 0; i < runner.getNumResults(); ++i)
     {
         const auto* const result = runner.getResult (i);
