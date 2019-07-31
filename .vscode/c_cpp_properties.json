@@ -15,7 +15,8 @@
                 "${workspaceRoot}/libs/libkv",
                 "${workspaceRoot}/libs/ksp1/src",
                 "${HOME}/SDKs/JUCE/modules",
-                "/usr/local/include/juce-5"
+                "/usr/local/include/juce-5",
+                "/usr/local/include/kv-0"
             ],
             "defines": [ ],
             "forcedInclude": [ ],
@@ -31,7 +32,8 @@
                     "${workspaceRoot}/src",
                     "${workspaceRoot}/libs/kv/modules",
                     "${HOME}/SDKs/JUCE/modules",
-                    "/usr/local/include/juce-5"
+                    "/usr/local/include/juce-5",
+                    "/usr/local/include/kv-0"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
