@@ -14,7 +14,8 @@
                 "${workspaceRoot}/libs/kv/modules",
                 "${workspaceRoot}/libs/libkv",
                 "${workspaceRoot}/libs/ksp1/src",
-                "${HOME}/SDKs/JUCE/modules"
+                "${HOME}/SDKs/JUCE/modules",
+                "/usr/local/include/juce-5"
             ],
             "defines": [ ],
             "forcedInclude": [ ],
