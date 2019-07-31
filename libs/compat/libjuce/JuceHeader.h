@@ -5,3 +5,5 @@ namespace juce {}
 using namespace juce;
 namespace kv {}
 using namespace kv;
+
+#include "../../jucer/JuceLibraryCode/BinaryData.h"

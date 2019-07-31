@@ -39,7 +39,6 @@ void GuiController::launched()
     if (window)
         return;
     window.reset (new MainWindow ("Versicap", versicap));
-    checkUnlockStatus();
 }
 
 ContentComponent* GuiController::getContent()
@@ -80,15 +79,7 @@ bool GuiController::perform (const ApplicationCommandTarget::InvocationInfo& inf
 
         case Commands::showLicenseManagement:
         {
-            auto* const dialog = new kv::ActivationDialog (versicap.getUnlockStatus(), unlock);
-            auto* const ac = dialog->getActivationComponent();
-
-            dialog->centreAroundComponent (window.get(), dialog->getWidth(), dialog->getHeight());
-            ac->setAppName ("VERSICAP");
-            ac->setShouldDialogWhenFinished (false);
-            ac->setQuitButtonText ("Continue");
-            if (KV_IS_ACTIVATED (versicap.getUnlockStatus()))
-                ac->setForManagement (true);
+            
         } break;
 
         default: handled = false;
@@ -97,23 +88,6 @@ bool GuiController::perform (const ApplicationCommandTarget::InvocationInfo& inf
     return handled;
 }
 
-void GuiController::checkUnlockStatus()
-{
-    if (KV_IS_ACTIVATED (versicap.getUnlockStatus()))
-    {
-        unlock.reset();
-    }
-    else
-    {
-        if (nullptr == unlock)
-        {
-            auto* const dialog = new kv::ActivationDialog (versicap.getUnlockStatus(), unlock);
-            auto* const activation = dialog->getActivationComponent();
-            activation->setAppName ("Versicap");
-            activation->setLinks ("https://kushview.net/products/versicap/");
-            dialog->centreAroundComponent (window.get(), dialog->getWidth(), dialog->getHeight());
-        }
-    }
-}
+
 
 }

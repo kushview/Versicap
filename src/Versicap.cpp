@@ -14,7 +14,6 @@
 #include "Commands.h"
 #include "PluginManager.h"
 #include "Project.h"
-#include "UnlockStatus.h"
 #include "Versicap.h"
 
 #include "IncludeKSP1.h"
@@ -61,19 +60,10 @@ struct Versicap::Impl : public AudioIODeviceCallback,
         ignoreUnused (source, messageData, numBytesSoFar, timestamp);
     }
 
-    void updateLockedStatus()
-    {
-        const bool unlocked = KV_IS_ACTIVATED (*unlock);
-        shouldProcess.set (unlocked ? 1 : 0);
-    }
-
     //=========================================================================
     void changeListenerCallback (ChangeBroadcaster* broadcaster) override
     {
-        if (broadcaster == unlock.get())
-        {
-            updateLockedStatus();
-        }
+        ignoreUnused (broadcaster);
     }
 
     //=========================================================================
@@ -165,7 +155,6 @@ struct Versicap::Impl : public AudioIODeviceCallback,
     OptionalScopedPointer<AudioDeviceManager> devices;
     OptionalScopedPointer<AudioFormatManager> formats;
     OptionalScopedPointer<PluginManager> plugins;
-    std::unique_ptr<UnlockStatus> unlock;
     MidiKeyboardState keyboardState;
     std::unique_ptr<UndoManager> undoManager;
 
@@ -180,7 +169,6 @@ Versicap::Versicap()
     impl->devices.setOwned (new AudioDeviceManager());
     impl->formats.setOwned (new AudioFormatManager());
     impl->plugins.setOwned (new PluginManager());
-    impl->unlock.reset (new UnlockStatus (impl->settings));
     
     impl->exporter.reset (new ExportThread());
     impl->undoManager.reset (new UndoManager (30000, 30));
@@ -321,21 +309,12 @@ void Versicap::initializePlugins()
     plugins.restoreAudioPlugins (file);
 }
 
-void Versicap::initializeUnlockStatus()
-{
-    getUnlockStatus().load();
-    getUnlockStatus().dump();
-    impl->updateLockedStatus();
-    getUnlockStatus().addChangeListener (impl.get());
-}
-
 void Versicap::initialize()
 {
     initializeDataPath();
     initializeExporters();
     initializePlugins();
     initializeAudioDevice();
-    initializeUnlockStatus();
 
     impl->commands.registerAllCommandsForTarget (impl.get());
     impl->commands.setFirstCommandTarget (impl.get());
@@ -357,10 +336,6 @@ void Versicap::shutdown()
         controller->shutdown();
     }
 
-    auto& unlock = getUnlockStatus();
-    unlock.removeChangeListener (impl.get());
-    unlock.save();
-
     auto& devices = getDeviceManager();
     devices.removeAudioCallback (impl.get());
     devices.removeMidiInputCallback (String(), impl.get());
@@ -373,7 +348,6 @@ void Versicap::saveSettings()
     auto& devices  = getDeviceManager();
     auto& plugins  = getPluginManager();
     auto& formats  = getAudioFormats();
-    auto& unlock   = getUnlockStatus();
 
     if (auto xml = std::unique_ptr<XmlElement> (plugins.getKnownPlugins().createXml()))
     {
@@ -389,8 +363,6 @@ void Versicap::saveSettings()
             deleteAndZero (devicesXml);
         }
     }
-
-    unlock.save();
 }
 
 void Versicap::saveRenderContext()
@@ -419,7 +391,6 @@ AudioDeviceManager& Versicap::getDeviceManager()            { return *impl->devi
 AudioFormatManager& Versicap::getAudioFormats()             { return *impl->formats; }
 MidiKeyboardState& Versicap::getMidiKeyboardState()         { return impl->keyboardState; }
 PluginManager& Versicap::getPluginManager()                 { return *impl->plugins; }
-UnlockStatus& Versicap::getUnlockStatus()                   { return *impl->unlock; }
 UndoManager& Versicap::getUndoManager()                     { return *impl->undoManager; }
 
 void Versicap::loadPlugin (const PluginDescription& type, bool clearProjectPlugin)
@@ -585,7 +556,6 @@ bool Versicap::setProject (const Project& newProject)
 {
     auto& engine  = getAudioEngine();
     auto& devices = getDeviceManager();
-    auto& unlock  = getUnlockStatus();
 
     engine.setEnabled (false);
 
@@ -637,7 +607,7 @@ bool Versicap::setProject (const Project& newProject)
     }
     
     engine.setProject (impl->project);
-    engine.setEnabled ((bool) unlock.isUnlocked());
+    engine.setEnabled (true);
 
     listeners.call ([](Listener& listener) { listener.projectChanged(); });
 

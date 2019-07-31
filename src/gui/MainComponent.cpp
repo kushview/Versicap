@@ -1,6 +1,4 @@
 
-#include "kv/gui/ActivationComponent.h"
-
 #include "engine/AudioEngine.h"
 
 #include "gui/ExporterContentView.h"
@@ -14,14 +12,10 @@
 #include "gui/SamplesTableContentView.h"
 #include "gui/SampleEditContentView.h"
 #include "gui/MainComponent.h"
-#include "gui/UnlockForm.h"
 
 #include "Commands.h"
 #include "Versicap.h"
-#include "UnlockStatus.h"
 #include "Utils.h"
-
-#include "../../jucer/JuceLibraryCode/BinaryData.h"
 
 namespace vcp {
 
@@ -210,8 +204,6 @@ public:
     ~Content()
     {
         projectName.removeListener (this);
-        if (auto* _unlock = unlock.getComponent())
-            delete _unlock;
     }
 
     Rectangle<int> getNameRectangle() const { return { 50, 6, 150, 32 }; }
@@ -282,11 +274,6 @@ public:
         {
             progress.setBounds (getAlertBounds());
         }
-
-        if (unlock != nullptr && unlock->isVisible())
-        {
-            unlock->setBounds (getAlertBounds());
-        }
     }
 
     Rectangle<int> getAlertBounds() const
@@ -323,14 +310,6 @@ public:
             removeChildComponent (&overlay);
         }
 
-        resized();
-    }
-
-    void showUnlockForm()
-    {
-        showOverlay (true);
-        auto* dialog = new kv::ActivationDialog (versicap.getUnlockStatus(), unlocker);
-        dialog->centreAroundComponent (&owner, dialog->getWidth(), dialog->getHeight());
         resized();
     }
 
@@ -414,9 +393,6 @@ public:
 
     void displayObject (const ValueTree& object)
     {
-        if (! KV_IS_ACTIVATED (versicap.getUnlockStatus()))
-            return;
-        
         bool callDisplay = true;
         if (object.hasType (Tags::exporter))
         {
@@ -459,9 +435,6 @@ public:
 
     void checkValidProject()
     {
-        if (! KV_IS_ACTIVATED (versicap.getUnlockStatus()))
-            return;
-
         if (! project.isValid())
         {
             view.reset (new EmptyProjectContentView (versicap));
@@ -506,11 +479,7 @@ private:
 
     ComboBox sourceCombo;
 
-    Component::SafePointer<UnlockForm> unlock;
-
     Image logo;
-
-    std::unique_ptr<Component> unlocker;
 
     struct Overlay : public Component
     {
@@ -557,17 +526,12 @@ MainComponent::MainComponent (Versicap& vc)
     setSize (600, 400);
 
     versicap.addListener (this);
-    versicap.getUnlockStatus().addChangeListener (this);
-    if (! KV_IS_ACTIVATED (versicap.getUnlockStatus()))
-        content->showOverlay (true);
-    
     stabilizeProject();
 }
 
 MainComponent::~MainComponent()
 {
     versicap.removeListener (this);
-    versicap.getUnlockStatus().removeChangeListener (this);
     content.reset();
 }
 
@@ -596,11 +560,7 @@ void MainComponent::applyState (const String& state)
 
 void MainComponent::changeListenerCallback (ChangeBroadcaster* bcaster)
 {
-    if (bcaster == &versicap.getUnlockStatus())
-    {
-        content->checkValidProject();
-        content->showOverlay (! KV_IS_ACTIVATED (versicap.getUnlockStatus()));
-    }
+    ignoreUnused (bcaster);
 }
 
 //=============================================================================

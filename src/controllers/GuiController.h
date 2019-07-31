@@ -33,7 +33,6 @@ private:
     ValueTree displayedObject;
 
     ContentComponent* getContent();
-    void checkUnlockStatus();
 };
 
 }

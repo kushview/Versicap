@@ -4,7 +4,6 @@
 #include "Project.h"
 #include "Settings.h"
 #include "Tags.h"
-#include "UnlockStatus.h"
 
 namespace vcp {
 
@@ -13,7 +12,6 @@ class AudioEngine;
 class PluginManager;
 class Render;
 class RenderContext;
-class UnlockStatus;
 
 struct AppMessage : public Message
 {
@@ -80,9 +78,6 @@ public:
     bool hasProjectChanged() const;
     
     //=========================================================================
-    UnlockStatus& getUnlockStatus();
-    
-    //=========================================================================
     const ExporterTypeArray& getExporterTypes() const;
     ExporterTypePtr getExporterType (const String& slug) const;
     
@@ -135,7 +130,6 @@ private:
     void initializeExporters();
     void initializeAudioDevice();
     void initializePlugins();
-    void initializeUnlockStatus();
 
     void launched();
 };
