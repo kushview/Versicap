@@ -71,7 +71,7 @@ def configure (conf):
                     mandatory=True)
 
     print
-    juce.display_header ("Versicap Configuration")
+    juce.display_header ("Versicap")
     juce.display_msg (conf, "Installation PREFIX", conf.env.PREFIX)
     juce.display_msg (conf, "Installation DATADIR", conf.env.DATADIR)
     juce.display_msg (conf, "Debugging Symbols", conf.options.debug)
@@ -81,16 +81,12 @@ def configure (conf):
     juce.display_msg (conf, "CXXFLAGS", conf.env.CXXFLAGS)
     juce.display_msg (conf, "LINKFLAGS", conf.env.LINKFLAGS)
 
-def common_use_flags():
-    return 'ACCELERATE AUDIO_TOOLBOX AUDIO_UNIT CORE_AUDIO CORE_AUDIO_KIT COCOA CORE_MIDI IO_KIT QUARTZ_CORE'.split()
-
 def build_sf2cute (bld):
     return bld.stlib (
-        source = bld.path.ant_glob ("libs/sf2cute/src/**/*.cpp"),
-        includes = [ 'libs/sf2cute/src', \
-                     'libs/sf2cute/include' ],
-        name   = 'SF2CUTE',
-        target  = 'lib/sf2cute'
+        source      = bld.path.ant_glob ("libs/sf2cute/src/**/*.cpp"),
+        includes    = [ 'libs/sf2cute/src', 'libs/sf2cute/include' ],
+        name        = 'SF2CUTE',
+        target      = 'lib/sf2cute'
     )
 
 def build_mac (bld):
