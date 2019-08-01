@@ -107,7 +107,7 @@ private:
     {
         versicap->initialize();
         auto& plugins = versicap->getPluginManager();
-        plugins.scanAudioPlugins ({ "AudioUnit", "VST", "VST3" });
+        plugins.scanAudioPlugins ({ "AudioUnit", "VST", "VST3", "LV2" });
     }
 
     bool maybeLaunchSlave (const String& commandLine)

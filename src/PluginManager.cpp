@@ -289,6 +289,7 @@ public:
             pluginList, plugins->getDeadAudioPluginsFile());
         
         plugins->addDefaultFormats();
+        
         auto pluginsFile = Versicap::getApplicationDataPath().getChildFile ("plugins.xml");
         if (auto xml = std::unique_ptr<XmlElement> (XmlDocument::parse (pluginsFile)))
             plugins->restoreUserPlugins (*xml);
@@ -373,7 +374,7 @@ private:
         const auto key = String(settings->lastPluginScanPathPrefix) + format.getName();
         FileSearchPath path (settings->getUserSettings()->getValue (key));
        #else
-        FileSearchPath path;
+        FileSearchPath path = format.getDefaultLocationsToSearch();
        #endif
         scanner = new PluginDirectoryScanner (pluginList, format, path, true,
                                               plugins->getDeadAudioPluginsFile(),
@@ -604,7 +605,6 @@ private:
 
 	void audioPluginScanStarted (const String& plugin) override
 	{
-		// DBG("[VCP] scanning: " << plugin);
 		ScopedLock sl (lock);
 		scannedPlugin = plugin;
 	}
@@ -630,9 +630,8 @@ private:
 PluginManager::PluginManager()
 {
     priv = new Private (*this);
-   #if ELEMENT_LV2_PLUGIN_HOST
-    priv->symbols.setOwned (new SymbolMap ());
-    priv->lv2.setOwned (new LV2World());
+   #if KV_LV2_PLUGIN_HOST
+    addFormat (new LV2PluginFormat());
    #endif
 }
 
@@ -644,8 +643,8 @@ PluginManager::~PluginManager()
 void PluginManager::addDefaultFormats()
 {
     getAudioPluginFormats().addDefaultFormats();
-   #if ELEMENT_LV2_PLUGIN_HOST
-    addFormat (new LV2PluginFormat (*priv->lv2));
+   #if KV_LV2_PLUGIN_HOST
+    addFormat (new kv::LV2PluginFormat());
    #endif
 }
 

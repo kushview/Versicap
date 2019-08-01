@@ -485,6 +485,7 @@ private:
     {
         auto& plugins = versicap.getPluginManager();
         auto& list = plugins.getKnownPlugins();
+
         PopupMenu menu;
         list.addToMenu (menu, KnownPluginList::sortByManufacturer);
         menu.showMenuAsync (PopupMenu::Options().withTargetComponent (&plugin),
