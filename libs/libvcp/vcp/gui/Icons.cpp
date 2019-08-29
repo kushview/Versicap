@@ -1,9 +1,8 @@
 /*
-    Icons.cpp - This file is part of libkv
     Copyright (C) 2013-2019  Michael Fisher <mfisher@kushview.net>
 */
 
-#include "kv/gui/Icons.h"
+#include "vcp/gui/Icons.h"
 
 namespace kv {
 static Icons* __icons = nullptr;

@@ -162,6 +162,7 @@
         <MODULEPATH id="juce_product_unlocking" path="~/SDKs/JUCE/modules"/>
         <MODULEPATH id="juce_audio_utils" path="~/SDKs/JUCE/modules"/>
         <MODULEPATH id="kv_engines" path="../libs/kv/modules"/>
+        <MODULEPATH id="jlv2_host" path="../libs/jlv2/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
     <VS2017 targetFolder="Builds/VisualStudio2017" toolset="v140_xp" smallIcon="EYE9Kw"
@@ -191,10 +192,12 @@
         <MODULEPATH id="juce_product_unlocking" path="c:/SDKs/JUCE/modules"/>
         <MODULEPATH id="juce_audio_utils" path="c:/SDKs/JUCE/modules"/>
         <MODULEPATH id="kv_engines" path="../libs/kv/modules"/>
+        <MODULEPATH id="jlv2_host" path="../libs/jlv2/modules"/>
       </MODULEPATHS>
     </VS2017>
   </EXPORTFORMATS>
   <MODULES>
+    <MODULE id="jlv2_host" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>

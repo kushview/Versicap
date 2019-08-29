@@ -1,5 +1,5 @@
 /*
-    This file is part of KV Modules for JUCE
+    This file is part of Versicap
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef KV_PLUGIN_H
-#define KV_PLUGIN_H
+#ifndef VCP_PLUGIN_H
+#define VCP_PLUGIN_H
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -27,48 +27,48 @@
 extern "C" {
 #endif
 
-#define KV_PREFIX "net.kushview."
+#define VCP_PREFIX "net.kushview.versicap"
 
-typedef void* KV_Handle;
+typedef void* VCPHandle;
 
-typedef struct _KV_Extension {
+typedef struct _VCPExtension {
     /** Unique identifier for this feature */
     const char* ID;
 
     /** Opaque extension data */
     void* data;
-} KV_Extension;
+} VCPExtension;
 
-typedef struct _KV_Descriptor {
+typedef struct _VCPDescriptor {
     /** Globally unique identifier for this plugin */
     const char* ID;
 
     /** Allocate plugin instance */
-    KV_Handle (*instantiate)(const char* bundle_path);
+    VCPHandle (*instantiate)(const char* bundle_path);
 
     /** Destroy/clean-up resources */
-    void (*destroy)(KV_Handle handle);
+    void (*destroy)(VCPHandle handle);
 
     /** Returns extension data */
     const void * (*extension)(const char * identifier);
-} KV_Descriptor;
+} VCPDescriptor;
 
 #ifdef __cplusplus
- #define KV_SYMBOL_EXTERN extern "C"
+ #define VCP_SYMBOL_EXTERN extern "C"
 #else
- #define KV_SYMBOL_EXTERN
+ #define VCP_SYMBOL_EXTERN
 #endif
 
 #ifdef _WIN32
- #define KV_SYMBOL_EXPORT KV_SYMBOL_EXTERN __declspec(dllexport)
+ #define VCP_SYMBOL_EXPORT VCP_SYMBOL_EXTERN __declspec(dllexport)
 #else
- #define KV_SYMBOL_EXPORT KV_SYMBOL_EXTERN __attribute__((visibility("default")))
+ #define VCP_SYMBOL_EXPORT VCP_SYMBOL_EXTERN __attribute__((visibility("default")))
 #endif
 
-KV_SYMBOL_EXPORT
-const KV_Descriptor* kv_descriptor (const uint32_t index);
+VCP_SYMBOL_EXPORT
+const VCPDescriptor* vcp_descriptor (const uint32_t index);
 
-typedef const KV_Descriptor* (*KV_Descriptor_Function)(const uint32_t);
+typedef const VCPDescriptor* (*VCPDescriptorFunction)(const uint32_t);
 
 #ifdef __cplusplus
 } /* extern "C" */
@@ -79,12 +79,12 @@ typedef const KV_Descriptor* (*KV_Descriptor_Function)(const uint32_t);
 #include <string>
 #include <vector>
 
-namespace kv {
+namespace vcp {
 
-typedef KV_Descriptor PluginDescriptor;
+typedef VCPDescriptor PluginDescriptor;
+typedef VCPDescriptorFunction DescriptorFunction;
 typedef std::initializer_list<std::string> ExtensionList;
 typedef const void* (*ExtensionDataFunction)(const char*);
-typedef KV_Descriptor_Function DescriptorFunction;
 
 struct PluginDescriptorList : public std::vector<PluginDescriptor> {
     inline ~PluginDescriptorList() {
@@ -111,8 +111,8 @@ public:
     inline static uint32_t registerDescriptor (const std::string& _identifier,
                                                const ExtensionList& _extensions = {})
     {
-        KV_Descriptor desc;
-        memset (&desc, 0, sizeof (KV_Descriptor));
+        VCPDescriptor desc;
+        memset (&desc, 0, sizeof (VCPDescriptor));
         desc.ID             = strdup (_identifier.c_str());
         desc.instantiate    = &PluginType::_instantiate;
         desc.destroy        = &PluginType::_destroy;
@@ -121,8 +121,8 @@ public:
         for (const auto& ext : _extensions)
             extensions()[ext] = Instance::extension (ext.c_str());
 
-        kv::plugin_descriptors().push_back (desc);
-        return kv::plugin_descriptors().size() - 1;
+        vcp::plugin_descriptors().push_back (desc);
+        return vcp::plugin_descriptors().size() - 1;
     }
 
 private:
@@ -135,12 +135,12 @@ private:
     }
 
     // Base Plugin
-    inline static KV_Handle _instantiate (const char* bundlePath) {
+    inline static VCPHandle _instantiate (const char* bundlePath) {
         std::unique_ptr<Instance> instance (Instance::instantiate (bundlePath));
-        return static_cast<KV_Handle> (instance.release());
+        return static_cast<VCPHandle> (instance.release());
     }
 
-    inline static void _destroy (KV_Handle handle) {
+    inline static void _destroy (VCPHandle handle) {
         delete static_cast<Instance*> (handle);
     }
 
@@ -152,10 +152,11 @@ private:
 
 }
 
-#define KV_REGISTER_PLUGIN(t, i, e) static uint32_t __t = kv::Plugin<t>::registerDescriptor(i, e); \
-    KV_SYMBOL_EXPORT const KV_Descriptor* kv_descriptor (const uint32_t index) { \
-        return index < kv::plugin_descriptors().size() \
-            ? &kv::plugin_descriptors()[index] : NULL; }
+#define VCP_PLUGIN_CLASS(t) class t : public vcp::Plugin<t> 
+#define VCP_REGISTER_PLUGIN(t, i, e) static uint32_t __t = vcp::Plugin<t>::registerDescriptor(i, e); \
+    VCP_SYMBOL_EXPORT const VCPDescriptor* vcp_descriptor (const uint32_t index) { \
+        return index < vcp::plugin_descriptors().size() \
+            ? &vcp::plugin_descriptors()[index] : NULL; }
 
 #endif // __cplusplus
 #endif // header

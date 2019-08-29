@@ -1,7 +1,4 @@
 
-#include <kv/kv.h>
-#include "kv/gui/ActivationComponent.h"
-
 #include "controllers/GuiController.h"
 #include "gui/LookAndFeel.h"
 #include "gui/MainWindow.h"
@@ -16,7 +13,6 @@ GuiController::~GuiController() { }
 void GuiController::initialize()
 {
     look.reset (new LookAndFeel());
-    
     LookAndFeel::setDefaultLookAndFeel (look.get());
 }
 

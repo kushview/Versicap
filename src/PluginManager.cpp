@@ -630,9 +630,6 @@ private:
 PluginManager::PluginManager()
 {
     priv = new Private (*this);
-   #if KV_LV2_PLUGIN_HOST
-    addFormat (new LV2PluginFormat());
-   #endif
 }
 
 PluginManager::~PluginManager()
@@ -643,8 +640,8 @@ PluginManager::~PluginManager()
 void PluginManager::addDefaultFormats()
 {
     getAudioPluginFormats().addDefaultFormats();
-   #if KV_LV2_PLUGIN_HOST
-    addFormat (new kv::LV2PluginFormat());
+   #if HAVE_LILV && HAVE_SUIL
+    addFormat (new jlv2::LV2PluginFormat());
    #endif
 }
 

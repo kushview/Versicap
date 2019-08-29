@@ -1,7 +1,6 @@
 
-#include "kv/gui/Icons.h"
-#include "kv/gui/IconButton.h"
-
+#include "vcp/gui/Icons.h"
+#include "vcp/gui/IconButton.h"
 #include "gui/LookAndFeel.h"
 #include "gui/SampleEditContentView.h"
 #include "gui/WaveDisplayComponent.h"

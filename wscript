@@ -4,9 +4,9 @@ from subprocess import call, Popen, PIPE
 import os, sys
 
 sys.path.append (os.getcwd() + "/tools/waf")
-import cross, element, juce
+import cross, versicap, juce
 
-VERSION='1.0.0b1'
+VERSION='1.0.0'
 
 def options (opt):
     opt.load ("compiler_c compiler_cxx cross juce")
@@ -34,10 +34,6 @@ def silence_warnings (conf):
     conf.env.append_unique ('CFLAGS', ['-Wno-deprecated-declarations'])
     conf.env.append_unique ('CXXFLAGS', ['-Wno-deprecated-declarations'])
 
-def configure_product (conf):
-    # noop
-    return
-
 def configure_product_name (conf):
     return "Versicap"
 
@@ -60,21 +56,15 @@ def configure (conf):
     if conf.env.DEBUG:
         conf.define ('JUCE_DISABLE_AUDIOPROCESSOR_BEGIN_END_GESTURE_CHECKING', 1)
 
+    conf.define ('VERSION_STRING', VERSION)
     conf.env.VERSION_STRING = VERSION
-
-    configure_product (conf)
-
-    conf.define ('VERSION_STRING', conf.env.VERSION_STRING)
-
-    conf.check_cfg (package='kv_debug-0' if conf.options.debug else 'kv-0',
-                    uselib_store='KV', args=['--libs', '--cflags'], 
-                    mandatory=True)
 
     print
     juce.display_header ("Versicap")
-    juce.display_msg (conf, "Installation PREFIX", conf.env.PREFIX)
-    juce.display_msg (conf, "Installation DATADIR", conf.env.DATADIR)
-    juce.display_msg (conf, "Debugging Symbols", conf.options.debug)
+    juce.display_msg (conf, "PREFIX", conf.env.PREFIX)
+    juce.display_msg (conf, "DATADIR", conf.env.DATADIR)
+    juce.display_msg (conf, "Debug", conf.env.DEBUG)
+
     print
     juce.display_header ("Compiler")
     juce.display_msg (conf, "CFLAGS", conf.env.CFLAGS)
@@ -89,66 +79,87 @@ def build_sf2cute (bld):
         target      = 'lib/sf2cute'
     )
 
-def build_mac (bld):
-    bld.add_group()
-    libEnv = bld.env.derive()
-    versicap = bld.shlib (
+def build_versicap (bld):
+    vcp = bld.shlib (
         source      = bld.path.ant_glob ("src/**/*.cpp") +
-                      [ 'jucer/JuceLibraryCode/BinaryData.cpp' ],
-        includes    = [ 'libs/compat/libjuce', 'libs/libkv', 'libs/ksp1/src', 'src' ],
+                      [ 'jucer/JuceLibraryCode/BinaryData.cpp',
+                        'jucer/JuceLibraryCode/include_kv_core.cpp',
+                        'jucer/JuceLibraryCode/include_kv_gui.cpp',
+                        'jucer/JuceLibraryCode/include_kv_models.cpp',
+                        'libs/libvcp/vcp.cpp' ],
+        includes    = [ 'libs/compat/libjuce',
+                        'libs/kv/modules',
+                        'libs/jlv2/modules',
+                        'libs/libvcp',
+                        'libs/ksp1/src',
+                        'src' ],
         target      = 'lib/vcp',
         cxxflags    = [ '-DVCP_STLIB=1' ],
         name        = 'VERSICAP',
-        env         = libEnv,
-        use         = [ 'KV' ]
+        env         = bld.env.derive(),
+        use         = [pkg.upper() for pkg in versicap.juce_packages],
+        vnum        = VERSION
     )
+
+    if bld.env.LV2:
+        vcp.source.append ('jucer/JuceLibraryCode/include_jlv2_host.cpp')
+        vcp.use += [ 'LV2', 'LILV', 'SUIL' ]
+    
+    if juce.is_mac():
+        vcp.install_path = None
 
     bld.add_group()
 
-    appEnv = bld.env.derive()
-    bld.program (
+    app = bld.program (
         source      = [ 'src/Main.cpp' ],
-        includes    = versicap.includes,
-        target      = 'Applications/Versicap',
+        includes    = vcp.includes,
+        target      = 'bin/versicap',
         name        = 'Versicap',
-        env         = appEnv,
-        use         = [ 'VERSICAP' ],
-        mac_app     = True,
-        mac_plist   = 'tools/macdeploy/Info.plist',
-        mac_files   = [ 'tools/macdeploy/Icon.icns' ]
-    )
-
-    bld.add_group()
-    bld.program (
-        source      = bld.path.ant_glob ("tests/**/*.cpp"),
-        includes    = versicap.includes,
-        target      = 'bin/test-versicap',
-        name        = 'TEST_VERSICAP',
-        env         = appEnv,
+        env         = bld.env.derive(),
         use         = [ 'VERSICAP' ]
     )
+
+    if juce.is_mac():
+        app.target       = 'Applications/Versicap'
+        app.mac_app      = True,
+        app.mac_plist    = 'tools/macdeploy/Info.plist',
+        app.mac_files    = [ 'tools/macdeploy/Icon.icns' ]
+
+    bld.add_group()
+
+    tests = bld.program (
+        source          = bld.path.ant_glob ("tests/**/*.cpp"),
+        includes        = vcp.includes,
+        target          = 'bin/test-versicap',
+        name            = 'TEST_VERSICAP',
+        env             = bld.env.derive(),
+        use             = [ 'VERSICAP' ],
+        install_path    = None
+    )
+
+    return (vcp, app, tests)
 
 def build_plugin (bld, slug):
-    pluginEnv = bld.env.derive()
-    pluginEnv.cxxshlib_PATTERN = pluginEnv.plugin_PATTERN
-    bld.shlib (
+    plugin = bld.shlib (
         source      = [ 'plugins/%s.vcp/%s.cpp' % (slug, slug) ],
-        includes    = [ 'libs/versicap', 'libs/libkv' ],
+        includes    = [ 'libs/libvcp' ],
+        cxxflags    = [ '-fvisibility=hidden' ],
         target      = 'plugins/%s.vcp/%s' % (slug, slug),
         name        = '%s_PLUGIN' % slug.upper(),
-        env         = pluginEnv,
+        env         = bld.env.derive(),
         use         = [ 'VERSICAP' ]
     )
+    plugin.env.cxxshlib_PATTERN = plugin.env.plugin_PATTERN
+    return plugin
 
 def build (bld):
-    build_sf2cute (bld)
-    if juce.is_mac():   build_mac (bld)
+    build_versicap (bld)
     for plugin in 'test'.split():
         build_plugin (bld, plugin)
 
 def macdeploy (ctx):
     call (["tools/macdeploy/appbundle.py",
-           "-verbose", "3",
+           "-verbose", "2",
            "-dmg", "versicap-osx-%s" % VERSION,
            "-volname", "Versicap",
            "-fancy", "tools/macdeploy/fancy.plist",

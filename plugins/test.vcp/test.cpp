@@ -1,11 +1,10 @@
-#include "kv/plugin.h"
+#include "vcp/plugin.h"
 #include <iostream>
 
-#define KV_DEFINE_PLUGIN_CLASS(t) class t : public kv::Plugin<t>
-KV_DEFINE_PLUGIN_CLASS (TestPlugin)
+VCP_PLUGIN_CLASS (TestPlugin)
 {
 public:
-    TestPlugin() { }
+    TestPlugin() {}
     
     ~TestPlugin()
     {
@@ -32,14 +31,12 @@ public:
 private:
     struct VersicapDescriptor
     {
-        void (*testvcp)(KV_Handle handle);
+        void (*testvcp)(VCPHandle handle);
     };
 
-    static void _testVcp (KV_Handle handle) {
+    static void _testVcp (VCPHandle handle) {
         std::clog << "testVcp()\n";
     }
 };
 
-KV_REGISTER_PLUGIN (TestPlugin, "com.versicap.TestPlugin", {
-    "com.versicap.Plugin"
-});
+VCP_REGISTER_PLUGIN (TestPlugin, "com.versicap.TestPlugin", {});

@@ -1,13 +1,14 @@
 
-#include <juce/juce.h>
-#include "kv/plugin.h"
+#pragma once
 
-namespace kv {
+#include "vcp/plugin.h"
 
-class PluginInstance
+namespace vcp {
+
+class PluginInstance final
 {
 public:
-    PluginInstance (const KV_Descriptor* _desc, KV_Handle _handle)
+    PluginInstance (const VCPDescriptor* _desc, VCPHandle _handle)
         : desc (*_desc),
           handle (_handle)
     { 
@@ -21,8 +22,8 @@ public:
     }
 
 private:
-    const KV_Descriptor desc;
-    KV_Handle handle;
+    const VCPDescriptor desc;
+    VCPHandle handle;
 };
 
 }

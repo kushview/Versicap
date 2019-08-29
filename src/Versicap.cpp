@@ -656,7 +656,6 @@ void Versicap::stopExporting()
 
 }
 
-#include "../libs/libkv/kv.cpp"
 #include "../libs/ksp1/src/engine/ADSR.cpp"
 #include "../libs/ksp1/src/engine/Articulator.cpp"
 #include "../libs/ksp1/src/engine/LayerData.cpp"

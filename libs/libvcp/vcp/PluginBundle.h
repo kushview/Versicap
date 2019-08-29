@@ -1,10 +1,11 @@
 
 #pragma once
-#include <juce/juce.h>
-#include "kv/plugin.h"
-#include "kv/PluginInstance.h"
 
-namespace kv {
+#include "JuceHeader.h"
+#include "vcp/plugin.h"
+#include "vcp/PluginInstance.h"
+
+namespace vcp {
 
 class PluginBundle
 {
@@ -80,10 +81,10 @@ public:
     }
 
 protected:
-    const KV_Descriptor* getDescriptor (const uint32 index)
+    const VCPDescriptor* getDescriptor (const uint32 index)
     {
         if (descriptorFunction == nullptr)
-            descriptorFunction = (kv::DescriptorFunction) library.getFunction ("kv_descriptor");
+            descriptorFunction = (DescriptorFunction) library.getFunction ("vcp_descriptor");
         return descriptorFunction != nullptr ? descriptorFunction (index) : nullptr;
     }
 
@@ -91,15 +92,15 @@ private:
     const String bundlePath;
     DynamicLibrary library;
     bool libraryOpen;
-    Array<const KV_Descriptor*> descriptors;
+    Array<const VCPDescriptor*> descriptors;
     DescriptorFunction descriptorFunction = nullptr;
 
-    PluginInstance* createInstanceForDescriptor (const KV_Descriptor* const desc)
+    PluginInstance* createInstanceForDescriptor (const VCPDescriptor* const desc)
     {
         jassert (desc != nullptr && desc->instantiate != nullptr && desc->extension != nullptr);
         if (desc == nullptr || desc->instantiate == nullptr || desc->extension == nullptr)
             return nullptr;
-        if (KV_Handle handle = desc->instantiate (bundlePath.toRawUTF8()))
+        if (VCPHandle handle = desc->instantiate (bundlePath.toRawUTF8()))
             return new PluginInstance (desc, handle);
 
         return nullptr;

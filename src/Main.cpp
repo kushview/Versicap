@@ -1,9 +1,8 @@
 
 #ifndef VCP_STLIB
 
-#include "kv/plugin.h"
-#include "kv/PluginBundle.h"
-
+#include "vcp/plugin.h"
+#include "vcp/PluginBundle.h"
 #include "gui/LookAndFeel.h"
 #include "gui/MainWindow.h"
 
@@ -22,13 +21,12 @@ public:
     Application() { }
 
     const String getApplicationName() override       { return "Versicap"; }
-    const String getApplicationVersion() override    { return "1.0.0"; }
+    const String getApplicationVersion() override    { return "0.1.0"; }
     bool moreThanOneInstanceAllowed() override       { return true; }
 
     void initialise (const String& commandLine) override
     {
         versicap.reset (new Versicap());
-
 #if 1
         PluginBundle bundle ("/Users/mfisher/workspace/kushview/versicap/build/plugins/test.vcp");
 
