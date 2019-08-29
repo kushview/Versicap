@@ -2,9 +2,8 @@
 
 jucer/Builds
 jucer/JuceLibraryCode/ReadMe.txt
-jucer/JuceLibraryCode/include_*.*
-jucer/JuceLibraryCode/include_*.*
-jucer/JuceLibraryCode/BinaryData*.*
+jucer/JuceLibraryCode/include_juce*.*
+jucer/JuceLibraryCode/include__juce*.*
 
 data/*.ai
 data/export*
