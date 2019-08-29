@@ -69,6 +69,7 @@ VCP_SYMBOL_EXPORT
 const VCPDescriptor* vcp_descriptor (const uint32_t index);
 
 typedef const VCPDescriptor* (*VCPDescriptorFunction)(const uint32_t);
+typedef const void* (*VCPExtensionFunction)(const char*);
 
 #ifdef __cplusplus
 } /* extern "C" */
@@ -84,7 +85,7 @@ namespace vcp {
 typedef VCPDescriptor PluginDescriptor;
 typedef VCPDescriptorFunction DescriptorFunction;
 typedef std::initializer_list<std::string> ExtensionList;
-typedef const void* (*ExtensionDataFunction)(const char*);
+typedef VCPExtensionFunction ExtensionFunction;
 
 struct PluginDescriptorList : public std::vector<PluginDescriptor> {
     inline ~PluginDescriptorList() {
@@ -101,7 +102,7 @@ inline static PluginDescriptorList& plugin_descriptors()
 }
 
 /** C++ bindings to the C interface */
-template<class Instance>
+template<class I>
 class Plugin
 {
 public:
@@ -114,19 +115,19 @@ public:
         VCPDescriptor desc;
         memset (&desc, 0, sizeof (VCPDescriptor));
         desc.ID             = strdup (_identifier.c_str());
-        desc.instantiate    = &PluginType::_instantiate;
-        desc.destroy        = &PluginType::_destroy;
-        desc.extension      = &PluginType::_extension;
+        desc.instantiate    = &P::_instantiate;
+        desc.destroy        = &P::_destroy;
+        desc.extension      = &P::_extension;
 
         for (const auto& ext : _extensions)
-            extensions()[ext] = Instance::extension (ext.c_str());
+            extensions()[ext] = I::extension (ext.c_str());
 
         vcp::plugin_descriptors().push_back (desc);
         return vcp::plugin_descriptors().size() - 1;
     }
 
 private:
-    typedef Plugin<Instance> PluginType;
+    typedef Plugin<I> P;
     typedef std::map<std::string, const void*> ExtensionMap;
 
     inline static ExtensionMap& extensions() {
@@ -136,12 +137,12 @@ private:
 
     // Base Plugin
     inline static VCPHandle _instantiate (const char* bundlePath) {
-        std::unique_ptr<Instance> instance (Instance::instantiate (bundlePath));
+        std::unique_ptr<I> instance (I::instantiate (bundlePath));
         return static_cast<VCPHandle> (instance.release());
     }
 
     inline static void _destroy (VCPHandle handle) {
-        delete static_cast<Instance*> (handle);
+        delete static_cast<I*> (handle);
     }
 
     inline static const void* _extension (const char* identifier) {
